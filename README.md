@@ -12,6 +12,22 @@ private local AI systems, based in Gordon, TX.
 - **Booking:** [Cal.com](https://cal.com) embed (popup widget).
 - **Hosting:** Render (Web Service, free tier).
 
+## Brand
+
+The "A" mark (header, footer, favicon) uses colors sampled directly from the
+company logo — navy `#3A4653→#202932`, blue `#2CA0FF→#0072E8`, orange
+`#FF8A2E→#E85400` (dark-theme values; light theme uses slightly deeper
+variants of the same three, see the `--color-navy` / `--color-blue` /
+`--color-orange` tokens in [public/styles.css](public/styles.css)). It's
+built as an inline SVG in [public/index.html](public/index.html) and
+[lib/layout.js](lib/layout.js) (`logoMarkSvg()`), not a raster image, so it
+stays crisp from favicon size up.
+
+The site's primary accent stays the cyberpunk green (`--color-primary`) for
+buttons and CTAs; blue and orange are layered in as secondary accents
+(blue for inline text links and nav hover, orange for the pricing "featured"
+badge) rather than a full palette swap.
+
 ## Local development
 
 ```bash

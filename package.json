@@ -1,0 +1,20 @@
+{
+  "name": "ahern-ai-solutions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ahern AI Solutions website — Node/Express server with Turso-backed contact form and analytics, static-Markdown blog.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "express": "^4.21.2",
+    "gray-matter": "^4.0.3",
+    "marked": "^13.0.3"
+  }
+}

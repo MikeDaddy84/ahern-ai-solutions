@@ -3,13 +3,37 @@ const express = require('express');
 
 const db = require('./lib/db');
 const blog = require('./lib/blog');
+const seo = require('./lib/seo');
+const gate = require('./lib/gate');
 const { renderPage, escapeHtml } = require('./lib/layout');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.disable('x-powered-by');
+// Render terminates TLS at its load balancer, so without this req.protocol is
+// always "http" and req.ip is the proxy — which would break the gate's secure
+// cookie and collapse its rate limiting onto a single address.
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '20kb' }));
+
+// Before anything is served: while SITE_GATE_PASSWORD is set, this answers
+// every request with a password page. See lib/gate.js.
+app.use(gate.createGate());
+
+// ---------- SEO ----------
+// Both of these change shape with the gate, so neither can be a static file.
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send(seo.robotsTxt({ gated: gate.isEnabled() }));
+});
+
+// Unlike robots.txt this is not on the gate's allowlist, so while the gate is
+// up it never gets here — a sitemap for a site that isn't public yet would be
+// an invitation to index it.
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml').send(seo.sitemapXml());
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // ---------- Blog ----------
@@ -38,7 +62,7 @@ app.get('/blog', (req, res) => {
     </section>
   `;
 
-  res.send(renderPage({ title: 'Blog — Ahern AI Solutions', description: 'Case studies in AI automation, custom PCs, and private local AI systems.', bodyHtml: body }));
+  res.send(renderPage({ title: 'Blog — Ahern AI Solutions', description: 'Case studies in AI automation, custom PCs, and private local AI systems.', canonicalPath: '/blog', bodyHtml: body }));
 });
 
 app.get('/blog/:slug', (req, res) => {
@@ -60,7 +84,7 @@ app.get('/blog/:slug', (req, res) => {
     </article>
   `;
 
-  res.send(renderPage({ title: `${post.title} — Ahern AI Solutions`, description: post.excerpt || post.title, bodyHtml: body }));
+  res.send(renderPage({ title: `${post.title} — Ahern AI Solutions`, description: post.excerpt || post.title, canonicalPath: `/blog/${encodeURIComponent(post.slug)}`, ogType: 'article', bodyHtml: body }));
 });
 
 // ---------- API: contact form ----------

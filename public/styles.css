@@ -486,6 +486,10 @@ p { text-wrap: pretty; max-width: 70ch; }
 .spec-total-row.is-grand { background: var(--color-primary-highlight); border-top: 1px solid var(--color-border); color: var(--color-text); font-weight: 700; }
 .spec-total-row.is-grand span:last-child { color: var(--color-primary); font-size: var(--text-base); font-weight: 700; }
 .spec-fine { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-3); max-width: 62ch; }
+
+/* Reads the visitor's answer to the closing expectation check back to them,
+   so it lands as a reply rather than as something we quietly harvested. */
+.builder-close { margin-top: var(--space-5); padding: var(--space-4) var(--space-5); border-left: 3px solid var(--color-primary); background: var(--color-primary-highlight); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: var(--text-sm); color: var(--color-text); max-width: none; }
 .spec-notes { padding: var(--space-4) var(--space-5); border-top: 1px solid var(--color-border); background: var(--color-surface-offset); }
 .spec-notes-title { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-faint); margin-bottom: var(--space-2); }
 .spec-notes ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }

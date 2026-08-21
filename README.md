@@ -126,6 +126,15 @@ low, and hides the options that would have taught them what things cost.
 The estimate updates as they answer instead, so changing an answer visibly
 moves the number.
 
+Each track closes with a non-binding expectation check (`EXPECT` /
+`expectationStep()` in [public/pc-builder.js](public/pc-builder.js)) that
+reads the finished estimate back in the question itself — *"This build comes
+to $3,650–5,550. Does that land where you expected?"* It gates nothing and
+changes no part. Its `close` text is shown back to the visitor on the
+summary; its `lead` text rides along in the quote request, so a lead arrives
+already labelled *ready to talk specifics* / *wants to find savings* /
+*has room to go bigger*.
+
 Estimates are **ranges, not point values** — a single number reads as a
 quote. Totals round to the nearest $25 because the inputs aren't precise
 enough to justify a figure that looks like it is. `AS_OF` is shown on the

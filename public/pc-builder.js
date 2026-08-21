@@ -51,6 +51,53 @@
     ]
   };
 
+  // Closing question. Non-binding and it changes nothing about the build —
+  // it just says where to start the conversation. `lead` is what rides along
+  // to us in the quote request; `close` is what the visitor reads back.
+  var EXPECT = {
+    onboard: {
+      label: 'Works for me',
+      lead: 'Comfortable with this number — ready to talk specifics.',
+      close: "Good — that's the number to work from. Bring it to the consult and we'll turn it into real parts and a firm price."
+    },
+    expected: {
+      label: 'About what I expected',
+      lead: 'Estimate landed about where they expected.',
+      close: "Then we're in the right neighborhood. The consult is where this turns into real parts and a firm price."
+    },
+    high: {
+      label: 'Higher than I hoped',
+      lead: 'Estimate came in higher than hoped — wants to find savings.',
+      close: "Worth talking through — there's usually room to trim without changing how the machine feels to use. Tell us your target and we'll work to it."
+    },
+    room: {
+      label: 'I could go higher',
+      lead: 'Has room above this estimate — open to a bigger build.',
+      close: "Then there's headroom worth spending well. We'll show you where more money actually changes the experience, and where it quietly doesn't."
+    }
+  };
+
+  // The estimate is complete by the time this asks, so it goes in the
+  // question itself — on a phone the running total is a collapsed bar, and
+  // signing off on a number you have to go looking for isn't signing off.
+  function expectationStep() {
+    return {
+      question: function (b, est) {
+        return est
+          ? 'This build comes to ' + PRICING.range(est.total) + '. Does that land where you expected?'
+          : 'Does that land where you expected?';
+      },
+      sub: 'Nothing is locked in either way — this just tells us where to start the conversation.',
+      short: 'Expectation',
+      options: [
+        { label: 'Yep — that works', sub: 'Ready to talk specifics', effect: function (b) { b.expectation = EXPECT.onboard; } },
+        { label: 'About what I expected', sub: 'Roughly the range I had in mind', effect: function (b) { b.expectation = EXPECT.expected; } },
+        { label: 'Higher than I hoped', sub: "Let's find savings that don't hurt", effect: function (b) { b.expectation = EXPECT.high; } },
+        { label: 'I could go higher', sub: 'Show me what more would buy', effect: function (b) { b.expectation = EXPECT.room; } }
+      ]
+    };
+  }
+
   var TRACKS = {
     gaming: { steps: [
       { question: "What's the gaming target?", sub: 'This drives the GPU — the single biggest factor in how a game feels.', short: 'Gaming target',
@@ -88,7 +135,8 @@
           { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.air; } },
           { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
           { label: 'Push it — extreme cooling', sub: 'Custom loop territory', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
-        ] }
+        ] },
+      expectationStep()
     ] },
 
     creative: { steps: [
@@ -122,7 +170,8 @@
           { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.air; } },
           { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
           { label: 'Push it — extreme cooling', sub: 'Long render sessions, max sustained clocks', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
-        ] }
+        ] },
+      expectationStep()
     ] },
 
     ai: { steps: [
@@ -157,7 +206,8 @@
           { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.airAi; } },
           { label: 'Liquid — quieter under sustained load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
           { label: 'Push it — extreme cooling', sub: 'Maximum sustained multi-GPU performance', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop and rack cooling options on the consult"); } }
-        ] }
+        ] },
+      expectationStep()
     ] },
 
     everyday: { steps: [
@@ -189,7 +239,8 @@
         options: [
           { label: 'Standard is fine', sub: '', effect: function (b) { b.cooling = COOL.stock; } },
           { label: 'Whisper-quiet, please', sub: '', effect: function (b) { b.cooling = COOL.quiet; } }
-        ] }
+        ] },
+      expectationStep()
     ] }
   };
 
@@ -207,11 +258,17 @@
   var rigOpen = false; // mobile: is the build panel expanded
 
   function defaultBuild() {
-    return { track: null, trackLabel: null, interest: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, notes: [] };
+    return { track: null, trackLabel: null, interest: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, expectation: null, notes: [] };
   }
 
   function stepAt(i) {
     return i === 0 ? PURPOSE_STEP : state.trackSteps[i - 1];
+  }
+
+  // A step's question may be a function of the build so far — the closing
+  // expectation check reads the current estimate back to the visitor.
+  function stepQuestion(step) {
+    return typeof step.question === 'function' ? step.question(state.build, state.estimate) : step.question;
   }
 
   function getCurrentStep() {
@@ -380,7 +437,7 @@
       var label = step.options[choice].label;
       var short = i === 0 ? PURPOSE_SHORT : (step.short || 'Step ' + (i + 1));
       return '<li><button type="button" class="builder-chip" data-step="' + i + '" ' +
-        'aria-label="' + escapeHtml('Change your answer to: ' + step.question + ' — currently ' + label) + '">' +
+        'aria-label="' + escapeHtml('Change your answer to: ' + stepQuestion(step) + ' — currently ' + label) + '">' +
         '<span class="builder-chip-key">' + escapeHtml(short) + '</span>' +
         '<span class="builder-chip-value">' + escapeHtml(label) + '</span>' +
       '</button></li>';
@@ -408,7 +465,7 @@
     panelEl.innerHTML =
       progressHtml(pct, total ? 'Step ' + stepNum + ' of ' + total : 'Step ' + stepNum) +
       trailHtml() +
-      '<h2 class="builder-question" id="builder-question" tabindex="-1">' + escapeHtml(step.question) + '</h2>' +
+      '<h2 class="builder-question" id="builder-question" tabindex="-1">' + escapeHtml(stepQuestion(step)) + '</h2>' +
       (step.sub ? '<p class="builder-sub">' + escapeHtml(step.sub) + '</p>' : '') +
       '<div class="builder-options" role="group" aria-labelledby="builder-question">' +
         step.options.map(function (opt, i) {
@@ -481,6 +538,7 @@
           : '') +
       '</div>' +
       totalsHtml(est) +
+      (b.expectation ? '<p class="builder-close">' + escapeHtml(b.expectation.close) + '</p>' : '') +
       '<div class="builder-cta-row">' +
         '<a class="btn btn-primary" href="' + escapeHtml(ctaHref(b)) + '">Get this build quoted <span aria-hidden="true">&rarr;</span></a>' +
         '<button type="button" class="btn btn-ghost" data-copy="spec">Copy spec</button>' +
@@ -519,7 +577,8 @@
   function pad(label) {
     var s = label + ':';
     while (s.length < 12) s += ' ';
-    return s;
+    // Modifier labels run past the column; they still need a gap after the colon.
+    return s.length > 12 ? s + ' ' : s;
   }
 
   function specText(b) {
@@ -535,6 +594,7 @@
       est.laborModifiers.forEach(function (m) { lines.push(pad(m.label) + PRICING.money(m.fee)); });
       lines.push(pad('ESTIMATE') + PRICING.range(est.total));
     }
+    if (b.expectation) lines.push('', 'On the estimate: ' + b.expectation.label);
     if (b.notes.length) {
       lines.push('', 'Worth knowing');
       b.notes.forEach(function (n) { lines.push('  - ' + n); });
@@ -590,6 +650,7 @@
     }).filter(Boolean);
     var summary = 'Sandbox build (' + b.trackLabel + '): ' + parts.join(' · ') + '.' +
       (est ? ' Sandbox estimate: ' + PRICING.range(est.total) + ' (parts at cost as of ' + est.asOf + ' + build fee).' : '') +
+      (b.expectation ? ' ' + b.expectation.lead : '') +
       ' Full config: ' + shareUrl();
     var params = new URLSearchParams();
     if (b.interest) params.set('interest', b.interest);

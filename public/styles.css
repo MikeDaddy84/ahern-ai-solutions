@@ -177,7 +177,6 @@ p { text-wrap: pretty; max-width: 70ch; }
 .btn-ghost:hover { border-color: var(--color-primary); background: var(--color-surface); color: var(--color-primary); }
 .btn-sm { padding: .55rem 1.05rem; }
 .btn-block { width: 100%; }
-.cal-trigger { margin-top: var(--space-5); font-size: var(--text-sm); }
 
 /* ---------- HERO ---------- */
 .hero { padding-block: clamp(3rem, 8vw, 6rem) clamp(2.5rem, 6vw, 4.5rem); position: relative; overflow: hidden; }

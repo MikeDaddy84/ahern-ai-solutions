@@ -323,9 +323,6 @@
           <div class="cta-text">
             <h2 class="section-title">Tell me what you want to build.</h2>
             <p class="section-sub">Book a free consultation for AI automation, a custom PC, or a private local AI system. No pressure and no obligation.</p>
-            <button type="button" class="btn btn-ghost cal-trigger" data-cal-link="CAL_USERNAME/consultation" data-cal-config='{"theme":"auto"}'>
-              <span aria-hidden="true">▤</span> Pick a time on the calendar instead
-            </button>
           </div>
           <form class="audit-form" id="audit-form" action="/api/contact" method="POST" novalidate>
             <input type="checkbox" name="botcheck" class="honeypot" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -396,14 +393,6 @@
     </div>
   </footer>
 
-  <!-- Cal.com embed — replace CAL_USERNAME/consultation below (and in the
-       button's data-cal-link above) once you've created your Cal.com event.
-       See README.md "Booking (Cal.com)" for setup steps. -->
-  <script type="text/javascript">
-    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-    Cal("init", { origin: "https://app.cal.com" });
-    Cal("ui", { styles: { branding: { brandColor: "#00e5a0" } }, hideEventTypeDetails: false, layout: "month_view" });
-  </script>
   <script src="/script.js?v=cyberpunk-2"></script>
 </body>
 </html>

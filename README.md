@@ -9,7 +9,7 @@ private local AI systems, based in Gordon, TX.
   Markdown-backed blog and two small JSON APIs.
 - **Database:** [Turso](https://turso.tech) (libSQL) — contact form
   submissions and first-party pageview analytics.
-- **Booking:** [Cal.com](https://cal.com) embed (popup widget).
+- **Booking:** none — the contact form is the only inbound path.
 - **Hosting:** Render (Web Service, free tier).
 
 ## Brand
@@ -54,17 +54,12 @@ Schema (`contact_submissions`, `pageviews`) is created automatically on
 first boot via `CREATE TABLE IF NOT EXISTS` — no manual migration needed
 once the two env vars above are set. See [lib/db.js](lib/db.js).
 
-## Booking (Cal.com)
+## Booking
 
-The "Pick a time on the calendar instead" button and the embed script in
-[public/index.html](public/index.html) currently point at the placeholder
-`CAL_USERNAME/consultation`. To wire up real booking:
-
-1. Create a free account at [cal.com](https://cal.com) and set up an event
-   type (e.g. "consultation").
-2. In `public/index.html`, replace both occurrences of
-   `CAL_USERNAME/consultation` with your real `username/event-slug`.
-3. Commit + push — Render auto-deploys.
+There is no self-serve scheduling. The contact form is the only way in, so
+nothing lands on the calendar without a reply first — deliberate for now.
+The Cal.com embed that used to sit on the homepage was removed in full
+(`git log -- public/index.html` if it's ever wanted back).
 
 ## PC Builder sandbox
 
@@ -129,7 +124,7 @@ moves the number.
 Each track closes with a non-binding expectation check (`EXPECT` /
 `expectationStep()` in [public/pc-builder.js](public/pc-builder.js)) that
 reads the finished estimate back in the question itself — *"This build comes
-to $3,650–5,550. Does that land where you expected?"* It gates nothing and
+to $3,650–$5,550. Does that land where you expected?"* It gates nothing and
 changes no part. Its `close` text is shown back to the visitor on the
 summary; its `lead` text rides along in the quote request, so a lead arrives
 already labelled *ready to talk specifics* / *wants to find savings* /

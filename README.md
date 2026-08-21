@@ -66,6 +66,41 @@ The "Pick a time on the calendar instead" button and the embed script in
    `CAL_USERNAME/consultation` with your real `username/event-slug`.
 3. Commit + push — Render auto-deploys.
 
+## PC Builder sandbox
+
+`/pc-builder` is a data-driven quiz that assembles a possible build live as
+the visitor answers plain-language questions. All of it lives in
+[public/pc-builder.js](public/pc-builder.js) — the questions are plain data
+(`PURPOSE_STEP` + `TRACKS`), and each option's `effect(build)` writes the
+parts it implies. To add or reword a question, edit the data; the rendering
+and navigation don't change.
+
+The answered path is the single source of truth and it lives in the URL
+hash — `#b=<track>.<index>.<index>…`, e.g.
+`/pc-builder#b=ai.1.2.1.2.1.2`. That one decision buys a lot:
+
+- **Browser back/forward** steps through questions instead of leaving the page.
+- **Refresh** keeps the visitor's place.
+- **A finished build is a link.** "Copy link" on the summary reopens the exact
+  configuration, and the link is embedded in the message the "Get this build
+  quoted" CTA pre-fills — so a quote request arrives with a one-click way to
+  see the build behind it.
+
+A malformed hash truncates at the first bad token rather than throwing, so
+a mangled link still lands on a usable step.
+
+Other entry points:
+
+- `?track=gaming|creative|ai|everyday` skips the first question (used by the
+  "Start this build" links on the homepage) and is rewritten to a `#b=` hash
+  on load.
+- The CTA hands off to the homepage contact form via `?interest=&build=`,
+  read by `prefillFromBuilder()` in [public/script.js](public/script.js).
+
+Keyboard: number keys answer, arrows move between options, `Backspace` goes
+back. Answering moves focus to the new question, and a visually-hidden live
+region announces only the parts that changed.
+
 ## Blog / case studies
 
 Posts live as Markdown files in [content/posts/](content/posts/) with

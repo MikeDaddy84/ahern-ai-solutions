@@ -211,12 +211,14 @@
     return '$' + Math.round(n).toLocaleString('en-US');
   }
 
-  // "$2,325–3,550" rather than "$2,325–$3,550" — one currency mark reads as
-  // one number with a range, which is what it is.
+  // Both ends carry the dollar sign: "$2,325–$3,550". Editorial style drops
+  // the repeat ("$50–75"), but that's a rule for prose — on a price a bare
+  // second number reads as a typo, and a price people are deciding to trust
+  // can't afford the double-take.
   function range(pair) {
     if (!pair[0] && !pair[1]) return 'included';
     if (pair[0] === pair[1]) return money(pair[0]);
-    return money(pair[0]) + '–' + Math.round(pair[1]).toLocaleString('en-US');
+    return money(pair[0]) + '–' + money(pair[1]);
   }
 
   window.AHERN_PRICING = {

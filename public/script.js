@@ -42,6 +42,21 @@
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  // ---------- Prefill from the PC Builder sandbox (?interest=&build=) ----------
+  (function prefillFromBuilder() {
+    var params = new URLSearchParams(location.search);
+    var interest = params.get('interest');
+    var buildSummary = params.get('build');
+    if (!interest && !buildSummary) return;
+    var interestSelect = document.getElementById('interest');
+    var msg = document.getElementById('msg');
+    if (interestSelect && interest) {
+      var hasOption = Array.prototype.some.call(interestSelect.options, function (o) { return o.value === interest; });
+      if (hasOption) interestSelect.value = interest;
+    }
+    if (msg && buildSummary && !msg.value) msg.value = buildSummary;
+  })();
+
   // ---------- Contact form -> /api/contact ----------
   var form = document.getElementById('audit-form');
   var result = document.getElementById('form-result');

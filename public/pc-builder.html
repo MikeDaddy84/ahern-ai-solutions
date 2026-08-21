@@ -1,23 +1,12 @@
-// Shared page chrome (head, header, footer, background effects) for
-// server-rendered pages — currently just the blog. Keeps the blog visually
-// identical to the static homepage without duplicating markup everywhere.
-
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
-
-function renderPage({ title, description, bodyHtml, canonicalPath }) {
-  return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)}</title>
-  <meta name="description" content="${escapeHtml(description)}" />
-  <meta property="og:title" content="${escapeHtml(title)}" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
+  <title>PC Build Sandbox — Ahern AI Solutions</title>
+  <meta name="description" content="Answer a few real-world questions and watch a possible custom PC build come together live — GPU, memory, storage, and cooling, picked to match how you'll actually use it." />
+  <meta property="og:title" content="PC Build Sandbox — Ahern AI Solutions" />
+  <meta property="og:description" content="Answer a few real-world questions and watch a possible custom PC build come together live." />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/png" href="/brand/favicon.png" />
   <link rel="preconnect" href="https://api.fontshare.com" />
@@ -35,6 +24,7 @@ function renderPage({ title, description, bodyHtml, canonicalPath }) {
   <div class="scanlines" aria-hidden="true"></div>
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <!-- HEADER -->
   <header class="header" id="header">
     <div class="container header-inner">
       <a href="/#top" class="logo" aria-label="Ahern AI Solutions home">
@@ -57,9 +47,34 @@ function renderPage({ title, description, bodyHtml, canonicalPath }) {
   </header>
 
   <main id="main">
-${bodyHtml}
+    <!-- BUILDER HERO -->
+    <section class="container builder-hero">
+      <p class="eyebrow">Interactive sandbox</p>
+      <h1>Build your PC, one answer at a time.</h1>
+      <p>Answer a few plain-language questions and watch a possible build come together live — say yes to VR and watch the GPU jump. This is a starting point: the exact parts, current pricing, and vendor options get locked in on your free consultation.</p>
+    </section>
+
+    <!-- BUILDER -->
+    <section class="section builder-section">
+      <div class="container">
+        <div class="builder-layout">
+          <div class="builder-panel" id="builder-panel"></div>
+          <aside class="builder-rig" id="builder-rig" aria-live="polite" aria-label="Your build so far"></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- FALLBACK CTA -->
+    <section class="section section-alt">
+      <div class="container narrow builder-fallback">
+        <p class="section-title">Would rather just talk it through?</p>
+        <p class="section-sub">Skip the sandbox and book a free consultation — same outcome, a real conversation.</p>
+        <a class="btn btn-primary" href="/#audit">Book a free consultation</a>
+      </div>
+    </section>
   </main>
 
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
       <div class="footer-brand">
@@ -70,7 +85,6 @@ ${bodyHtml}
       </div>
       <nav class="footer-nav" aria-label="Footer">
         <a href="/#services">Services</a>
-        <a href="/#hardware">PC builds</a>
         <a href="/pc-builder">PC Builder</a>
         <a href="/#pricing">AI packages</a>
         <a href="/blog">Blog</a>
@@ -80,14 +94,12 @@ ${bodyHtml}
       <div class="footer-meta">
         <p>Gordon, Texas · Serving the North Texas area</p>
         <p><a href="tel:+19403299337">(940) 329-9337</a></p>
-        <p class="footer-fine">&copy; 2026 Ahern AI Solutions.</p>
+        <p class="footer-fine">&copy; 2026 Ahern AI Solutions. Built as a launch preview.</p>
       </div>
     </div>
   </footer>
 
   <script src="/script.js?v=cyberpunk-1"></script>
+  <script src="/pc-builder.js?v=1"></script>
 </body>
-</html>`;
-}
-
-module.exports = { renderPage, escapeHtml };
+</html>

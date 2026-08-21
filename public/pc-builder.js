@@ -1,8 +1,14 @@
 // Ahern AI Solutions — interactive PC Builder sandbox.
 // Vanilla JS, data-driven quiz that assembles a possible build live as the
-// visitor answers plain-language questions. No live pricing or vendor
-// catalog yet (see README roadmap notes) — budgets are ballpark bands, and
-// every build ends with "confirm the real spec on your free consult."
+// visitor answers plain-language questions.
+//
+// There's deliberately no budget question. Asking for a budget up front makes
+// people guess at a number before they know what they want, anchors them low,
+// and hides the options that would have taught them what things cost. Instead
+// the estimate updates as they answer, so changing an answer visibly moves the
+// number — the budget conversation happens continuously instead of as a gate.
+//
+// Part labels and every dollar figure live in pricing.js, not here.
 //
 // The answered path is the single source of truth and it lives in the URL
 // hash (#b=ai.1.2.0), so browser back/forward, refresh, and sharing a
@@ -12,6 +18,16 @@
   var rigEl = document.getElementById('builder-rig');
   var liveEl = document.getElementById('builder-live');
   if (!panelEl || !rigEl) return;
+
+  var PRICING = window.AHERN_PRICING;
+  if (!PRICING) {
+    panelEl.innerHTML = '<p class="builder-sub">The builder could not load its pricing data. ' +
+      '<a class="text-link" href="/#audit">Book a free consultation</a> and we\'ll spec it with you directly.</p>';
+    return;
+  }
+
+  var P = PRICING.parts;
+  var CPU = P.cpu, GPU = P.gpu, RAM = P.ram, DISK = P.storage, COOL = P.cooling, CASE = P['case'];
 
   function escapeHtml(str) {
     return String(str || '').replace(/[&<>"']/g, function (c) {
@@ -35,26 +51,14 @@
     ]
   };
 
-  function budgetStep(bands) {
-    var subs = ['Solid & budget-friendly', 'The sweet spot for most builds', 'High-end, built to last', 'No compromises'];
-    return {
-      question: "What's your target budget?",
-      sub: "A ballpark range — we'll fit real parts and vendors to it on your free consult.",
-      short: 'Budget',
-      options: bands.map(function (label, i) {
-        return { label: label, sub: subs[i], effect: function (b) { b.budget = label; } };
-      })
-    };
-  }
-
   var TRACKS = {
     gaming: { steps: [
       { question: "What's the gaming target?", sub: 'This drives the GPU — the single biggest factor in how a game feels.', short: 'Gaming target',
         options: [
-          { label: 'Competitive & high fps', sub: '1080p–1440p, maxed-out frame rate', effect: function (b) { b.gpu = 'RTX 4060 Ti / RX 7700 XT-class, 12–16GB'; b.cpu = 'High-frequency 6-core CPU (fast per-core speed for fps)'; } },
-          { label: 'Cinematic single-player', sub: '1440p, high detail', effect: function (b) { b.gpu = 'RTX 4070 Ti-class, 12–16GB'; b.cpu = '8-core CPU, balanced'; } },
-          { label: 'Go big — 4K', sub: '4K, everything maxed', effect: function (b) { b.gpu = 'RTX 4080 / 4090-class, 16GB+'; b.cpu = 'High-core-count CPU to keep up'; } },
-          { label: 'Virtual reality', sub: 'Smooth, no-compromise VR', effect: function (b) { b.gpu = 'RTX 4070 Ti SUPER / 4080-class, 16GB+ (VR-ready)'; b.cpu = '8-core CPU'; b.notes.push('VR-ready GPU + fast USB for the headset'); } }
+          { label: 'Competitive & high fps', sub: '1080p–1440p, maxed-out frame rate', effect: function (b) { b.gpu = GPU.rtx4060ti; b.cpu = CPU.fast6; } },
+          { label: 'Cinematic single-player', sub: '1440p, high detail', effect: function (b) { b.gpu = GPU.rtx4070ti; b.cpu = CPU.balanced8; } },
+          { label: 'Go big — 4K', sub: '4K, everything maxed', effect: function (b) { b.gpu = GPU.rtx4080_90; b.cpu = CPU.keepUp; } },
+          { label: 'Virtual reality', sub: 'Smooth, no-compromise VR', effect: function (b) { b.gpu = GPU.vr; b.cpu = CPU.core8; b.notes.push('VR-ready GPU + fast USB for the headset'); } }
         ] },
       { question: 'Planning to stream or record while you play?', sub: 'Encoding while gaming benefits from extra CPU headroom.', short: 'Streaming',
         options: [
@@ -63,133 +67,129 @@
         ] },
       { question: 'How many things do you usually have open at once?', sub: 'Sets how much memory (RAM) the build gets.', short: 'Multitasking',
         options: [
-          { label: 'Just the game', sub: '16GB is plenty', effect: function (b) { b.ram = '16GB'; } },
-          { label: 'Game + Discord + browser + Spotify', sub: 'The realistic default', effect: function (b) { b.ram = '32GB'; } },
-          { label: 'I basically never close anything', sub: 'Heavy multitasker', effect: function (b) { b.ram = '64GB'; } }
+          { label: 'Just the game', sub: '16GB is plenty', effect: function (b) { b.ram = RAM.gb16; } },
+          { label: 'Game + Discord + browser + Spotify', sub: 'The realistic default', effect: function (b) { b.ram = RAM.gb32; } },
+          { label: 'I basically never close anything', sub: 'Heavy multitasker', effect: function (b) { b.ram = RAM.gb64; } }
         ] },
       { question: 'Storage — what fits your library?', sub: '', short: 'Storage',
         options: [
-          { label: 'One fast drive is plenty', sub: '1TB NVMe SSD', effect: function (b) { b.storage = '1TB NVMe SSD'; } },
-          { label: 'Give me room to grow', sub: '2TB NVMe SSD', effect: function (b) { b.storage = '2TB NVMe SSD'; } },
-          { label: 'I hoard everything', sub: '4TB+ NVMe + bulk storage', effect: function (b) { b.storage = '4TB+ NVMe SSD + bulk HDD'; } }
+          { label: 'One fast drive is plenty', sub: '1TB NVMe SSD', effect: function (b) { b.storage = DISK.nvme1tb; } },
+          { label: 'Give me room to grow', sub: '2TB NVMe SSD', effect: function (b) { b.storage = DISK.nvme2tb; } },
+          { label: 'I hoard everything', sub: '4TB+ NVMe + bulk storage', effect: function (b) { b.storage = DISK.nvme4tbBulk; } }
         ] },
       { question: 'Look & feel?', sub: '', short: 'Look & feel',
         options: [
-          { label: 'RGB showpiece', sub: 'Tempered glass, RGB fans, on display', effect: function (b) { b.case = 'Tempered-glass case, RGB fans'; } },
-          { label: 'Clean & quiet', sub: 'Minimal lighting, tucked under the desk', effect: function (b) { b.case = 'Minimal case, sound-dampened'; } },
-          { label: 'Small form factor', sub: 'Compact, fits anywhere', effect: function (b) { b.case = 'Compact SFF case'; } }
+          { label: 'RGB showpiece', sub: 'Tempered glass, RGB fans, on display', effect: function (b) { b['case'] = CASE.glassRgb; } },
+          { label: 'Clean & quiet', sub: 'Minimal lighting, tucked under the desk', effect: function (b) { b['case'] = CASE.minimalQuiet; } },
+          { label: 'Small form factor', sub: 'Compact, fits anywhere', effect: function (b) { b['case'] = CASE.sff; } }
         ] },
       { question: 'Cooling?', sub: '', short: 'Cooling',
         options: [
-          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = 'High-performance air cooler'; } },
-          { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = '240–360mm AIO liquid cooler'; } },
-          { label: 'Push it — extreme cooling', sub: 'Custom loop territory', effect: function (b) { b.cooling = 'Custom liquid loop (extreme cooling)'; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
-        ] },
-      budgetStep(['$900 – $1,300', '$1,300 – $2,000', '$2,000 – $3,000', '$3,000+'])
+          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.air; } },
+          { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
+          { label: 'Push it — extreme cooling', sub: 'Custom loop territory', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
+        ] }
     ] },
 
     creative: { steps: [
       { question: "What's the main creative work?", sub: 'This sets the CPU/GPU balance.', short: 'Creative work',
         options: [
-          { label: 'Video editing', sub: 'Premiere, DaVinci, Final Cut', effect: function (b) { b.cpu = 'High-core-count CPU (fast timeline scrubbing & export)'; b.gpu = 'RTX 4070-class GPU, 12GB (GPU-accelerated export)'; } },
-          { label: '3D & VFX', sub: 'Blender, Maya, Octane/Redshift', effect: function (b) { b.cpu = 'High-core-count CPU'; b.gpu = 'RTX 4080-class GPU, 16GB (fast GPU rendering)'; } },
-          { label: 'Photo & design', sub: 'Lightroom, Photoshop, Illustrator', effect: function (b) { b.cpu = 'Fast 6–8 core CPU'; b.gpu = 'RTX 4060 Ti-class GPU, 16GB'; } },
-          { label: 'Music production', sub: 'Low-latency audio, big sample libraries', effect: function (b) { b.cpu = 'High-frequency CPU (low audio latency)'; b.gpu = 'Entry workstation GPU'; } }
+          { label: 'Video editing', sub: 'Premiere, DaVinci, Final Cut', effect: function (b) { b.cpu = CPU.editor; b.gpu = GPU.rtx4070; } },
+          { label: '3D & VFX', sub: 'Blender, Maya, Octane/Redshift', effect: function (b) { b.cpu = CPU.highCore; b.gpu = GPU.rtx4080; } },
+          { label: 'Photo & design', sub: 'Lightroom, Photoshop, Illustrator', effect: function (b) { b.cpu = CPU.fast68; b.gpu = GPU.rtx4060ti16; } },
+          { label: 'Music production', sub: 'Low-latency audio, big sample libraries', effect: function (b) { b.cpu = CPU.audio; b.gpu = GPU.wsEntry; } }
         ] },
       { question: 'How big are the files you work with?', sub: 'Sets how much memory (RAM) the build gets.', short: 'File sizes',
         options: [
-          { label: 'Normal', sub: 'Photos, short clips', effect: function (b) { b.ram = '32GB'; } },
-          { label: 'Big', sub: '4K/8K footage, huge scenes', effect: function (b) { b.ram = '64GB'; } },
-          { label: 'Massive', sub: 'Multi-track 8K, dense 3D scenes', effect: function (b) { b.ram = '128GB'; } }
+          { label: 'Normal', sub: 'Photos, short clips', effect: function (b) { b.ram = RAM.gb32; } },
+          { label: 'Big', sub: '4K/8K footage, huge scenes', effect: function (b) { b.ram = RAM.gb64; } },
+          { label: 'Massive', sub: 'Multi-track 8K, dense 3D scenes', effect: function (b) { b.ram = RAM.gb128; } }
         ] },
       { question: 'Storage — active work vs. archive?', sub: '', short: 'Storage',
         options: [
-          { label: 'One fast project drive', sub: '1TB NVMe', effect: function (b) { b.storage = '1TB NVMe SSD'; } },
-          { label: 'Active + archive', sub: '2TB NVMe + bulk storage', effect: function (b) { b.storage = '2TB NVMe SSD + bulk storage'; } },
-          { label: 'Everything, always', sub: '4TB+ NVMe + RAID storage', effect: function (b) { b.storage = '4TB+ NVMe SSD + RAID storage'; } }
+          { label: 'One fast project drive', sub: '1TB NVMe', effect: function (b) { b.storage = DISK.nvme1tb; } },
+          { label: 'Active + archive', sub: '2TB NVMe + bulk storage', effect: function (b) { b.storage = DISK.nvme2tbBulk; } },
+          { label: 'Everything, always', sub: '4TB+ NVMe + RAID storage', effect: function (b) { b.storage = DISK.nvme4tbRaid; } }
         ] },
       { question: 'Look & feel?', sub: '', short: 'Look & feel',
         options: [
-          { label: 'Clean & professional', sub: 'Looks the part in a studio', effect: function (b) { b.case = 'Minimal workstation case'; } },
-          { label: 'RGB showpiece', sub: 'Tempered glass, RGB fans', effect: function (b) { b.case = 'Tempered-glass case, RGB fans'; } },
-          { label: 'Small form factor', sub: 'Fits on a crowded desk', effect: function (b) { b.case = 'Compact SFF case'; } }
+          { label: 'Clean & professional', sub: 'Looks the part in a studio', effect: function (b) { b['case'] = CASE.workstation; } },
+          { label: 'RGB showpiece', sub: 'Tempered glass, RGB fans', effect: function (b) { b['case'] = CASE.glassRgb; } },
+          { label: 'Small form factor', sub: 'Fits on a crowded desk', effect: function (b) { b['case'] = CASE.sff; } }
         ] },
       { question: 'Cooling?', sub: '', short: 'Cooling',
         options: [
-          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = 'High-performance air cooler'; } },
-          { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = '240–360mm AIO liquid cooler'; } },
-          { label: 'Push it — extreme cooling', sub: 'Long render sessions, max sustained clocks', effect: function (b) { b.cooling = 'Custom liquid loop (extreme cooling)'; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
-        ] },
-      budgetStep(['$1,500 – $2,200', '$2,200 – $3,500', '$3,500 – $5,000', '$5,000+'])
+          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.air; } },
+          { label: 'Liquid — quieter under load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
+          { label: 'Push it — extreme cooling', sub: 'Long render sessions, max sustained clocks', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop options on the consult"); } }
+        ] }
     ] },
 
     ai: { steps: [
       { question: "What's the biggest model you want to run locally?", sub: 'This is the biggest factor — how much GPU memory (VRAM) it takes to load and run the model.', short: 'Model size',
         options: [
-          { label: 'Efficient everyday models', sub: '7B–14B-class — fast, general-purpose', effect: function (b) { b.gpu = 'RTX 4070 Ti-class GPU, 16GB VRAM'; } },
-          { label: 'Flagship open-weight 70B-class', sub: 'Llama 3.3 70B, Qwen2.5 72B-class — near-frontier quality', effect: function (b) { b.gpu = 'Dual RTX 4090-class GPUs, 48GB combined VRAM'; b.notes.push('70B-class models need real VRAM — usually quantized or split across two GPUs'); } },
-          { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, Llama 3.1 405B-class — the actual frontier, self-hosted', effect: function (b) { b.gpu = 'Multi-GPU server build, 96GB+ VRAM (4× 24GB or more)'; b.notes.push("This is a serious multi-GPU build — we'll scope exact GPU count, power, and cooling on your consult"); } },
-          { label: 'Not sure yet', sub: "We'll size it to whatever you end up running", effect: function (b) { b.gpu = 'RTX 4090-class GPU, 24GB VRAM (flexible headroom)'; } }
+          { label: 'Efficient everyday models', sub: '7B–14B-class — fast, general-purpose', effect: function (b) { b.gpu = GPU.ai16; } },
+          { label: 'Flagship open-weight 70B-class', sub: 'Llama 3.3 70B, Qwen2.5 72B-class — near-frontier quality', effect: function (b) { b.gpu = GPU.aiDual4090; b.notes.push('70B-class models need real VRAM — usually quantized or split across two GPUs'); } },
+          { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, Llama 3.1 405B-class — the actual frontier, self-hosted', effect: function (b) { b.gpu = GPU.aiMulti; b.notes.push("This is a serious multi-GPU build — we'll scope exact GPU count, power, and cooling on your consult"); } },
+          { label: 'Not sure yet', sub: "We'll size it to whatever you end up running", effect: function (b) { b.gpu = GPU.ai4090; } }
         ] },
       { question: 'How will you actually use it day to day?', sub: 'Agents and long-context work lean harder on CPU and memory than simple chat does.', short: 'Daily use',
         options: [
-          { label: 'Chat & document Q&A', sub: 'Ask questions, search internal docs', effect: function (b) { b.cpu = '8-core CPU'; b.ram = '32GB'; } },
-          { label: 'Coding assistant', sub: 'Large context, big codebases', effect: function (b) { b.cpu = '12-core CPU'; b.ram = '64GB'; b.notes.push('Long-context coding wants RAM headroom and fast storage for repo indexing'); } },
-          { label: 'Agents that use tools & chain tasks', sub: 'Browses, calls APIs, runs multi-step jobs', effect: function (b) { b.cpu = '12-core CPU'; b.ram = '64GB'; b.notes.push('Agent orchestration runs several processes at once — extra CPU cores keep it responsive'); } },
-          { label: 'Multiple people or agents at once', sub: 'Concurrent users, or several agents in parallel', effect: function (b) { b.cpu = 'High-core-count server-class CPU'; b.ram = '128GB'; b.notes.push('Concurrency needs CPU, RAM, and VRAM headroom on top of the base model'); } }
+          { label: 'Chat & document Q&A', sub: 'Ask questions, search internal docs', effect: function (b) { b.cpu = CPU.core8; b.ram = RAM.gb32; } },
+          { label: 'Coding assistant', sub: 'Large context, big codebases', effect: function (b) { b.cpu = CPU.core12; b.ram = RAM.gb64; b.notes.push('Long-context coding wants RAM headroom and fast storage for repo indexing'); } },
+          { label: 'Agents that use tools & chain tasks', sub: 'Browses, calls APIs, runs multi-step jobs', effect: function (b) { b.cpu = CPU.core12; b.ram = RAM.gb64; b.notes.push('Agent orchestration runs several processes at once — extra CPU cores keep it responsive'); } },
+          { label: 'Multiple people or agents at once', sub: 'Concurrent users, or several agents in parallel', effect: function (b) { b.cpu = CPU.server; b.ram = RAM.gb128; b.notes.push('Concurrency needs CPU, RAM, and VRAM headroom on top of the base model'); } }
         ] },
       { question: 'How much local model & data storage do you need?', sub: 'Flagship model weights alone can run 40–200GB+ each.', short: 'Storage',
         options: [
-          { label: 'A focused library', sub: 'One or two models, core documents', effect: function (b) { b.storage = '2TB NVMe SSD'; } },
-          { label: 'Growing steadily', sub: 'Several models plus a document library', effect: function (b) { b.storage = '4TB NVMe SSD'; } },
-          { label: 'Everything the business has', sub: 'Large model library + network storage', effect: function (b) { b.storage = '8TB+ NVMe SSD + network storage'; } }
+          { label: 'A focused library', sub: 'One or two models, core documents', effect: function (b) { b.storage = DISK.nvme2tb; } },
+          { label: 'Growing steadily', sub: 'Several models plus a document library', effect: function (b) { b.storage = DISK.nvme4tb; } },
+          { label: 'Everything the business has', sub: 'Large model library + network storage', effect: function (b) { b.storage = DISK.nvme8tbNet; } }
         ] },
       { question: 'Where does it live?', sub: '', short: 'Location',
         options: [
-          { label: 'Tucked away & quiet', sub: 'A closet or back office', effect: function (b) { b.case = 'Quiet, minimal server-style case'; } },
-          { label: 'On display in the office', sub: '', effect: function (b) { b.case = 'Clean case, visible on-site'; } },
-          { label: 'Rack-mountable', sub: 'Goes in a server rack', effect: function (b) { b.case = 'Rack-mountable chassis'; } }
+          { label: 'Tucked away & quiet', sub: 'A closet or back office', effect: function (b) { b['case'] = CASE.serverQuiet; } },
+          { label: 'On display in the office', sub: '', effect: function (b) { b['case'] = CASE.office; } },
+          { label: 'Rack-mountable', sub: 'Goes in a server rack', effect: function (b) { b['case'] = CASE.rack; } }
         ] },
       { question: 'Cooling?', sub: 'Multi-GPU AI workloads run hot for long, sustained stretches.', short: 'Cooling',
         options: [
-          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = 'High-performance air cooling'; } },
-          { label: 'Liquid — quieter under sustained load', sub: '240–360mm AIO', effect: function (b) { b.cooling = '240–360mm AIO liquid cooler'; } },
-          { label: 'Push it — extreme cooling', sub: 'Maximum sustained multi-GPU performance', effect: function (b) { b.cooling = 'Custom liquid loop (extreme cooling)'; b.notes.push("Extreme cooling — we'll walk through custom-loop and rack cooling options on the consult"); } }
-        ] },
-      budgetStep(['$2,000 – $3,500', '$3,500 – $6,000', '$6,000 – $12,000', '$12,000+'])
+          { label: 'Air cooling is fine', sub: 'Quiet, reliable, low-maintenance', effect: function (b) { b.cooling = COOL.airAi; } },
+          { label: 'Liquid — quieter under sustained load', sub: '240–360mm AIO', effect: function (b) { b.cooling = COOL.aio; } },
+          { label: 'Push it — extreme cooling', sub: 'Maximum sustained multi-GPU performance', effect: function (b) { b.cooling = COOL.loop; b.notes.push("Extreme cooling — we'll walk through custom-loop and rack cooling options on the consult"); } }
+        ] }
     ] },
 
     everyday: { steps: [
       { question: "What's it mainly for?", sub: '', short: 'Main use',
         options: [
-          { label: 'Browsing, email, streaming video', sub: '', effect: function (b) { b.cpu = 'Efficient 6-core CPU'; b.gpu = 'Integrated graphics'; } },
-          { label: 'Office work & video calls', sub: '', effect: function (b) { b.cpu = '6–8 core CPU'; b.gpu = 'Integrated graphics'; } },
-          { label: 'Light photo editing & light gaming', sub: '', effect: function (b) { b.cpu = '8-core CPU'; b.gpu = 'Entry GPU, 8GB'; } }
+          { label: 'Browsing, email, streaming video', sub: '', effect: function (b) { b.cpu = CPU.eff6; b.gpu = GPU.igpu; } },
+          { label: 'Office work & video calls', sub: '', effect: function (b) { b.cpu = CPU.office68; b.gpu = GPU.igpu; } },
+          { label: 'Light photo editing & light gaming', sub: '', effect: function (b) { b.cpu = CPU.core8; b.gpu = GPU.entry8; } }
         ] },
       { question: 'How many things do you usually have open at once?', sub: '', short: 'Multitasking',
         options: [
-          { label: "A few tabs, that's it", sub: '', effect: function (b) { b.ram = '8GB'; } },
-          { label: 'The usual mix', sub: 'Browser, email, a couple apps', effect: function (b) { b.ram = '16GB'; } },
-          { label: 'I never close anything', sub: '', effect: function (b) { b.ram = '32GB'; } }
+          { label: "A few tabs, that's it", sub: '', effect: function (b) { b.ram = RAM.gb8; } },
+          { label: 'The usual mix', sub: 'Browser, email, a couple apps', effect: function (b) { b.ram = RAM.gb16; } },
+          { label: 'I never close anything', sub: '', effect: function (b) { b.ram = RAM.gb32; } }
         ] },
       { question: 'Storage?', sub: '', short: 'Storage',
         options: [
-          { label: 'Just the basics', sub: '512GB SSD', effect: function (b) { b.storage = '512GB SSD'; } },
-          { label: 'A bit of room', sub: '1TB SSD', effect: function (b) { b.storage = '1TB SSD'; } },
-          { label: 'Plenty of space', sub: '2TB SSD', effect: function (b) { b.storage = '2TB SSD'; } }
+          { label: 'Just the basics', sub: '512GB SSD', effect: function (b) { b.storage = DISK.ssd512; } },
+          { label: 'A bit of room', sub: '1TB SSD', effect: function (b) { b.storage = DISK.ssd1tb; } },
+          { label: 'Plenty of space', sub: '2TB SSD', effect: function (b) { b.storage = DISK.ssd2tb; } }
         ] },
       { question: 'Look & feel?', sub: '', short: 'Look & feel',
         options: [
-          { label: "Doesn't matter, just works", sub: '', effect: function (b) { b.case = 'Minimal case'; } },
-          { label: 'Clean & quiet', sub: '', effect: function (b) { b.case = 'Sound-dampened case'; } },
-          { label: 'Small footprint', sub: 'Fits on the desk', effect: function (b) { b.case = 'Compact SFF case'; } }
+          { label: "Doesn't matter, just works", sub: '', effect: function (b) { b['case'] = CASE.minimal; } },
+          { label: 'Clean & quiet', sub: '', effect: function (b) { b['case'] = CASE.dampened; } },
+          { label: 'Small footprint', sub: 'Fits on the desk', effect: function (b) { b['case'] = CASE.sff; } }
         ] },
       { question: 'Cooling?', sub: '', short: 'Cooling',
         options: [
-          { label: 'Standard is fine', sub: '', effect: function (b) { b.cooling = 'Standard air cooling'; } },
-          { label: 'Whisper-quiet, please', sub: '', effect: function (b) { b.cooling = 'Whisper-quiet air cooling'; } }
-        ] },
-      budgetStep(['$500 – $800', '$800 – $1,200', '$1,200 – $1,800', '$1,800+'])
+          { label: 'Standard is fine', sub: '', effect: function (b) { b.cooling = COOL.stock; } },
+          { label: 'Whisper-quiet, please', sub: '', effect: function (b) { b.cooling = COOL.quiet; } }
+        ] }
     ] }
   };
 
@@ -199,15 +199,15 @@
   // ---------- State ----------
   // `answers` is where the visitor is now; `recalled` remembers the deepest
   // path they've taken, so stepping back can show what they picked before.
-  var state = { answers: [], build: null, trackSteps: null, finished: false };
+  var state = { answers: [], build: null, estimate: null, trackSteps: null, finished: false };
   var recalled = [];
   var prevBuild = null;
-  var prevFilled = null;
+  var prevTotal = null;
   var pushDepth = 0;   // how many of our own history entries sit behind us
   var rigOpen = false; // mobile: is the build panel expanded
 
   function defaultBuild() {
-    return { track: null, trackLabel: null, interest: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, case: null, budget: null, notes: [] };
+    return { track: null, trackLabel: null, interest: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, notes: [] };
   }
 
   function stepAt(i) {
@@ -231,6 +231,7 @@
       trackSteps[i - 1].options[state.answers[i]].effect(build);
     }
     state.build = build;
+    state.estimate = PRICING.estimate(build);
     state.trackSteps = trackSteps;
     state.finished = !!(trackSteps && state.answers.length === trackSteps.length + 1);
   }
@@ -295,11 +296,12 @@
 
   function selectOption(index) {
     var before = state.build;
+    var beforeEstimate = state.estimate;
     // On mobile the build panel overlays the questions, so answering closes
-    // it again; the part count in the collapsed bar still updates live.
+    // it again; the estimate in the collapsed bar still updates live.
     rigOpen = false;
     applyAnswers(state.answers.concat([index]), 'push', true);
-    announceChange(before, state.build);
+    announceChange(before, state.build, beforeEstimate, state.estimate);
   }
 
   function goBack() {
@@ -318,6 +320,7 @@
   function restart() {
     recalled = [];
     prevBuild = null;
+    prevTotal = null;
     applyAnswers([], 'push', true);
   }
 
@@ -331,15 +334,19 @@
   // ---------- Announcements ----------
   // Only what actually changed, so screen readers hear "Build updated. GPU:
   // ..." instead of the whole spec re-read on every single answer.
-  function announceChange(before, after) {
+  function announceChange(before, after, beforeEst, afterEst) {
     if (!liveEl) return;
     var changes = [];
     SLOTS.forEach(function (pair) {
       var key = pair[0];
-      if (after[key] && (!before || before[key] !== after[key])) changes.push(pair[1] + ': ' + after[key]);
+      if (after[key] && (!before || before[key] !== after[key])) changes.push(pair[1] + ': ' + after[key].label);
     });
-    if (after.budget && (!before || before.budget !== after.budget)) changes.push('Target budget: ' + after.budget);
-    liveEl.textContent = changes.length ? 'Build updated. ' + changes.join('. ') + '.' : '';
+    if (!changes.length) { liveEl.textContent = ''; return; }
+    var msg = 'Build updated. ' + changes.join('. ') + '.';
+    if (afterEst && (!beforeEst || String(beforeEst.total) !== String(afterEst.total))) {
+      msg += ' Estimate now ' + PRICING.range(afterEst.total) + '.';
+    }
+    liveEl.textContent = msg;
   }
 
   // ---------- Rendering ----------
@@ -430,18 +437,41 @@
 
   function specRowsHtml(b) {
     return SLOTS.filter(function (pair) { return b[pair[0]]; }).map(function (pair) {
-      return '<div class="spec-row"><dt>' + escapeHtml(pair[1]) + '</dt><dd>' + escapeHtml(b[pair[0]]) + '</dd></div>';
-    }).join('') +
-    (b.budget ? '<div class="spec-row spec-row-budget"><dt>Target budget</dt><dd>' + escapeHtml(b.budget) + '</dd></div>' : '');
+      var part = b[pair[0]];
+      return '<div class="spec-row">' +
+        '<dt>' + escapeHtml(pair[1]) + '</dt>' +
+        '<dd>' + escapeHtml(part.label) + '<span class="spec-price">' + escapeHtml(PRICING.range(part.price)) + '</span></dd>' +
+      '</div>';
+    }).join('');
+  }
+
+  function totalsHtml(est) {
+    if (!est) return '';
+    var rows = [
+      ['Components (' + est.known + ')', PRICING.range(est.parts)],
+      [est.platform.label, PRICING.range(est.platform.price)]
+    ];
+    if (est.labor) rows.push([est.labor.label, PRICING.money(est.labor.fee)]);
+    est.laborModifiers.forEach(function (m) { rows.push([m.label, PRICING.money(m.fee)]); });
+
+    return '<div class="spec-totals">' +
+      rows.map(function (r) {
+        return '<div class="spec-total-row"><span>' + escapeHtml(r[0]) + '</span><span>' + escapeHtml(r[1]) + '</span></div>';
+      }).join('') +
+      '<div class="spec-total-row is-grand"><span>Estimated total</span><span>' + escapeHtml(PRICING.range(est.total)) + '</span></div>' +
+    '</div>' +
+    '<p class="spec-fine">Components are quoted at cost, priced as of ' + escapeHtml(est.asOf) +
+      ' — they move, GPUs especially. Excludes shipping, tax, and peripherals. Final numbers are confirmed on your free consultation.</p>';
   }
 
   function renderSummaryPanel() {
     var b = state.build;
+    var est = state.estimate;
     panelEl.innerHTML =
       progressHtml(100, 'Build complete') +
       trailHtml() +
       '<h2 class="builder-question" id="builder-question" tabindex="-1">Your ' + escapeHtml(b.trackLabel) + ', on paper.</h2>' +
-      '<p class="builder-sub">A starting point, not a quote. Exact parts, current pricing, and vendor options get locked in on your free consultation.</p>' +
+      '<p class="builder-sub">An estimate, not a quote. Change any answer above to see the number move — exact parts and current pricing get locked in on your free consultation.</p>' +
       '<div class="spec-sheet">' +
         '<dl class="spec-list">' + specRowsHtml(b) + '</dl>' +
         (b.notes.length
@@ -450,6 +480,7 @@
             '</ul></div>'
           : '') +
       '</div>' +
+      totalsHtml(est) +
       '<div class="builder-cta-row">' +
         '<a class="btn btn-primary" href="' + escapeHtml(ctaHref(b)) + '">Get this build quoted <span aria-hidden="true">&rarr;</span></a>' +
         '<button type="button" class="btn btn-ghost" data-copy="spec">Copy spec</button>' +
@@ -487,21 +518,31 @@
 
   function pad(label) {
     var s = label + ':';
-    while (s.length < 10) s += ' ';
+    while (s.length < 12) s += ' ';
     return s;
   }
 
   function specText(b) {
+    var est = state.estimate;
     var lines = ['Ahern AI Solutions — PC build sandbox', b.trackLabel, ''];
     SLOTS.forEach(function (pair) {
-      if (b[pair[0]]) lines.push(pad(pair[1]) + b[pair[0]]);
+      if (b[pair[0]]) lines.push(pad(pair[1]) + b[pair[0]].label + '  ' + PRICING.range(b[pair[0]].price));
     });
-    if (b.budget) lines.push(pad('Budget') + b.budget);
+    if (est) {
+      lines.push('', pad('Components') + PRICING.range(est.parts));
+      lines.push(pad('Platform') + PRICING.range(est.platform.price) + '  (' + est.platform.label + ')');
+      if (est.labor) lines.push(pad('Build fee') + PRICING.money(est.labor.fee));
+      est.laborModifiers.forEach(function (m) { lines.push(pad(m.label) + PRICING.money(m.fee)); });
+      lines.push(pad('ESTIMATE') + PRICING.range(est.total));
+    }
     if (b.notes.length) {
       lines.push('', 'Worth knowing');
       b.notes.forEach(function (n) { lines.push('  - ' + n); });
     }
-    lines.push('', 'Starting point only — final parts, pricing, and vendors are confirmed on a free consultation.', shareUrl());
+    lines.push('',
+      'Components quoted at cost, priced as of ' + (est ? est.asOf : PRICING.asOf) + '. Excludes shipping, tax,',
+      'and peripherals. Final numbers are confirmed on a free consultation.',
+      shareUrl());
     return lines.join('\n');
   }
 
@@ -543,8 +584,13 @@
   }
 
   function ctaHref(b) {
-    var parts = [b.cpu, b.gpu, b.ram ? b.ram + ' RAM' : null, b.storage, b.cooling, b.case].filter(Boolean);
-    var summary = 'Sandbox build (' + b.trackLabel + '): ' + parts.join(' · ') + '. Target budget: ' + (b.budget || 'flexible') + '. Full config: ' + shareUrl();
+    var est = state.estimate;
+    var parts = SLOTS.map(function (pair) {
+      return b[pair[0]] ? b[pair[0]].label : null;
+    }).filter(Boolean);
+    var summary = 'Sandbox build (' + b.trackLabel + '): ' + parts.join(' · ') + '.' +
+      (est ? ' Sandbox estimate: ' + PRICING.range(est.total) + ' (parts at cost as of ' + est.asOf + ' + build fee).' : '') +
+      ' Full config: ' + shareUrl();
     var params = new URLSearchParams();
     if (b.interest) params.set('interest', b.interest);
     params.set('build', summary);
@@ -554,30 +600,40 @@
   // ---------- Build panel ("the rig") ----------
   function renderRig() {
     var b = state.build;
+    var est = state.estimate;
     var filled = 0;
     var lines = SLOTS.map(function (pair) {
       var key = pair[0], label = pair[1];
-      var val = b[key];
-      if (val) filled++;
-      var changed = prevBuild && prevBuild[key] !== val && val;
-      var cls = 'rig-line' + (val ? ' is-set' : '') + (changed ? ' just-set' : '');
-      return '<p class="t-line ' + cls + '"><span class="t-prompt">' + label + '</span><span class="rig-value">' + (val ? escapeHtml(val) : 'pending') + '</span></p>';
+      var part = b[key];
+      if (part) filled++;
+      var changed = prevBuild && prevBuild[key] !== part && part;
+      var cls = 'rig-line' + (part ? ' is-set' : '') + (changed ? ' just-set' : '');
+      return '<p class="t-line ' + cls + '"><span class="t-prompt">' + label + '</span><span class="rig-value">' + (part ? escapeHtml(part.label) : 'pending') + '</span></p>';
     }).join('');
-    var budgetLine = b.budget ? '<p class="t-line t-result">Target: ' + escapeHtml(b.budget) + '</p>' : '';
+
+    var totalText = est ? PRICING.range(est.total) : null;
+    var estChanged = totalText && prevTotal && prevTotal !== totalText;
+    var estimateLine = est
+      ? '<p class="t-line t-estimate' + (estChanged ? ' just-set' : '') + '">' +
+          '<span class="t-prompt">Estimate</span><span class="rig-value">' + escapeHtml(totalText) + '</span>' +
+        '</p>' +
+        '<p class="rig-estimate-note">' + (est.complete ? 'parts at cost + build fee' : 'so far — ' + filled + ' of ' + SLOTS.length + ' parts') + '</p>'
+      : '';
+
     var notes = b.notes.length ? '<div class="rig-notes">' + b.notes.map(function (n) { return '<p>&middot; ' + escapeHtml(n) + '</p>'; }).join('') + '</div>' : '';
     var label = (b.trackLabel || 'new-build').toLowerCase().replace(/\s+/g, '-');
-    var count = filled + ' of ' + SLOTS.length + ' parts';
+    var barText = totalText ? filled + '/' + SLOTS.length + ' · ' + totalText : filled + ' of ' + SLOTS.length + ' parts';
 
     rigEl.className = 'builder-rig' + (rigOpen ? ' is-open' : '');
     rigEl.innerHTML =
       '<button type="button" class="rig-toggle" id="rig-toggle" aria-expanded="' + (rigOpen ? 'true' : 'false') + '" aria-controls="rig-terminal">' +
         '<span class="rig-toggle-label">Your build</span>' +
-        '<span class="rig-toggle-count">' + escapeHtml(count) + '</span>' +
+        '<span class="rig-toggle-count">' + escapeHtml(barText) + '</span>' +
         '<span class="rig-toggle-chevron" aria-hidden="true"></span>' +
       '</button>' +
       '<div class="terminal" id="rig-terminal">' +
-        '<div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="terminal-label">' + escapeHtml(label) + '.cfg &middot; ' + escapeHtml(count) + '</span></div>' +
-        '<div class="terminal-body">' + lines + budgetLine + '</div>' +
+        '<div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="terminal-label">' + escapeHtml(label) + '.cfg &middot; ' + filled + ' of ' + SLOTS.length + ' parts</span></div>' +
+        '<div class="terminal-body">' + lines + estimateLine + '</div>' +
         notes +
       '</div>';
 
@@ -587,13 +643,13 @@
       rigEl.classList.toggle('is-open', rigOpen);
       toggle.setAttribute('aria-expanded', rigOpen ? 'true' : 'false');
     });
-    // Collapsed on mobile, the bar is the only signal that the build moved.
-    if (prevFilled !== null && filled !== prevFilled) {
+    // Collapsed on mobile, the bar is the only signal that the estimate moved.
+    if (estChanged) {
       toggle.classList.add('is-updated');
       setTimeout(function () { toggle.classList.remove('is-updated'); }, 1000);
     }
 
-    prevFilled = filled;
+    prevTotal = totalText;
     prevBuild = b;
   }
 

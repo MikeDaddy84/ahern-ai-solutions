@@ -474,9 +474,18 @@ p { text-wrap: pretty; max-width: 70ch; }
 .spec-row { display: grid; grid-template-columns: 8rem 1fr; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); }
 .spec-row:last-child { border-bottom: 0; }
 .spec-row dt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-primary); font-weight: 700; }
-.spec-row dd { margin: 0; font-size: var(--text-sm); color: var(--color-text); }
-.spec-row-budget { background: var(--color-surface-offset); }
-.spec-row-budget dd { font-weight: 700; }
+.spec-row dd { margin: 0; font-size: var(--text-sm); color: var(--color-text); display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
+.spec-price { flex-shrink: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: var(--text-xs); color: var(--color-text-muted); }
+
+/* Cost breakdown. Every line is a range because the inputs are ranges —
+   a single number would read as a quote. */
+.spec-totals { margin-top: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.spec-total-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); font-size: var(--text-sm); color: var(--color-text-muted); }
+.spec-total-row:last-child { border-bottom: 0; }
+.spec-total-row span:last-child { flex-shrink: 0; font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--color-text); }
+.spec-total-row.is-grand { background: var(--color-primary-highlight); border-top: 1px solid var(--color-border); color: var(--color-text); font-weight: 700; }
+.spec-total-row.is-grand span:last-child { color: var(--color-primary); font-size: var(--text-base); font-weight: 700; }
+.spec-fine { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-3); max-width: 62ch; }
 .spec-notes { padding: var(--space-4) var(--space-5); border-top: 1px solid var(--color-border); background: var(--color-surface-offset); }
 .spec-notes-title { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-faint); margin-bottom: var(--space-2); }
 .spec-notes ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-2); }
@@ -490,6 +499,9 @@ p { text-wrap: pretty; max-width: 70ch; }
 .rig-value { color: var(--color-text-faint); text-align: right; }
 .rig-line.is-set .rig-value { color: var(--color-text); }
 .rig-line.just-set .rig-value { color: var(--color-primary); animation: rig-flash 900ms ease-out; }
+.t-estimate { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--color-divider); }
+.t-estimate .rig-value { color: var(--color-primary); font-weight: 700; font-size: .95rem; }
+.rig-estimate-note { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .65rem; color: var(--color-text-faint); text-align: right; letter-spacing: .04em; }
 @keyframes rig-flash { 0% { opacity: 0; transform: translateX(6px); } 100% { opacity: 1; transform: translateX(0); } }
 @keyframes rig-pulse { 0% { box-shadow: var(--shadow-md), 0 0 0 0 color-mix(in oklab, var(--color-primary) 45%, transparent); } 100% { box-shadow: var(--shadow-md), 0 0 0 10px transparent; } }
 .rig-notes { padding: 0 1.4rem 1.25rem; display: flex; flex-direction: column; gap: .3rem; }
@@ -538,8 +550,9 @@ p { text-wrap: pretty; max-width: 70ch; }
   body { background: #fff; color: #000; }
   .builder-layout { display: block; }
   .builder-panel { border: 0; box-shadow: none; padding: 0; min-height: 0; }
-  .spec-sheet { border: 1px solid #999; }
-  .spec-row { border-bottom: 1px solid #ccc; }
-  .spec-row dt { color: #000; }
+  .spec-sheet, .spec-totals { border: 1px solid #999; }
+  .spec-row, .spec-total-row { border-bottom: 1px solid #ccc; }
+  .spec-row dt, .spec-total-row, .spec-total-row span { color: #000; }
+  .spec-total-row.is-grand { background: #f0f0f0; }
   a[href]::after { content: ""; }
 }

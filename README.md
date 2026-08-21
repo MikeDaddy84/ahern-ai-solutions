@@ -101,6 +101,45 @@ Keyboard: number keys answer, arrows move between options, `Backspace` goes
 back. Answering moves focus to the new question, and a visually-hidden live
 region announces only the parts that changed.
 
+### Pricing
+
+**All prices and fees live in [public/pricing.js](public/pricing.js) and are
+placeholders until verified.** Nothing outside that file contains a dollar
+figure. It holds four things:
+
+| Key | What it is |
+|---|---|
+| `parts` | The catalog. Each entry has the label the site shows, a `[low, high]` price band, a `tier`, and any labor modifiers it triggers. |
+| `platform` | Motherboard, PSU, fans, OS, cabling — nobody picks these in the quiz but they cost real money, sized to the build's highest-tier part. |
+| `labor` | Flat build fee per track. Local AI scales with GPU tier, because that work is systems integration, not assembly. |
+| `laborModifiers` | Custom loop, showpiece build, rack mounting. |
+
+Components are quoted **at cost** — `PARTS_HANDLING` is `0`. The build fee is
+therefore the only revenue on a build, and has to cover the free consult,
+testing, warranty and RMA handling, and the occasional DOA rebuild. If you
+ever want a handling percentage on parts, set that constant and disclose it;
+the estimate math already routes through it.
+
+There's deliberately **no budget question**. Asking for a budget up front
+makes people guess a number before they know what they want, anchors them
+low, and hides the options that would have taught them what things cost.
+The estimate updates as they answer instead, so changing an answer visibly
+moves the number.
+
+Estimates are **ranges, not point values** — a single number reads as a
+quote. Totals round to the nearest $25 because the inputs aren't precise
+enough to justify a figure that looks like it is. `AS_OF` is shown on the
+summary so a stale estimate is visibly stale; update it when you refresh
+prices.
+
+The estimate the visitor was shown — plus the price date and a link back to
+the exact config — is embedded in the message the quote CTA pre-fills, so a
+request that arrives weeks later still shows what they were quoted.
+
+When this moves to live vendor pricing, `parts` is the seam: each entry
+grows a product id and `price` gets refreshed on a schedule. Nothing else
+needs to change.
+
 ## Blog / case studies
 
 Posts live as Markdown files in [content/posts/](content/posts/) with

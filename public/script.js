@@ -131,14 +131,23 @@
     var fontSize = 15;
     var columns = 0;
     var drops = [];
+    var speeds = []; // rows/frame, per column — varied and slow, not a uniform sheet of rain
     var rafId = null;
     var running = false;
+
+    function randomSpeed() {
+      // ~0.04–0.26 rows/frame: at 60fps that's roughly 15–95s to cross a
+      // typical viewport, vs. a flat 1 row/frame (~0.8s) before — an
+      // ambient background detail, not something that grabs the eye.
+      return 0.04 + Math.random() * 0.22;
+    }
 
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       columns = Math.floor(canvas.width / fontSize);
       drops = new Array(columns).fill(0).map(function () { return Math.random() * -100; });
+      speeds = new Array(columns).fill(0).map(randomSpeed);
     }
 
     function draw() {
@@ -153,8 +162,11 @@
         var x = i * fontSize;
         var y = drops[i] * fontSize;
         ctx.fillText(text, x, y);
-        if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
+        if (y > canvas.height && Math.random() > 0.985) {
+          drops[i] = Math.random() * -20;
+          speeds[i] = randomSpeed(); // re-roll so a column doesn't keep the same pace forever
+        }
+        drops[i] += speeds[i];
       }
       rafId = requestAnimationFrame(draw);
     }

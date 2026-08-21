@@ -61,6 +61,14 @@ nothing lands on the calendar without a reply first — deliberate for now.
 The Cal.com embed that used to sit on the homepage was removed in full
 (`git log -- public/index.html` if it's ever wanted back).
 
+**Revisit when** replying to every inquiry by hand becomes the bottleneck,
+*and* there's a way to screen before a slot gets taken — the original worry
+wasn't booking, it was strangers claiming time unscreened. The PC Builder's
+expectation check already sorts leads before they reach you, so one likely
+shape is offering a booking link only to people who finish a build, rather
+than putting it on the homepage for anyone. Whatever the mechanism, the
+principle holds: qualify first, then offer the calendar.
+
 ## PC Builder sandbox
 
 `/pc-builder` is a data-driven quiz that assembles a possible build live as

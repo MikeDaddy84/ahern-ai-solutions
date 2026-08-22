@@ -1,4 +1,4 @@
-// Ahern AI Solutions — PC Builder pricing model.
+// Ahern AI — PC Builder pricing model.
 //
 // !! EVERY NUMBER IN THIS FILE IS A PLACEHOLDER. Check component prices and
 // !! confirm the build fees before this goes live.

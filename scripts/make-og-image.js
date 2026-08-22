@@ -1,13 +1,23 @@
 // Builds public/brand/og-image.png — the 1200x630 card that shows up when a
 // link to the site is pasted into a text, Slack, or Facebook.
 //
-// Why this exists instead of just pointing og:image at the logo: the logo is a
-// transparent PNG sized for a dark page. Link scrapers flatten transparency
-// onto a background of their own choosing — white in most clients — and a mark
-// drawn for dark backgrounds can come out invisible. This bakes the brand
-// background in so the card looks the same everywhere.
+// Why this exists instead of just pointing og:image at the lockup: the lockup
+// is a transparent PNG. Link scrapers flatten transparency onto a background of
+// their own choosing — white in most clients — so a mark drawn for one ground
+// can come out invisible. This bakes the brand background in so the card looks
+// the same everywhere.
 //
-// Run by hand when the logo changes; the output is committed:
+// The source is the *dark* lockup on purpose. The card ground is #0a0d0c, and
+// the light lockup is near-black line-work, which on that ground would be all
+// but invisible. brand/lockup-dark.png is already the inverted mark plus the
+// light-on-dark wordmark, so it composites straight on with no colour work here.
+//
+// Both lockup rasters are exported from the site's own lockup — the same mark
+// art and the same Cabinet Grotesk wordmark carrying the same gradient — and
+// committed as brand assets. They are not built by this script; regenerate them
+// from the live lockup if the wordmark ever changes, then re-run this.
+//
+// Run by hand when the lockup changes; the output is committed:
 //
 //   node scripts/make-og-image.js
 //
@@ -19,7 +29,7 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-const SOURCE = path.join(__dirname, '..', 'public', 'brand', 'logo.png');
+const SOURCE = path.join(__dirname, '..', 'public', 'brand', 'lockup-dark.png');
 const OUTPUT = path.join(__dirname, '..', 'public', 'brand', 'og-image.png');
 
 const CARD_WIDTH = 1200;
@@ -30,7 +40,7 @@ const ACCENT = [0x00, 0xe5, 0xa0];
 const ACCENT_BAR_HEIGHT = 8;
 // Leaves comfortable margin on all sides at typical preview crops.
 const LOGO_MAX_WIDTH = 840;
-const LOGO_MAX_HEIGHT = 360;
+const LOGO_MAX_HEIGHT = 400;
 
 // ---------- PNG decode ----------
 
@@ -279,7 +289,7 @@ function build() {
   console.log(
     `Wrote ${path.relative(path.join(__dirname, '..'), OUTPUT)} ` +
       `(${CARD_WIDTH}x${CARD_HEIGHT}, ${(png.length / 1024).toFixed(0)}KB) ` +
-      `from a ${logo.width}x${logo.height} logo scaled to ${destW}x${destH}.`
+      `from a ${logo.width}x${logo.height} lockup scaled to ${destW}x${destH}.`
   );
 }
 

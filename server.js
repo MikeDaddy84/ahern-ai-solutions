@@ -62,12 +62,12 @@ app.get('/blog', (req, res) => {
     </section>
   `;
 
-  res.send(renderPage({ title: 'Blog — Ahern AI Solutions', description: 'Case studies in AI automation, custom PCs, and private local AI systems.', canonicalPath: '/blog', bodyHtml: body }));
+  res.send(renderPage({ title: 'Blog — Ahern AI', description: 'Case studies in AI automation, custom PCs, and private local AI systems.', canonicalPath: '/blog', bodyHtml: body }));
 });
 
 app.get('/blog/:slug', (req, res) => {
   const post = blog.getPost(req.params.slug);
-  if (!post) return res.status(404).send(renderPage({ title: 'Not found — Ahern AI Solutions', description: 'Page not found.', bodyHtml: '<section class="container post"><p>Post not found.</p><p><a href="/blog">&larr; Back to the blog</a></p></section>' }));
+  if (!post) return res.status(404).send(renderPage({ title: 'Not found — Ahern AI', description: 'Page not found.', bodyHtml: '<section class="container post"><p>Post not found.</p><p><a href="/blog">&larr; Back to the blog</a></p></section>' }));
 
   const dateStr = post.date ? new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
   const body = `
@@ -84,7 +84,7 @@ app.get('/blog/:slug', (req, res) => {
     </article>
   `;
 
-  res.send(renderPage({ title: `${post.title} — Ahern AI Solutions`, description: post.excerpt || post.title, canonicalPath: `/blog/${encodeURIComponent(post.slug)}`, ogType: 'article', bodyHtml: body }));
+  res.send(renderPage({ title: `${post.title} — Ahern AI`, description: post.excerpt || post.title, canonicalPath: `/blog/${encodeURIComponent(post.slug)}`, ogType: 'article', bodyHtml: body }));
 });
 
 // ---------- API: contact form ----------
@@ -139,5 +139,5 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Ahern AI Solutions site running on port ${PORT} (db: ${db.isEnabled() ? 'connected' : 'not configured'})`);
+  console.log(`Ahern AI site running on port ${PORT} (db: ${db.isEnabled() ? 'connected' : 'not configured'})`);
 });

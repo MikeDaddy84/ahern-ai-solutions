@@ -1,4 +1,4 @@
-// Ahern AI Solutions — theme toggle, header scroll state, contact form,
+// Ahern AI — theme toggle, header scroll state, contact form,
 // pageview beacon, and the matrix-rain background effect.
 (function () {
   var root = document.documentElement;

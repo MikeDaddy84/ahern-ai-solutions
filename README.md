@@ -1,6 +1,6 @@
-# Ahern AI Solutions — Website
+# Ahern AI — Website
 
-Node/Express site for Ahern AI Solutions: AI automation, custom PCs, and
+Node/Express site for Ahern AI: AI automation, custom PCs, and
 private local AI systems, based in Gordon, TX.
 
 ## Stack
@@ -14,14 +14,65 @@ private local AI systems, based in Gordon, TX.
 
 ## Brand
 
-The "A" mark (header, footer, favicon) uses colors sampled directly from the
-company logo — navy `#3A4653→#202932`, blue `#2CA0FF→#0072E8`, orange
-`#FF8A2E→#E85400` (dark-theme values; light theme uses slightly deeper
-variants of the same three, see the `--color-navy` / `--color-blue` /
-`--color-orange` tokens in [public/styles.css](public/styles.css)). It's
-built as an inline SVG in [public/index.html](public/index.html) and
-[lib/layout.js](lib/layout.js) (`logoMarkSvg()`), not a raster image, so it
-stays crisp from favicon size up.
+The display brand is **Ahern AI**. The registered entity is still Ahern AI
+Solutions, and that longer name stays on the copyright line in the footer and
+anywhere else the legal name is what's wanted — display brand and legal entity
+are allowed to differ.
+
+### The lockup
+
+The lockup is deliberately **two pieces, not one image**:
+
+- **The mark** is `public/brand/mark.png` — the "A" cropped out of the original
+  logo art with its transparency intact.
+- **The wordmark** is live HTML text (`.logo-type`) set in Cabinet Grotesk 800,
+  uppercase, tracked out to `.17em`.
+
+Splitting them is what lets the lettering stay sharp at any size, read the
+theme tokens directly instead of being inverted as a picture, and leaves the
+bare mark available on its own for the favicon and social avatars. One custom
+property, `--logo-size`, drives the whole lockup: it sets the mark's height and
+everything else is expressed in `em`.
+
+The wordmark carries a gradient that opens in the wordmark's own ink, warms
+through brand blue across the middle of AHERN, and lands full orange on the I.
+The stops sit on measured glyph boundaries rather than round numbers — AHERN
+occupies 0–71.3% of the painted box and AI runs 77.9–100%, so the 52% blue stop
+falls mid-R. Two details in [public/styles.css](public/styles.css) are load-
+bearing and should not be "tidied up":
+
+- The gradient is declared **twice**, plain sRGB first and `in oklab` second.
+  Blue and orange blended in sRGB sag through a dead grey-brown at the midpoint,
+  which is exactly where a full-width gradient puts its middle; oklab routes
+  around it. A browser that can't parse `in oklab` drops that line and keeps the
+  sRGB one.
+- The whole gradient block sits behind `@supports (background-clip: text)`.
+  Without both guards, an unsupported value leaves `background-image: none`
+  behind `color: transparent` and the wordmark doesn't render at all.
+
+`--logo-ink` is its own token because the gradient's first stop wants the navy
+on light but the full text colour on dark; neither `--color-navy` nor
+`--color-text` tracks both.
+
+Colors come from the original logo art — navy `#3A4653→#202932`, blue
+`#2CA0FF→#0072E8`, orange `#FF8A2E→#E85400` (dark-theme values; light theme uses
+slightly deeper variants of the same three — see the `--color-navy` /
+`--color-blue` / `--color-orange` tokens).
+
+### Flat rasters
+
+A gradient wordmark can't be a flat colour anywhere, so the lockup is also
+committed as artwork for the places that need a single file — the social card,
+print, a decal, an emailed invoice:
+
+- `public/brand/lockup-light.png` — for light grounds.
+- `public/brand/lockup-dark.png` — inverted mark plus light-on-dark wordmark.
+
+Both are exported from the live lockup, so they carry the same mark art, the
+same Cabinet Grotesk wordmark, and the same gradient (sampled in Oklab to match
+what the CSS does). `public/brand/logo.png` is the **superseded** pre-rename
+lockup, kept only for reference — it still reads "Ahern AI Solutions" and should
+not be used on the site.
 
 The site's primary accent stays the cyberpunk green (`--color-primary`) for
 buttons and CTAs; blue and orange are layered in as secondary accents
@@ -87,8 +138,10 @@ Notes:
   are 8 attempts per IP per 10 minutes to make guessing tedious, but don't put
   anything behind it that would actually hurt to leak.
 - `/health` stays open so Render can check the service without a password, and
-  the stylesheet, logo, and favicon stay open because the gate page itself
-  renders with them.
+  the stylesheet, the mark, and the favicon stay open because the gate page
+  itself renders with them. The gate builds the same split lockup as the rest of
+  the site, but writes its CSS out longhand — it renders before any stylesheet
+  of ours is guaranteed reachable, so it can't lean on the theme tokens.
 - API routes answer `401 {"error": "Not available yet."}` rather than an HTML
   password page, so a fetch from a stale tab fails as JSON instead of blowing
   up in `response.json()`.
@@ -256,16 +309,20 @@ is pasted into a text, Slack, or Facebook. It's generated by
 node scripts/make-og-image.js
 ```
 
-It exists because `logo.png` can't be used directly. The logo is a transparent
-PNG drawn for a dark page; link scrapers flatten transparency onto a background
-of their own choosing — usually white — so the mark can come out nearly
-invisible in exactly the moment it's supposed to make an impression. The script
-bakes the dark brand background in so the card looks the same everywhere.
+It exists because the lockup can't be used directly. The lockup rasters are
+transparent PNGs; link scrapers flatten transparency onto a background of their
+own choosing — usually white — so the mark can come out nearly invisible in
+exactly the moment it's supposed to make an impression. The script bakes the
+dark brand background in so the card looks the same everywhere.
+
+It builds from **`lockup-dark.png`**, not the light one. The card ground is
+`#0a0d0c` and the script composites without recolouring, so a light-ground
+lockup would put near-black line-work on a near-black card.
 
 There's no image library involved on purpose: a native dependency shipped in
-every deploy forever, to produce one static file that changes when the logo
+every deploy forever, to produce one static file that changes when the lockup
 does, is a bad trade. PNG is deflate plus per-scanline filters, and Node's
-`zlib` already covers both directions. **Re-run it whenever the logo changes.**
+`zlib` already covers both directions. **Re-run it whenever the lockup changes.**
 
 ## Deployment
 

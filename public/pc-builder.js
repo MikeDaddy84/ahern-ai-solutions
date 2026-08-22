@@ -1,4 +1,4 @@
-// Ahern AI Solutions — interactive PC Builder sandbox.
+// Ahern AI — interactive PC Builder sandbox.
 // Vanilla JS, data-driven quiz that assembles a possible build live as the
 // visitor answers plain-language questions.
 //
@@ -583,7 +583,7 @@
 
   function specText(b) {
     var est = state.estimate;
-    var lines = ['Ahern AI Solutions — PC build sandbox', b.trackLabel, ''];
+    var lines = ['Ahern AI — PC build sandbox', b.trackLabel, ''];
     SLOTS.forEach(function (pair) {
       if (b[pair[0]]) lines.push(pad(pair[1]) + b[pair[0]].label + '  ' + PRICING.range(b[pair[0]].price));
     });

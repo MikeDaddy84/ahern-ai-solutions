@@ -1,5 +1,5 @@
 /* ============================================================
-   Ahern AI Solutions — Landing page
+   Ahern AI — Landing page
    Palette: warm neutral surfaces + Hydra Teal accent (matches model)
    Type: Cabinet Grotesk (display) + Satoshi (body)
    ============================================================ */
@@ -22,6 +22,10 @@
   --color-blue: #0072e8;
   --color-orange: #e85400;
   --color-navy: #232d36;
+  /* Where the wordmark's gradient starts. Its own token because it wants the
+     navy on light but the full text colour on dark — neither --color-navy nor
+     --color-text tracks both. */
+  --logo-ink: #232d36;
   --aurora-1: #01696f;
   --aurora-2: #1c86c9;
   --aurora-3: #0c4e54;
@@ -51,6 +55,7 @@
   --color-blue: #2ca0ff;
   --color-orange: #ff8a2e;
   --color-navy: #4a5866;
+  --logo-ink: #d3ded8;
   --aurora-1: #00e5a0;
   --aurora-2: #2ca0ff;
   --aurora-3: #0e7a5f;
@@ -143,22 +148,67 @@ p { text-wrap: pretty; max-width: 70ch; }
 .header { position: sticky; top: 0; z-index: 50; background: color-mix(in oklab, var(--color-bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid transparent; transition: border-color var(--transition), box-shadow var(--transition); }
 .header.scrolled { border-bottom-color: var(--color-border); box-shadow: var(--shadow-sm); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); height: 5.75rem; }
-.logo { display: inline-flex; align-items: center; }
-.logo-image {
-  height: 78px;
-  width: auto;
+/* ---------- LOCKUP ----------
+   The A-mark stays artwork; the wordmark is live type. Splitting them keeps
+   the lettering crisp at any size, lets it read the theme tokens directly
+   instead of being inverted as a picture, and leaves the bare mark available
+   for the favicon and social avatars.
+   One number drives the whole thing: --logo-size sets the mark's height and
+   everything else is expressed in em. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .58em;
+  font-size: var(--logo-size, 52px);
+}
+
+.logo-mark {
   display: block;
+  height: 1em;
+  /* Stands in for the intrinsic size the old <img> carried, so height still
+     drives width. */
+  aspect-ratio: 598 / 471;
+  background: url('/brand/mark.png') center / contain no-repeat;
   transition: filter var(--transition);
 }
-/* Light theme: the logo's own background is transparent, so it already
-   reads as part of the page — nothing to do here. */
-[data-theme='dark'] .logo-image {
-  /* The source art is dark line-work on a light (now transparent) ground.
-     invert() flips light/dark so it reads correctly against the dark
-     theme; hue-rotate(180deg) undoes the hue swap invert() causes, so navy
-     stays navy-ish, blue stays blue, orange stays orange — just inverted
-     in lightness, exactly like the rest of the site's light->dark swap. */
-  filter: invert(1) hue-rotate(180deg);
+/* Light theme: the mark's ground is transparent, so it already sits on the
+   page correctly — nothing to do.
+   Dark theme: it is near-black line-work, so it needs the same lightness flip
+   the rest of the palette gets. hue-rotate(180deg) undoes the hue swap that
+   invert() causes, putting blue back to blue and orange back to orange. */
+[data-theme='dark'] .logo-mark { filter: invert(1) hue-rotate(180deg); }
+
+.logo-type {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: .33em;
+  letter-spacing: .17em;
+  line-height: 1;
+  white-space: nowrap;
+  /* Trailing letter-spacing hangs off the last letter as a phantom half
+     space. Pulling it back is what makes the wordmark sit optically centred
+     rather than nudged left. */
+  margin-right: -.17em;
+  color: var(--logo-ink);
+}
+
+/* The gradient opens in the wordmark's own ink, warms through brand blue
+   across the middle of AHERN, and arrives at full orange on the I. The stops
+   sit on measured glyph boundaries rather than round numbers: AHERN occupies
+   0-71.3% of the painted box and AI runs 77.9-100%, so 52% lands mid-R.
+   Guarded by @supports, and declared twice inside it: a browser that cannot
+   parse "in oklab" throws out that line and keeps the sRGB one. Without both
+   safety nets an unsupported value would leave background-image:none behind
+   transparent text, and the wordmark would not render at all. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .logo-type {
+    background-image: linear-gradient(90deg, var(--logo-ink) 0%, var(--color-blue) 52%, var(--color-orange) 100%);
+    background-image: linear-gradient(90deg in oklab, var(--logo-ink) 0%, var(--color-blue) 52%, var(--color-orange) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 .nav { display: flex; gap: clamp(.75rem, 2vw, 1.75rem); }
 .nav a { font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 500; transition: color var(--transition); }
@@ -330,8 +380,7 @@ p { text-wrap: pretty; max-width: 70ch; }
 /* ---------- FOOTER ---------- */
 .footer { border-top: 1px solid var(--color-border); padding-block: var(--space-12) var(--space-8); }
 .footer-inner { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: var(--space-8); align-items: start; }
-.logo-footer { margin-bottom: var(--space-3); }
-.logo-footer .logo-image { height: 84px; }
+.logo-footer { --logo-size: 64px; margin-bottom: var(--space-3); }
 .footer-tag { font-size: var(--text-sm); color: var(--color-text-muted); }
 .footer-nav { display: flex; flex-direction: column; gap: var(--space-2); }
 .footer-nav a { font-size: var(--text-sm); color: var(--color-text-muted); transition: color var(--transition); }
@@ -404,7 +453,7 @@ p { text-wrap: pretty; max-width: 70ch; }
   .hero-cta { flex-direction: column; align-items: stretch; }
   .hero-cta .btn { width: 100%; }
   .header-inner { height: 4.5rem; }
-  .logo-image { height: 58px; }
+  .logo { --logo-size: 40px; }
 }
 
 /* ---------- PC BUILDER SANDBOX ---------- */

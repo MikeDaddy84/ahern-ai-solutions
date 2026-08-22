@@ -2,7 +2,7 @@
   "name": "ahern-ai-solutions",
   "version": "1.0.0",
   "private": true,
-  "description": "Ahern AI Solutions website — Node/Express server with Turso-backed contact form and analytics, static-Markdown blog.",
+  "description": "Ahern AI website — Node/Express server with Turso-backed contact form and analytics, static-Markdown blog.",
   "main": "server.js",
   "engines": {
     "node": ">=18"

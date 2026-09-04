@@ -71,7 +71,36 @@ const ATTACH = 0.40;                 // share of customers who take a retainer
 const CHURN = 0.05;                  // monthly
 const LIFE = 1 / CHURN;              // 20 months
 const RETAINER = { price: 897, hours: 1.5, gp: 897 * (1 - LLM - CARD) };
-const FIXED_MONTHLY = 55;            // tooling and hosting; there is no floor to defend
+// Fixed monthly cost. This was $55 — hosting and a domain — which described a
+// side project, not a business whose product is running frontier models for
+// people. Itemised so each line can be argued with separately, because a single
+// blended number hides the ones that were forgotten rather than estimated.
+//
+// Every dollar here comes off gross profit every month, so it compounds through
+// the entire ramp: an error of $500/month is roughly $9,000 of extra capital
+// over an eighteen-month climb, not $500.
+//
+// ESTIMATES, not quotes. Replace them with real figures before this goes in
+// front of anyone.
+const FIXED_COSTS = {
+  'Frontier model subscriptions': 500,  // multiple premium plans, top tier
+  'Business internet':            150,  // symmetric; local-AI work moves large files
+  'Business phone line':           60,
+  'Automation platform seats':    100,  // Zapier/Make at a tier that permits client work
+  'Accounting software':           50,
+  'Liability + E&O insurance':    175,  // SEE NOTE BELOW
+  'Vehicle and fuel, on-site':    200,  // North Texas service area, client visits
+  'Hosting, database, domain':     45
+};
+
+// The insurance line is the one most likely to have been forgotten, and it is
+// not optional in practice: professional/E&O cover is what stands between a bad
+// afternoon on a client's server and a personal liability. Several of the
+// customers this business is aimed at — law offices, clinics, CPA practices —
+// will ask for a certificate of insurance before they let anyone touch a
+// machine, so it gates the highest-value pillar as well as protecting it.
+
+const FIXED_MONTHLY = Object.values(FIXED_COSTS).reduce((a, b) => a + b, 0);
 
 // The salary this business has to replace, and the reason outside capital is
 // needed at all. Everything above is steady state; a founder does not live in
@@ -298,6 +327,11 @@ for (const b of [8, 12, 20, 30]) {
 }
 console.log('\n  Free while demand binds; straight off the top once it does not.');
 
+
+heading('Fixed monthly cost');
+Object.entries(FIXED_COSTS).forEach(([k, v]) => console.log('  ' + k.padEnd(32) + money(v).padStart(8)));
+console.log('  ' + '-'.repeat(40));
+console.log('  ' + 'TOTAL'.padEnd(32) + money(FIXED_MONTHLY).padStart(8) + '   (' + money(FIXED_MONTHLY * 12) + '/yr)');
 
 heading('Replacing a ' + money(OWNER_DRAW_ANNUAL) + ' salary — the ramp');
 const drawStated = OWNER_DRAW_ANNUAL / 12;

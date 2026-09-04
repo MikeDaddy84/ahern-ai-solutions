@@ -41,14 +41,25 @@ const HOUR = 150;     // founder hour, used to cost acquisition time
 
 // Total working hours a month — all in, not billable. Overhead comes out of
 // this before anything reaches a customer.
-const CAPACITY = [60, 70, 80];
+const CAPACITY = [120, 140, 160];
 
-// How those hours are meant to be spent. Overhead is admin, bookkeeping,
-// quoting, and staying current in a field that moves quarterly; 25% is a
-// judgment call for a solo operator, and the sensitivity table exists because
-// of that. Delivery is whatever is left.
 const SALES_SHARE = 0.22;
-const OVERHEAD_SHARE = 0.25;
+
+// Overhead is NOT a flat share of hours, and modelling it as one was wrong.
+//
+// Staying current in a field that moves quarterly, keeping the tooling alive,
+// and general business admin cost roughly the same whether the week is half
+// full or full. Quoting, invoicing and onboarding scale with customers, not
+// with capacity. A flat 25% share was defensible at 70 hours a month, where it
+// came to 17 hours. Carried to a genuine full-time 160, the same share asserts
+// 40 hours a month of bookkeeping, which is not a real number — and every hour
+// it invents comes straight out of delivery.
+//
+// Splitting it fixed the error and had a consequence worth noticing: at
+// full-time capacity, overhead shrinks as a share, delivery capacity grows, and
+// the funnel has to work harder to keep up with it.
+const OVERHEAD_BASE_HOURS = 12;      // fixed monthly: learning, tooling, admin
+const OVERHEAD_PER_CUSTOMER = 1.5;   // quoting, invoicing, onboarding
 
 // Funnel. 14 hours of outreach and calls to land one customer at a 15% close
 // rate, scaling inversely with the close rate. This is the single input that
@@ -132,31 +143,41 @@ function loadPerCustomer() {
 
 // The outreach share at which demand and delivery bind at the same moment.
 // Below it the calendar idles; above it, work is sold that cannot be delivered.
-function optimalSalesShare(close, overhead) {
+//
+// This now depends on total hours, through the fixed overhead base: a bigger
+// week dilutes a constant 12 hours, so more of the calendar is available to
+// deliver with and the funnel has to be pushed harder to fill it.
+function optimalSalesShare(close, H, base) {
+  base = base == null ? OVERHEAD_BASE_HOURS : base;
   const hpc = HOURS_PER_CUSTOMER_AT_15 * (0.15 / close);
-  return (hpc * (1 - overhead)) / (loadPerCustomer() + hpc);
+  return (hpc * (1 - base / H)) / (loadPerCustomer() + OVERHEAD_PER_CUSTOMER + hpc);
 }
 
-function capacity(H, close, overhead, salesShare) {
-  overhead = overhead == null ? OVERHEAD_SHARE : overhead;
+function capacity(H, close, base, salesShare) {
+  base = base == null ? OVERHEAD_BASE_HOURS : base;
   salesShare = salesShare == null ? SALES_SHARE : salesShare;
   const b = blend();
   const sales = H * salesShare;
-  const deliveryCap = H - sales - H * overhead;
   const hoursPerCustomer = HOURS_PER_CUSTOMER_AT_15 * (0.15 / close);
 
   // Two ceilings: the funnel produces this many customers a month, and the
   // calendar can carry this many. Revenue is set by the lower of the two —
   // reporting the higher one is how a model promises undeliverable work.
   const demandCust = sales / hoursPerCustomer;
-  const deliveryCust = deliveryCap / loadPerCustomer();
+
+  // Delivery capacity and overhead are mutually dependent now: each customer
+  // brings their own admin, which eats the very hours available to serve them.
+  // Solving c = (H - sales - base - perCustomer*c) / load for c:
+  const deliveryCust = (H - sales - base) / (loadPerCustomer() + OVERHEAD_PER_CUSTOMER);
   const custPerMo = Math.min(demandCust, deliveryCust);
 
+  const overhead = base + OVERHEAD_PER_CUSTOMER * custPerMo;
+  const deliveryCap = H - sales - overhead;
   const retainers = custPerMo * ATTACH * LIFE;
   const revMo = custPerMo * b.rev + retainers * RETAINER.price;
   const gpMo = custPerMo * b.gp + retainers * RETAINER.gp - FIXED_MONTHLY;
   return {
-    H, close, sales, deliveryCap,
+    H, close, sales, deliveryCap, overhead,
     deliveryUsed: custPerMo * b.hrs + retainers * RETAINER.hours,
     custPerMo, retainers,
     binding: demandCust <= deliveryCust ? 'demand' : 'delivery',
@@ -199,33 +220,36 @@ console.log('\n  One customer eventually costs ' + loadPerCustomer().toFixed(1) 
             ' delivery hours, retainer included.');
 
 heading('Steady state at the planned split (outreach ' + pct(SALES_SHARE) +
-        ', overhead ' + pct(OVERHEAD_SHARE) + ')');
+        ', overhead ' + OVERHEAD_BASE_HOURS + 'h + ' + OVERHEAD_PER_CUSTOMER + 'h/customer)');
 console.log('hrs'.padEnd(5) + 'close'.padEnd(7) + 'cust/mo'.padStart(8) + 'retainers'.padStart(11) +
-            'delivery'.padStart(13) + '  binds on'.padEnd(12) + 'revenue/yr'.padStart(13) + 'GP/yr'.padStart(13));
+            'overhead'.padStart(11) + 'delivery'.padStart(13) + '  binds on'.padEnd(12) +
+            'revenue/yr'.padStart(13) + 'GP/yr'.padStart(13));
 for (const H of CAPACITY) for (const c of CLOSE_RATES) {
   const x = capacity(H, c);
   console.log(String(H).padEnd(5) + pct(c).padEnd(7) + x.custPerMo.toFixed(2).padStart(8) +
     x.retainers.toFixed(1).padStart(11) +
+    (x.overhead.toFixed(0) + 'h (' + pct(x.overhead / H) + ')').padStart(11) +
     (x.deliveryUsed.toFixed(0) + ' / ' + x.deliveryCap.toFixed(0)).padStart(13) +
     ('  ' + x.binding).padEnd(12) + money(x.revYr).padStart(13) + money(x.gpYr).padStart(13));
 }
 
 heading('The split that makes both ceilings bind at once');
 for (const c of CLOSE_RATES) {
-  const s = optimalSalesShare(c, OVERHEAD_SHARE);
-  console.log('  close ' + pct(c) + ' → outreach ' + pct(s, 1) + ' of hours');
+  console.log('  close ' + pct(c) + ':');
   for (const H of CAPACITY) {
-    const x = capacity(H, c, OVERHEAD_SHARE, s), base = capacity(H, c);
-    console.log('    ' + String(H).padStart(3) + 'h  ' + x.sales.toFixed(1).padStart(5) + ' outreach hrs  ' +
+    const sh = optimalSalesShare(c, H);
+    const x = capacity(H, c, null, sh), base = capacity(H, c);
+    console.log('    ' + String(H).padStart(3) + 'h  outreach ' + pct(sh, 1).padStart(5) + ' = ' +
+      x.sales.toFixed(1).padStart(5) + ' hrs  ' +
       x.custPerMo.toFixed(2) + ' cust/mo  ' + money(x.revYr).padStart(11) +
       '  vs planned ' + (x.revYr >= base.revYr ? '+' : '') + pct(x.revYr / base.revYr - 1));
   }
 }
 
-heading('What overhead costs (70 hrs, planned split)');
-for (const o of [0.12, 0.20, 0.25, 0.30]) {
-  const lo = capacity(70, 0.15, o), hi = capacity(70, 0.25, o);
-  console.log('  overhead ' + pct(o).padEnd(5) + ' delivery cap ' + lo.deliveryCap.toFixed(0).padStart(3) +
+heading('What the fixed overhead base costs (140 hrs, planned split)');
+for (const b of [8, 12, 20, 30]) {
+  const lo = capacity(140, 0.15, b), hi = capacity(140, 0.25, b);
+  console.log('  base ' + String(b).padStart(2) + 'h/mo  delivery cap ' + lo.deliveryCap.toFixed(0).padStart(3) +
     'h   at 15% close ' + money(lo.revYr).padStart(11) + '   at 25% close ' + money(hi.revYr).padStart(11));
 }
 console.log('\n  Free while demand binds; straight off the top once it does not.');

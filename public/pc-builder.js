@@ -142,7 +142,7 @@
         { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, 405B-class — self-hosted',
           effect: function (b) { b.appliance = BOX.sparkPair; b.notes.push('Two Sparks linked over 200GbE reach 405B-class models — a single box cannot'); } },
         { label: 'No ceiling — the biggest there is', sub: 'Trillion-parameter models, data-centre silicon on a desk',
-          effect: function (b) { b.appliance = BOX.dgxStation; b.notes.push('DGX Station is data-centre hardware in a tower — we plan the power draw and the noise before it ships'); } }
+          effect: function (b) { b.appliance = BOX.dgxStation; b.notes.push('DGX Station is data-centre hardware in a tower — the power draw and the noise get planned before it ships'); } }
       ] },
 
     { question: 'What matters more once it is running?',
@@ -154,7 +154,7 @@
         { label: 'A sensible balance', sub: 'Where most offices land',
           effect: function () {} },
         { label: 'Fastest answers in the class', sub: 'Highest memory bandwidth available',
-          effect: function (b) { b.appliance = fasterBox(b.appliance); b.notes.push('Apple silicon runs local models fast, but it is not CUDA — we check your tools against it before recommending it'); } }
+          effect: function (b) { b.appliance = fasterBox(b.appliance); b.notes.push('Apple silicon runs local models fast, but it is not CUDA — your tools get checked against it before it is recommended'); } }
       ] },
 
     { question: 'Where do the models and documents live?',
@@ -638,7 +638,7 @@
       }).join('') +
       '<div class="spec-total-row is-grand"><span>Estimated total</span><span>' + escapeHtml(PRICING.range(est.total)) + '</span></div>' +
     '</div>' +
-    '<p class="spec-fine">' + (est.appliance ? 'Hardware is' : 'Components and platform are') + ' quoted at our cost plus ' + PRICING.pct(est.handlingPct) +
+    '<p class="spec-fine">' + (est.appliance ? 'Hardware is' : 'Components and platform are') + ' quoted at cost plus ' + PRICING.pct(est.handlingPct) +
       ' handling, priced as of ' + escapeHtml(est.asOf) + '. <strong>Good for ' + est.validDays +
       ' days</strong> — memory, storage and GPUs are currently moving 10–15% a quarter. Excludes shipping, tax, and peripherals. Final numbers are confirmed on your free consultation.</p>';
   }
@@ -723,7 +723,7 @@
       b.notes.forEach(function (n) { lines.push('  - ' + n); });
     }
     lines.push('',
-      'Components and platform at our cost plus ' + PRICING.pct(PRICING.handlingPct) + ' handling, priced as of ' + (est ? est.asOf : PRICING.asOf) + '.',
+      'Components and platform at cost plus ' + PRICING.pct(PRICING.handlingPct) + ' handling, priced as of ' + (est ? est.asOf : PRICING.asOf) + '.',
       'Good for ' + PRICING.validDays + ' days — parts are moving 10-15% a quarter. Excludes shipping, tax,',
       'and peripherals. Final numbers are confirmed on a free consultation.',
       shareUrl());

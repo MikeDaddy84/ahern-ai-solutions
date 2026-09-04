@@ -73,6 +73,21 @@ const LIFE = 1 / CHURN;              // 20 months
 const RETAINER = { price: 897, hours: 1.5, gp: 897 * (1 - LLM - CARD) };
 const FIXED_MONTHLY = 55;            // tooling and hosting; there is no floor to defend
 
+// The salary this business has to replace, and the reason outside capital is
+// needed at all. Everything above is steady state; a founder does not live in
+// steady state, he lives through the ramp to it.
+const OWNER_DRAW_ANNUAL = 125000;
+
+// A W-2 salary and an owner's draw of the same number are not the same cost.
+// Two things move against you the day you leave payroll:
+//   - the employer half of FICA becomes yours, on top of the half you paid
+//   - benefits that were an employer line item become a personal one
+// Modelling the draw at a flat $125k understates what has to be earned to stand
+// still. BENEFITS_MONTHLY is an estimate for family cover and should be replaced
+// with a real quote before this number is shown to anyone.
+const SE_TAX_UPLIFT = 0.0765;
+const BENEFITS_MONTHLY = 1400;
+
 // Representative builds, priced by the live engine rather than typed in here.
 const BUILDS = {
   gaming:  { label: 'Gaming PC (1440p)', hours: 6,
@@ -191,6 +206,35 @@ function ltv() {
   return { entry: b.gp, attached: b.gp + LIFE * RETAINER.gp, blended: b.gp + ATTACH * LIFE * RETAINER.gp };
 }
 
+// Month-by-month cash, which is the only view that answers "can he survive the
+// ramp". Everything above describes a destination; this describes the climb.
+//
+// The deepest point of the cumulative line is the capital the climb requires —
+// that trough IS the investment ask, and it is a larger number than the annual
+// shortfall, because the shortfall accumulates before it closes.
+function ramp(H, close, drawMonthly, months, salesShare) {
+  const b = blend();
+  const c = capacity(H, close, null, salesShare).custPerMo;
+  let retainers = 0, cum = 0, trough = 0, troughMonth = 0, breakeven = null;
+  const rows = [];
+  for (let t = 1; t <= months; t++) {
+    // Existing retainers churn before the month's new ones attach.
+    retainers = retainers * (1 - CHURN) + c * ATTACH;
+    const gp = c * b.gp + retainers * RETAINER.gp - FIXED_MONTHLY;
+    const net = gp - drawMonthly;
+    cum += net;
+    if (cum < trough) { trough = cum; troughMonth = t; }
+    if (breakeven === null && gp >= drawMonthly) breakeven = t;
+    rows.push({ t, retainers, gp, net, cum });
+  }
+  return { c, rows, breakeven, trough, troughMonth };
+}
+
+// What the business must actually earn for the household to stand still.
+function trueDrawMonthly() {
+  return (OWNER_DRAW_ANNUAL * (1 + SE_TAX_UPLIFT)) / 12 + BENEFITS_MONTHLY;
+}
+
 // ------------------------------------------------------------------- reporting
 
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
@@ -253,6 +297,47 @@ for (const b of [8, 12, 20, 30]) {
     'h   at 15% close ' + money(lo.revYr).padStart(11) + '   at 25% close ' + money(hi.revYr).padStart(11));
 }
 console.log('\n  Free while demand binds; straight off the top once it does not.');
+
+
+heading('Replacing a ' + money(OWNER_DRAW_ANNUAL) + ' salary — the ramp');
+const drawStated = OWNER_DRAW_ANNUAL / 12;
+const drawTrue = trueDrawMonthly();
+console.log('  stated draw          ' + money(drawStated) + '/mo  (' + money(OWNER_DRAW_ANNUAL) + '/yr)');
+console.log('  true cost to match   ' + money(drawTrue) + '/mo  (' + money(drawTrue * 12) + '/yr)');
+console.log('    +' + pct(SE_TAX_UPLIFT, 2) + ' self-employment tax, +' + money(BENEFITS_MONTHLY) + '/mo benefits');
+console.log('');
+console.log('hrs  close   draw        months to cover   capital needed   deepest month');
+for (const H of CAPACITY) for (const c of CLOSE_RATES) {
+  for (const [label, draw] of [['stated', drawStated], ['true', drawTrue]]) {
+    const r = ramp(H, c, draw, 120);
+    console.log(String(H).padEnd(5) + pct(c).padEnd(7) + label.padEnd(11) +
+      (r.breakeven ? ('month ' + r.breakeven) : 'never').padEnd(18) +
+      money(-r.trough).padStart(15) + ('  month ' + r.troughMonth).padStart(16));
+  }
+}
+
+heading('What rebalancing outreach does to the ask (true cost of the draw)');
+console.log('hrs  close   split         cust/mo   covered      capital needed');
+for (const H of CAPACITY) for (const c of CLOSE_RATES) {
+  const planned = ramp(H, c, trueDrawMonthly(), 120);
+  const sh = optimalSalesShare(c, H);
+  const bal = ramp(H, c, trueDrawMonthly(), 120, sh);
+  console.log(String(H).padEnd(5) + pct(c).padEnd(7) + 'planned 22%'.padEnd(14) +
+    planned.c.toFixed(2).padStart(7) + ('  month ' + (planned.breakeven || '-')).padStart(11) +
+    money(-planned.trough).padStart(20));
+  console.log(String(H).padEnd(5) + pct(c).padEnd(7) + ('balanced ' + pct(sh, 1)).padEnd(14) +
+    bal.c.toFixed(2).padStart(7) + ('  month ' + (bal.breakeven || '-')).padStart(11) +
+    money(-bal.trough).padStart(20));
+}
+
+heading('Month by month at 140 hrs, 15% close, true cost of the draw');
+const detail = ramp(140, 0.15, drawTrue, 24);
+console.log('  mo  retainers   gross profit      net       cumulative');
+[1,3,6,9,12,15,18,21,24].forEach(t => {
+  const r = detail.rows[t - 1];
+  console.log('  ' + String(r.t).padStart(2) + r.retainers.toFixed(1).padStart(11) +
+    money(r.gp).padStart(15) + money(r.net).padStart(11) + money(r.cum).padStart(16));
+});
 
 heading('Acquisition, on gross profit');
 const L = ltv();

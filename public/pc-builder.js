@@ -28,6 +28,7 @@
 
   var P = PRICING.parts;
   var CPU = P.cpu, GPU = P.gpu, RAM = P.ram, DISK = P.storage, COOL = P.cooling, CASE = P['case'];
+  var BOX = PRICING.appliances;
 
   function escapeHtml(str) {
     return String(str || '').replace(/[&<>"']/g, function (c) {
@@ -98,13 +99,86 @@
     };
   }
 
+  // ---------- The AI fork ----------
+  // Picked once, up front, because it changes every question after it.
+  var AI_DELIVERY_STEP = {
+    question: 'How do you want it delivered?',
+    sub: 'Same models either way — this is about whether you get a machine that opens up, or a sealed box that just runs.',
+    short: 'Delivery',
+    options: [
+      { label: 'A workstation I can open up', sub: 'Standard parts — add GPUs, memory or storage later',
+        effect: function (b) { b.delivery = 'workstation'; } },
+      { label: 'A turnkey appliance', sub: 'One sealed box sized to the model. Nothing to assemble',
+        effect: function (b) {
+          b.delivery = 'appliance';
+          b.trackLabel = 'Local AI appliance';
+          b.notes.push('Unified memory holds much bigger models than discrete GPUs at the same price — what you trade away is speed per token, not capacity');
+        } }
+    ]
+  };
+
+  // Same model, different box. "Cheaper" only ever means a box that still
+  // fits the model; where nothing cheaper fits, the choice is a no-op rather
+  // than a quiet downgrade into something that won't load.
+  function cheaperBox(a) {
+    if (a === BOX.dgxSpark) return BOX.strixHalo;
+    return a;
+  }
+  function fasterBox(a) {
+    if (a === BOX.strixHalo || a === BOX.dgxSpark) return BOX.macMax128;
+    if (a === BOX.macMax128 || a === BOX.sparkPair) return BOX.macUltra256;
+    return a;
+  }
+
+  var AI_APPLIANCE_STEPS = [
+    { question: "What's the biggest model you need to run?",
+      sub: 'On an appliance this is a capacity question — the whole model has to fit in the box.',
+      short: 'Model size',
+      options: [
+        { label: 'Efficient everyday models', sub: '7B–14B-class — fast, general-purpose',
+          effect: function (b) { b.appliance = BOX.strixHalo; } },
+        { label: 'Flagship open-weight 70B-class', sub: 'Llama 3.3 70B, Qwen2.5 72B-class',
+          effect: function (b) { b.appliance = BOX.dgxSpark; b.notes.push('128GB of unified memory holds a 70B model comfortably — the same job needs two RTX 5090s and roughly $9,000 of GPU in a workstation'); } },
+        { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, 405B-class — self-hosted',
+          effect: function (b) { b.appliance = BOX.sparkPair; b.notes.push('Two Sparks linked over 200GbE reach 405B-class models — a single box cannot'); } },
+        { label: 'No ceiling — the biggest there is', sub: 'Trillion-parameter models, data-centre silicon on a desk',
+          effect: function (b) { b.appliance = BOX.dgxStation; b.notes.push('DGX Station is data-centre hardware in a tower — we plan the power draw and the noise before it ships'); } }
+      ] },
+
+    { question: 'What matters more once it is running?',
+      sub: 'Every box here fits the model you picked. Where they differ is how fast the answers come back.',
+      short: 'Priority',
+      options: [
+        { label: 'The lowest price that still fits', sub: 'Most memory per dollar, slower replies',
+          effect: function (b) { b.appliance = cheaperBox(b.appliance); b.notes.push('Sized for capacity over speed — expect a readable pace rather than instant'); } },
+        { label: 'A sensible balance', sub: 'Where most offices land',
+          effect: function () {} },
+        { label: 'Fastest answers in the class', sub: 'Highest memory bandwidth available',
+          effect: function (b) { b.appliance = fasterBox(b.appliance); b.notes.push('Apple silicon runs local models fast, but it is not CUDA — we check your tools against it before recommending it'); } }
+      ] },
+
+    { question: 'Where do the models and documents live?',
+      sub: 'Flagship model weights run 40–200GB each, and a library adds up quickly.',
+      short: 'Storage',
+      options: [
+        { label: 'The built-in drive is enough', sub: 'A couple of models and your core documents',
+          effect: function (b) { b.storage = DISK.included; } },
+        { label: 'Add a fast external library', sub: '4TB NVMe alongside the box',
+          effect: function (b) { b.storage = DISK.nvme4tb; } },
+        { label: 'Everything the business has', sub: 'Large model library plus network storage',
+          effect: function (b) { b.storage = DISK.nvme8tbNet; } }
+      ] },
+
+    expectationStep()
+  ];
+
   var TRACKS = {
     gaming: { steps: [
       { question: "What's the gaming target?", sub: 'This drives the GPU — the single biggest factor in how a game feels.', short: 'Gaming target',
         options: [
-          { label: 'Competitive & high fps', sub: '1080p–1440p, maxed-out frame rate', effect: function (b) { b.gpu = GPU.rtx4060ti; b.cpu = CPU.fast6; } },
-          { label: 'Cinematic single-player', sub: '1440p, high detail', effect: function (b) { b.gpu = GPU.rtx4070ti; b.cpu = CPU.balanced8; } },
-          { label: 'Go big — 4K', sub: '4K, everything maxed', effect: function (b) { b.gpu = GPU.rtx4080_90; b.cpu = CPU.keepUp; } },
+          { label: 'Competitive & high fps', sub: '1080p–1440p, maxed-out frame rate', effect: function (b) { b.gpu = GPU.fps1440; b.cpu = CPU.fast6; } },
+          { label: 'Cinematic single-player', sub: '1440p, high detail', effect: function (b) { b.gpu = GPU.game1440; b.cpu = CPU.balanced8; } },
+          { label: 'Go big — 4K', sub: '4K, everything maxed', effect: function (b) { b.gpu = GPU.game4k; b.cpu = CPU.keepUp; } },
           { label: 'Virtual reality', sub: 'Smooth, no-compromise VR', effect: function (b) { b.gpu = GPU.vr; b.cpu = CPU.core8; b.notes.push('VR-ready GPU + fast USB for the headset'); } }
         ] },
       { question: 'Planning to stream or record while you play?', sub: 'Encoding while gaming benefits from extra CPU headroom.', short: 'Streaming',
@@ -142,9 +216,9 @@
     creative: { steps: [
       { question: "What's the main creative work?", sub: 'This sets the CPU/GPU balance.', short: 'Creative work',
         options: [
-          { label: 'Video editing', sub: 'Premiere, DaVinci, Final Cut', effect: function (b) { b.cpu = CPU.editor; b.gpu = GPU.rtx4070; } },
-          { label: '3D & VFX', sub: 'Blender, Maya, Octane/Redshift', effect: function (b) { b.cpu = CPU.highCore; b.gpu = GPU.rtx4080; } },
-          { label: 'Photo & design', sub: 'Lightroom, Photoshop, Illustrator', effect: function (b) { b.cpu = CPU.fast68; b.gpu = GPU.rtx4060ti16; } },
+          { label: 'Video editing', sub: 'Premiere, DaVinci, Final Cut', effect: function (b) { b.cpu = CPU.editor; b.gpu = GPU.creatorVideo; } },
+          { label: '3D & VFX', sub: 'Blender, Maya, Octane/Redshift', effect: function (b) { b.cpu = CPU.highCore; b.gpu = GPU.creator3d; } },
+          { label: 'Photo & design', sub: 'Lightroom, Photoshop, Illustrator', effect: function (b) { b.cpu = CPU.fast68; b.gpu = GPU.creator16; } },
           { label: 'Music production', sub: 'Low-latency audio, big sample libraries', effect: function (b) { b.cpu = CPU.audio; b.gpu = GPU.wsEntry; } }
         ] },
       { question: 'How big are the files you work with?', sub: 'Sets how much memory (RAM) the build gets.', short: 'File sizes',
@@ -174,13 +248,21 @@
       expectationStep()
     ] },
 
-    ai: { steps: [
+    // The AI track is the one that forks. Everything before the fork is
+    // shared; after it, a sealed box and a workstation ask different
+    // questions, so the two lists are kept separate rather than papered over
+    // with questions that make no sense for one of them.
+    ai: { steps: function (b) {
+      return [AI_DELIVERY_STEP].concat(b.delivery === 'appliance' ? AI_APPLIANCE_STEPS : TRACKS.aiWorkstation.steps);
+    } },
+
+    aiWorkstation: { steps: [
       { question: "What's the biggest model you want to run locally?", sub: 'This is the biggest factor — how much GPU memory (VRAM) it takes to load and run the model.', short: 'Model size',
         options: [
-          { label: 'Efficient everyday models', sub: '7B–14B-class — fast, general-purpose', effect: function (b) { b.gpu = GPU.ai16; } },
-          { label: 'Flagship open-weight 70B-class', sub: 'Llama 3.3 70B, Qwen2.5 72B-class — near-frontier quality', effect: function (b) { b.gpu = GPU.aiDual4090; b.notes.push('70B-class models need real VRAM — usually quantized or split across two GPUs'); } },
-          { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, Llama 3.1 405B-class — the actual frontier, self-hosted', effect: function (b) { b.gpu = GPU.aiMulti; b.notes.push("This is a serious multi-GPU build — we'll scope exact GPU count, power, and cooling on your consult"); } },
-          { label: 'Not sure yet', sub: "We'll size it to whatever you end up running", effect: function (b) { b.gpu = GPU.ai4090; } }
+          { label: 'Efficient everyday models', sub: '7B–14B-class — fast, general-purpose', effect: function (b) { b.gpu = GPU.aiEveryday; } },
+          { label: 'Flagship open-weight 70B-class', sub: 'Llama 3.3 70B, Qwen2.5 72B-class — near-frontier quality', effect: function (b) { b.gpu = GPU.aiFlagship; b.notes.push('70B-class models need real VRAM — usually quantized or split across two GPUs'); b.notes.push('Worth asking about on the consult: a 128GB unified-memory box (DGX Spark, ~$4,700; Ryzen AI Max+ 395, ~$2,300) fits a 70B model for a fraction of this, and trades throughput for capacity'); } },
+          { label: 'Frontier MoE giants', sub: 'DeepSeek-V3, Llama 3.1 405B-class — the actual frontier, self-hosted', effect: function (b) { b.gpu = GPU.aiFrontier; b.notes.push("This is a serious multi-GPU build — we'll scope exact GPU count, power, and cooling on your consult"); } },
+          { label: 'Not sure yet', sub: "We'll size it to whatever you end up running", effect: function (b) { b.gpu = GPU.aiFlexible; } }
         ] },
       { question: 'How will you actually use it day to day?', sub: 'Agents and long-context work lean harder on CPU and memory than simple chat does.', short: 'Daily use',
         options: [
@@ -245,6 +327,21 @@
   };
 
   var SLOTS = [['cpu', 'CPU'], ['gpu', 'GPU'], ['ram', 'Memory'], ['storage', 'Storage'], ['cooling', 'Cooling'], ['case', 'Case']];
+  // An appliance is one sealed box — it has no CPU/GPU/memory to choose, so
+  // the spec panel shows the box and whatever storage got bolted onto it.
+  var APPLIANCE_SLOTS = [['appliance', 'System'], ['storage', 'Storage']];
+  function slotsFor(b) { return b && b.delivery === 'appliance' ? APPLIANCE_SLOTS : SLOTS; }
+
+  // A track's steps are usually a fixed list, but the AI track forks: once
+  // you pick 'appliance' the remaining questions are different ones, because
+  // a sealed box has no cooling or case to choose. Resolving the list from
+  // the build-so-far is what lets that work while keeping every answer a
+  // plain index in the URL hash.
+  function stepsFor(build) {
+    if (!build || !build.track) return null;
+    var defn = TRACKS[build.track].steps;
+    return typeof defn === 'function' ? defn(build) : defn;
+  }
   var PURPOSE_SHORT = 'Build type';
 
   // ---------- State ----------
@@ -258,7 +355,7 @@
   var rigOpen = false; // mobile: is the build panel expanded
 
   function defaultBuild() {
-    return { track: null, trackLabel: null, interest: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, expectation: null, notes: [] };
+    return { track: null, trackLabel: null, interest: null, delivery: null, appliance: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, expectation: null, notes: [] };
   }
 
   function stepAt(i) {
@@ -283,10 +380,17 @@
     if (state.answers.length > 0) {
       PURPOSE_STEP.options[state.answers[0]].effect(build);
     }
-    var trackSteps = build.track ? TRACKS[build.track].steps : null;
+    var trackSteps = stepsFor(build);
     for (var i = 1; i < state.answers.length; i++) {
-      trackSteps[i - 1].options[state.answers[i]].effect(build);
+      // Re-resolve every iteration: an earlier answer may have swapped the
+      // remaining questions out from under us.
+      trackSteps = stepsFor(build);
+      var step = trackSteps && trackSteps[i - 1];
+      var opt = step && step.options[state.answers[i]];
+      if (!opt) break;
+      opt.effect(build);
     }
+    trackSteps = stepsFor(build);
     state.build = build;
     state.estimate = PRICING.estimate(build);
     state.trackSteps = trackSteps;
@@ -311,11 +415,18 @@
     }
     if (first < 0) return [];
     var answers = [first];
-    var steps = TRACKS[parts[0]].steps;
-    for (var i = 1; i < parts.length && i - 1 < steps.length; i++) {
+    // Replay as we go — with a forking track the valid options at position i
+    // depend on the answers before it.
+    var probe = defaultBuild();
+    PURPOSE_STEP.options[first].effect(probe);
+    for (var i = 1; i < parts.length; i++) {
+      var steps = stepsFor(probe);
+      if (!steps || i - 1 >= steps.length) break;
       var n = parseInt(parts[i], 10);
-      if (!(n >= 0 && n < steps[i - 1].options.length)) break;
+      var opt = n >= 0 ? steps[i - 1].options[n] : null;
+      if (!opt) break;
       answers.push(n);
+      opt.effect(probe);
     }
     return answers;
   }
@@ -394,7 +505,7 @@
   function announceChange(before, after, beforeEst, afterEst) {
     if (!liveEl) return;
     var changes = [];
-    SLOTS.forEach(function (pair) {
+    slotsFor(after).forEach(function (pair) {
       var key = pair[0];
       if (after[key] && (!before || before[key] !== after[key])) changes.push(pair[1] + ': ' + after[key].label);
     });
@@ -493,7 +604,7 @@
   }
 
   function specRowsHtml(b) {
-    return SLOTS.filter(function (pair) { return b[pair[0]]; }).map(function (pair) {
+    return slotsFor(b).filter(function (pair) { return b[pair[0]]; }).map(function (pair) {
       var part = b[pair[0]];
       return '<div class="spec-row">' +
         '<dt>' + escapeHtml(pair[1]) + '</dt>' +
@@ -504,10 +615,15 @@
 
   function totalsHtml(est) {
     if (!est) return '';
+    // Handling is broken out as its own line rather than folded into the
+    // components figure. A disclosed percentage is defensible; the same money
+    // hidden inside a parts total is the thing people feel cheated by later.
     var rows = [
-      ['Components (' + est.known + ')', PRICING.range(est.parts)],
-      [est.platform.label, PRICING.range(est.platform.price)]
+      [(est.appliance ? 'Hardware' : 'Components (' + est.known + ')'), PRICING.range(est.components)],
+      [(est.appliance ? 'Hardware' : 'Parts') + ' handling (' + PRICING.pct(est.handlingPct) + ')', PRICING.range(est.handling)]
     ];
+    // An appliance has no separate platform to buy — it is the platform.
+    if (est.platform) rows.push([est.platform.label, PRICING.range(est.platform.price)]);
     if (est.labor) rows.push([est.labor.label, PRICING.money(est.labor.fee)]);
     est.laborModifiers.forEach(function (m) { rows.push([m.label, PRICING.money(m.fee)]); });
 
@@ -517,8 +633,9 @@
       }).join('') +
       '<div class="spec-total-row is-grand"><span>Estimated total</span><span>' + escapeHtml(PRICING.range(est.total)) + '</span></div>' +
     '</div>' +
-    '<p class="spec-fine">Components are quoted at cost, priced as of ' + escapeHtml(est.asOf) +
-      ' — they move, GPUs especially. Excludes shipping, tax, and peripherals. Final numbers are confirmed on your free consultation.</p>';
+    '<p class="spec-fine">' + (est.appliance ? 'Hardware is' : 'Components are') + ' quoted at our cost plus ' + PRICING.pct(est.handlingPct) +
+      ' handling, priced as of ' + escapeHtml(est.asOf) + '. <strong>Good for ' + est.validDays +
+      ' days</strong> — memory, storage and GPUs are currently moving 10–15% a quarter. Excludes shipping, tax, and peripherals. Final numbers are confirmed on your free consultation.</p>';
   }
 
   function renderSummaryPanel() {
@@ -584,12 +701,13 @@
   function specText(b) {
     var est = state.estimate;
     var lines = ['Ahern AI — PC build sandbox', b.trackLabel, ''];
-    SLOTS.forEach(function (pair) {
+    slotsFor(b).forEach(function (pair) {
       if (b[pair[0]]) lines.push(pad(pair[1]) + b[pair[0]].label + '  ' + PRICING.range(b[pair[0]].price));
     });
     if (est) {
-      lines.push('', pad('Components') + PRICING.range(est.parts));
-      lines.push(pad('Platform') + PRICING.range(est.platform.price) + '  (' + est.platform.label + ')');
+      lines.push('', pad(est.appliance ? 'Hardware' : 'Components') + PRICING.range(est.components));
+      lines.push(pad('Handling ' + PRICING.pct(est.handlingPct)) + PRICING.range(est.handling));
+      if (est.platform) lines.push(pad('Platform') + PRICING.range(est.platform.price) + '  (' + est.platform.label + ')');
       if (est.labor) lines.push(pad('Build fee') + PRICING.money(est.labor.fee));
       est.laborModifiers.forEach(function (m) { lines.push(pad(m.label) + PRICING.money(m.fee)); });
       lines.push(pad('ESTIMATE') + PRICING.range(est.total));
@@ -600,7 +718,8 @@
       b.notes.forEach(function (n) { lines.push('  - ' + n); });
     }
     lines.push('',
-      'Components quoted at cost, priced as of ' + (est ? est.asOf : PRICING.asOf) + '. Excludes shipping, tax,',
+      'Components at our cost plus ' + PRICING.pct(PRICING.handlingPct) + ' handling, priced as of ' + (est ? est.asOf : PRICING.asOf) + '.',
+      'Good for ' + PRICING.validDays + ' days — parts are moving 10-15% a quarter. Excludes shipping, tax,',
       'and peripherals. Final numbers are confirmed on a free consultation.',
       shareUrl());
     return lines.join('\n');
@@ -645,11 +764,11 @@
 
   function ctaHref(b) {
     var est = state.estimate;
-    var parts = SLOTS.map(function (pair) {
+    var parts = slotsFor(b).map(function (pair) {
       return b[pair[0]] ? b[pair[0]].label : null;
     }).filter(Boolean);
     var summary = 'Sandbox build (' + b.trackLabel + '): ' + parts.join(' · ') + '.' +
-      (est ? ' Sandbox estimate: ' + PRICING.range(est.total) + ' (parts at cost as of ' + est.asOf + ' + build fee).' : '') +
+      (est ? ' Sandbox estimate: ' + PRICING.range(est.total) + ' (parts + ' + PRICING.pct(PRICING.handlingPct) + ' handling, as of ' + est.asOf + ', + build fee; good ' + PRICING.validDays + ' days).' : '') +
       (b.expectation ? ' ' + b.expectation.lead : '') +
       ' Full config: ' + shareUrl();
     var params = new URLSearchParams();
@@ -663,7 +782,8 @@
     var b = state.build;
     var est = state.estimate;
     var filled = 0;
-    var lines = SLOTS.map(function (pair) {
+    var slots = slotsFor(b);
+    var lines = slots.map(function (pair) {
       var key = pair[0], label = pair[1];
       var part = b[key];
       if (part) filled++;
@@ -678,12 +798,12 @@
       ? '<p class="t-line t-estimate' + (estChanged ? ' just-set' : '') + '">' +
           '<span class="t-prompt">Estimate</span><span class="rig-value">' + escapeHtml(totalText) + '</span>' +
         '</p>' +
-        '<p class="rig-estimate-note">' + (est.complete ? 'parts at cost + build fee' : 'so far — ' + filled + ' of ' + SLOTS.length + ' parts') + '</p>'
+        '<p class="rig-estimate-note">' + (est.complete ? (est.appliance ? 'system + handling + setup fee' : 'parts + handling + build fee') : 'so far — ' + filled + ' of ' + slots.length + ' parts') + '</p>'
       : '';
 
     var notes = b.notes.length ? '<div class="rig-notes">' + b.notes.map(function (n) { return '<p>&middot; ' + escapeHtml(n) + '</p>'; }).join('') + '</div>' : '';
     var label = (b.trackLabel || 'new-build').toLowerCase().replace(/\s+/g, '-');
-    var barText = totalText ? filled + '/' + SLOTS.length + ' · ' + totalText : filled + ' of ' + SLOTS.length + ' parts';
+    var barText = totalText ? filled + '/' + slots.length + ' · ' + totalText : filled + ' of ' + slots.length + ' parts';
 
     rigEl.className = 'builder-rig' + (rigOpen ? ' is-open' : '');
     rigEl.innerHTML =
@@ -693,7 +813,7 @@
         '<span class="rig-toggle-chevron" aria-hidden="true"></span>' +
       '</button>' +
       '<div class="terminal" id="rig-terminal">' +
-        '<div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="terminal-label">' + escapeHtml(label) + '.cfg &middot; ' + filled + ' of ' + SLOTS.length + ' parts</span></div>' +
+        '<div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="terminal-label">' + escapeHtml(label) + '.cfg &middot; ' + filled + ' of ' + slots.length + ' parts</span></div>' +
         '<div class="terminal-body">' + lines + estimateLine + '</div>' +
         notes +
       '</div>';

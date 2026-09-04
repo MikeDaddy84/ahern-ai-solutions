@@ -204,9 +204,19 @@ region announces only the parts that changed.
 
 ### Pricing
 
-**All prices and fees live in [public/pricing.js](public/pricing.js) and are
-placeholders until verified.** Nothing outside that file contains a dollar
-figure. It holds four things:
+**All prices and fees live in [public/pricing.js](public/pricing.js), verified
+September 2026 against US street pricing** — Amazon/Newegg lowest current
+listings, not MSRP. MSRP is meaningless in this market: the RTX 5090 carries a
+$1,999 sticker and sells around $4,500.
+
+**Re-check this file quarterly.** Components are moving 10–15% a quarter and
+the catalog went badly stale once already — it sat on RTX 40-series parts and
+pre-shortage memory prices while a 64GB DDR5 kit went from ~$190 to ~$900,
+which meant the builder was quoting some machines below what their parts cost.
+Update `AS_OF` whenever you touch the numbers, so a stale estimate is visibly
+stale on the summary.
+
+The catalog holds four things:
 
 | Key | What it is |
 |---|---|
@@ -215,11 +225,74 @@ figure. It holds four things:
 | `labor` | Flat build fee per track. Local AI scales with GPU tier, because that work is systems integration, not assembly. |
 | `laborModifiers` | Custom loop, showpiece build, rack mounting. |
 
-Components are quoted **at cost** — `PARTS_HANDLING` is `0`. The build fee is
-therefore the only revenue on a build, and has to cover the free consult,
-testing, warranty and RMA handling, and the occasional DOA rebuild. If you
-ever want a handling percentage on parts, set that constant and disclose it;
-the estimate math already routes through it.
+Components are quoted at cost **plus 10% handling** (`PARTS_HANDLING`), shown
+as its own line on the summary rather than folded into the parts figure — a
+disclosed percentage is defensible, the same money hidden inside a component
+total is what people feel cheated by later. It isn't margin for its own sake:
+prices move between quoting and buying, and without it every one of those
+moves comes out of the build fee. Quoting at bare cost in this market isn't
+generous, it's uninsured.
+
+Changing `PARTS_HANDLING` updates the estimate, the summary breakdown, the
+copied spec text and the pre-filled quote message automatically — they all
+read it through `PRICING.handlingPct`. **The two prose mentions in
+[public/pc-builder.html](public/pc-builder.html) are hand-written and won't
+follow**; change those by hand or the page will contradict the estimate.
+
+`VALID_DAYS` (7) drives the "good for 7 days" line. It caps the exposure on a
+quote someone sits on for a month, and said out loud it reads as competence
+rather than hedging.
+
+The build fee still carries the free consult, testing, warranty and RMA
+handling, and the occasional DOA rebuild. Fees were left unchanged in the
+September 2026 repricing — the work didn't get harder, and the handling
+percentage is what addresses the margin problem.
+
+### AI appliances, and the one forking track
+
+The AI track asks **how do you want it delivered** before anything else, and
+the answer changes every question after it. A workstation gets the original
+five (model size, daily use, storage, location, cooling); an appliance gets
+three (model size, priority, storage), because a sealed box has no cooling or
+case to choose.
+
+That fork is why `TRACKS[x].steps` may be **either an array or a function of
+the build so far**, resolved through `stepsFor()`. Both `recompute()` and
+`decodeAnswers()` replay answers through it rather than reading a fixed list,
+so an index in the URL hash is always validated against the questions that
+were actually on screen at that point. `slotsFor()` does the same job for the
+spec panel — an appliance fills two slots (`appliance`, `storage`) instead of
+six.
+
+Appliances live in `appliances`, not `parts`, and `estimate()` routes them
+through `estimateAppliance()`. They replace the CPU, GPU, memory **and**
+platform in one SKU, so they skip the platform table entirely — putting one in
+the GPU slot would have double-counted the rest of the machine. `est.platform`
+is therefore `null` on an appliance and every consumer has to tolerate that.
+
+They earn their place on the maths: a 70B model needs ~40–70GB to load, which
+is two RTX 5090s and about $9,000 of GPU in a workstation, or 128GB of unified
+memory in a $2,300 Strix Halo box. The appliance is much slower per token —
+bandwidth is what it trades away, not capacity — so the second question is
+explicitly about that trade, and picking "fastest answers" swaps the NVIDIA and
+AMD boxes for the higher-bandwidth Mac Studio equivalents with a note that it
+isn't CUDA.
+
+Labor for an appliance is `labor.appliance` ($650), lower than a build fee
+because there is no assembly — but the work that actually matters on a local
+AI system is unchanged: quantization, the inference server, integration, and
+proving it holds up under load.
+
+> **Adding the fork shifted every AI answer index by one.** A pre-existing
+> `#b=ai.…` link now decodes to different answers. Nothing was live behind the
+> gate when this changed, so no real share links broke — but if you ever
+> insert a step ahead of others again, that is the cost.
+
+Part keys are named for the **job the part does** (`game4k`, `aiFlagship`,
+`creatorVideo`), never for the silicon in it. The original catalog used model
+names (`rtx4070ti`, `ai4090`), which meant every key had to be renamed and
+every reference in `pc-builder.js` chased down the moment the 40-series aged
+out. Labels carry the model number; keys don't.
 
 There's deliberately **no budget question**. Asking for a budget up front
 makes people guess a number before they know what they want, anchors them

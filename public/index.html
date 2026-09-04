@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" href="/brand/favicon.png" />
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=web-pillar-2" />
+  <link rel="stylesheet" href="/styles.css?v=hero-demo-2" />
 </head>
 <body>
   <canvas id="matrix-rain" aria-hidden="true"></canvas>
@@ -78,20 +78,29 @@
             <li><span aria-hidden="true">✓</span> Based in Gordon, serving the North Texas area</li>
           </ul>
         </div>
-        <div class="hero-visual" aria-hidden="true">
-          <div class="terminal">
+        <!-- Working software, not a picture of software. This is the real
+             pricing engine the PC Builder runs on — the numbers below are
+             computed, not typed in — and answering here carries the answer
+             into the full builder. The old decorative terminal printed fake
+             output; on a site whose whole claim is "I build things that
+             work", that was the wrong thing to put above the fold. -->
+        <div class="hero-visual">
+          <div class="terminal hero-demo" id="hero-demo">
             <div class="terminal-bar">
               <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <span class="terminal-label">system status</span>
+              <span class="terminal-label">build sandbox &middot; live</span>
             </div>
             <div class="terminal-body">
-              <p class="t-line"><span class="t-prompt">01</span> Business workflow</p>
-              <p class="t-line t-out"><span class="t-prompt">ai</span> Automated. Leads answered in seconds.</p>
-              <p class="t-line"><span class="t-prompt">02</span> Custom workstation</p>
-              <p class="t-line t-out"><span class="t-prompt">pc</span> Tuned. Built for the real workload.</p>
-              <p class="t-line"><span class="t-prompt">03</span> Private local AI</p>
-              <p class="t-line t-out"><span class="t-prompt">gpu</span> Running in-house. Your data stays local.</p>
-              <p class="t-line t-result">One partner. Three ways forward.</p>
+              <p class="t-line hero-demo-q"><span class="t-prompt">?</span> What would you build?</p>
+              <div class="hero-demo-opts" role="group" aria-label="Pick a build type to see a real estimate">
+                <button type="button" class="hero-opt" data-track="gaming">Gaming</button>
+                <button type="button" class="hero-opt" data-track="creative">Creative work</button>
+                <button type="button" class="hero-opt" data-track="ai">Local AI</button>
+                <button type="button" class="hero-opt" data-track="everyday">Everyday</button>
+              </div>
+              <div class="hero-demo-out" id="hero-demo-out" role="status" aria-live="polite">
+                <p class="t-line t-out hero-demo-hint">Pick one. The estimate is real &mdash; and it moves.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -507,6 +516,9 @@
     </div>
   </footer>
 
-  <script src="/script.js?v=web-pillar-2"></script>
+  <!-- The hero demo computes its estimates with the same pricing model the
+       PC Builder uses, so the two can never quietly disagree. -->
+  <script src="/pricing.js?v=sept2026-2"></script>
+  <script src="/script.js?v=hero-demo-2"></script>
 </body>
 </html>

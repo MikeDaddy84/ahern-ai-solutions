@@ -205,4 +205,116 @@
       if (document.hidden) stop(); else start();
     });
   }
+
+  // ---------- Hero build demo ----------
+  // One question from the PC Builder, answerable in the hero, priced by the
+  // real model. Every figure here comes out of AHERN_PRICING — nothing is
+  // hardcoded — so it can't drift away from the builder the way a typed-in
+  // number would. Answering carries the choice into the full flow.
+  initHeroDemo();
+
+  function initHeroDemo() {
+    var demo = document.getElementById('hero-demo');
+    var out = document.getElementById('hero-demo-out');
+    if (!demo || !out) return;
+
+    var buttons = demo.querySelectorAll('.hero-opt');
+    var PRICING = window.AHERN_PRICING;
+
+    // Without the pricing model the buttons still do something useful — they
+    // just hand off to the builder instead of quoting. A broken demo above
+    // the fold would be worse than no demo.
+    if (!PRICING) {
+      Array.prototype.forEach.call(buttons, function (btn) {
+        btn.addEventListener('click', function () {
+          window.location.href = '/pc-builder?track=' + btn.getAttribute('data-track');
+        });
+      });
+      return;
+    }
+
+    var P = PRICING.parts;
+
+    // A representative mid-range build per track — roughly what the middle
+    // answers in the real builder produce. Labelled "typical" on screen
+    // because that is exactly what it is.
+    var TYPICAL = {
+      gaming: {
+        title: 'Gaming PC · 1440p, high detail',
+        build: { track: 'gaming', cpu: P.cpu.balanced8, gpu: P.gpu.game1440, ram: P.ram.gb32,
+                 storage: P.storage.nvme2tb, cooling: P.cooling.air, "case": P['case'].glassRgb }
+      },
+      creative: {
+        title: 'Creator workstation · video editing',
+        build: { track: 'creative', cpu: P.cpu.editor, gpu: P.gpu.creatorVideo, ram: P.ram.gb64,
+                 storage: P.storage.nvme4tb, cooling: P.cooling.quiet, "case": P['case'].workstation }
+      },
+      ai: {
+        title: 'Local AI workstation · 7B–14B models',
+        build: { track: 'ai', cpu: P.cpu.core12, gpu: P.gpu.aiEveryday, ram: P.ram.gb64,
+                 storage: P.storage.nvme2tb, cooling: P.cooling.airAi, "case": P['case'].serverQuiet }
+      },
+      everyday: {
+        title: 'Everyday PC · office and browsing',
+        build: { track: 'everyday', cpu: P.cpu.eff6, gpu: P.gpu.igpu, ram: P.ram.gb16,
+                 storage: P.storage.ssd512, cooling: P.cooling.stock, "case": P['case'].minimal }
+      }
+    };
+
+    function esc(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function render(track) {
+      var spec = TYPICAL[track];
+      if (!spec) return;
+      var est = PRICING.estimate(spec.build);
+      if (!est) return;
+
+      var rows = [
+        ['gpu', spec.build.gpu.label],
+        ['cpu', spec.build.cpu.label],
+        ['ram', spec.build.ram.label + ' memory']
+      ];
+
+      out.innerHTML =
+        '<p class="t-line hero-demo-title">' + esc(spec.title) + '</p>' +
+        rows.map(function (r) {
+          return '<p class="t-line t-out"><span class="t-prompt">' + esc(r[0]) + '</span>' + esc(r[1]) + '</p>';
+        }).join('') +
+        '<p class="t-line hero-demo-est"><span class="t-prompt">est</span>' +
+          '<strong>' + esc(PRICING.range(est.total)) + '</strong></p>' +
+        '<p class="hero-demo-fine">Typical build, ' + esc(PRICING.asOf) + ' pricing &mdash; parts plus ' +
+          esc(PRICING.pct(est.handlingPct)) + ' handling and the build fee. Yours is priced on your answers.</p>' +
+        '<a class="hero-demo-cta" href="/pc-builder?track=' + esc(track) + '">Build this one properly <span aria-hidden="true">&rarr;</span></a>';
+    }
+
+    Array.prototype.forEach.call(buttons, function (btn) {
+      btn.addEventListener('click', function () {
+        Array.prototype.forEach.call(buttons, function (b) {
+          b.classList.toggle('is-active', b === btn);
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        render(btn.getAttribute('data-track'));
+      });
+      btn.setAttribute('aria-pressed', 'false');
+    });
+
+    // Render one on load rather than waiting for a click. The point of
+    // putting this above the fold is that a visitor sees working software
+    // immediately — an empty box they have to poke first proves nothing, and
+    // leaves a dead rectangle in the hero. Local AI is the default because
+    // it's the pillar nobody else round here offers; change DEFAULT_TRACK to
+    // lead with something else.
+    var DEFAULT_TRACK = 'ai';
+    var initial = demo.querySelector('.hero-opt[data-track="' + DEFAULT_TRACK + '"]');
+    if (initial) {
+      initial.classList.add('is-active');
+      initial.setAttribute('aria-pressed', 'true');
+      render(DEFAULT_TRACK);
+    }
+  }
+
 })();

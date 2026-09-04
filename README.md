@@ -167,6 +167,41 @@ shape is offering a booking link only to people who finish a build, rather
 than putting it on the homepage for anyone. Whatever the mechanism, the
 principle holds: qualify first, then offer the calendar.
 
+## The hero demo
+
+The terminal in the hero is **working software, not a picture of it**. It runs
+one question from the PC Builder, prices the answer with the real model
+(`window.AHERN_PRICING`, the same one the builder uses), and hands the choice
+off to `/pc-builder?track=…` so nothing the visitor did is thrown away.
+
+It replaced a decorative terminal that printed fake output — invented status
+lines about workflows being automated. On a site whose entire claim is *I
+build things that work*, a mock-up of working software was the wrong thing to
+put above the fold, and it was the most valuable real estate on the page.
+
+Details that matter:
+
+- **Every figure is computed.** `TYPICAL` in [public/script.js](public/script.js)
+  holds a representative mid-range build per track — roughly what the middle
+  answers produce in the real builder — and the estimate comes out of
+  `PRICING.estimate()`. Nothing is hardcoded, so the hero can't drift away from
+  the builder the way a typed-in number would. It's labelled "typical build"
+  on screen because that's exactly what it is.
+- **It renders on load** rather than waiting for a click, so a visitor who
+  never interacts still sees working software. `DEFAULT_TRACK` is `'ai'` —
+  local AI is the pillar nobody else in the area offers. Change that one
+  constant to lead with something else.
+- **It degrades to something useful.** If `pricing.js` fails to load, the
+  buttons stop quoting and just navigate to the builder. A broken widget above
+  the fold would be worse than no widget.
+- **The hero visual no longer leads on mobile.** It used to carry `order: -1`
+  at ≤960px, which was fine for decoration but now puts a real price above the
+  headline — a phone visitor would meet "$4,500–$5,925" before learning what
+  the business does. The copy comes first; the demo follows it.
+- It is **not** `aria-hidden` any more (the old one was, correctly, since it
+  was decoration). Buttons carry `aria-pressed`, and the output is a polite
+  live region.
+
 ## PC Builder sandbox
 
 `/pc-builder` is a data-driven quiz that assembles a possible build live as

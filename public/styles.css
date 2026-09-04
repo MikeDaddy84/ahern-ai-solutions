@@ -285,6 +285,44 @@ p { text-wrap: pretty; max-width: 70ch; }
 .t-out { color: var(--color-text-muted); padding-left: 1.1rem; }
 .t-result { margin-top: .5rem; color: var(--color-success); font-weight: 700; }
 
+/* ---------- HERO BUILD DEMO ---------- */
+/* Lives inside the terminal shell, so it reads as the same object the PC
+   Builder's rig panel does — but every line in it is computed. */
+.hero-demo .terminal-body { line-height: 1.7; }
+.hero-demo-q { font-weight: 700; }
+.hero-demo-opts { display: flex; flex-wrap: wrap; gap: .4rem; margin: .85rem 0 1rem; }
+.hero-opt {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: .74rem; font-weight: 600; letter-spacing: .02em;
+  padding: .42rem .7rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border); background: var(--color-surface-offset);
+  color: var(--color-text-muted); cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+.hero-opt:hover { color: var(--color-text); border-color: var(--color-primary); }
+.hero-opt:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.hero-opt.is-active { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-highlight); }
+
+.hero-demo-out { min-height: 9.5rem; }
+.hero-demo-hint { color: var(--color-text-faint); }
+.hero-demo-title { font-weight: 700; margin-bottom: .3rem; }
+.hero-demo-est { margin-top: .55rem; padding-top: .55rem; border-top: 1px solid var(--color-border); }
+.hero-demo-est strong { color: var(--color-primary); font-size: 1.02rem; }
+.hero-demo-fine { margin-top: .55rem; font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-text-faint); line-height: 1.5; }
+.hero-demo-cta {
+  display: inline-flex; gap: .4rem; align-items: center; margin-top: .75rem;
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 700; color: var(--color-blue);
+}
+.hero-demo-cta span { transition: transform var(--transition); }
+.hero-demo-cta:hover span { transform: translateX(3px); }
+/* The output swaps wholesale on each pick; a short fade keeps that from
+   reading as a flicker. */
+.hero-demo-out > * { animation: heroDemoIn .22s ease-out both; }
+@keyframes heroDemoIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-demo-out > * { animation: none; }
+}
+
 /* ---------- SECTIONS ---------- */
 .section { padding-block: clamp(3.5rem, 8vw, 6rem); }
 .section-alt { background: color-mix(in oklab, var(--color-surface) 86%, transparent); border-block: 1px solid var(--color-border); }
@@ -495,7 +533,11 @@ p { text-wrap: pretty; max-width: 70ch; }
   .pillar-number { margin-bottom: var(--space-10); }
   .text-link { margin-top: var(--space-8); }
   .hero-grid { grid-template-columns: 1fr; }
-  .hero-visual { order: -1; max-width: 460px; }
+  /* The visual follows the copy on narrow screens. It led the hero when it
+     was a decorative terminal, but it now opens with a real price — and
+     landing a phone visitor on "$4,500–$5,925" before they've read what the
+     business does gets the introduction backwards. */
+  .hero-visual { max-width: 460px; }
   .process { grid-template-columns: 1fr; }
   .cta-card { grid-template-columns: 1fr; }
   .footer-inner { grid-template-columns: 1fr; gap: var(--space-6); }

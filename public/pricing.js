@@ -14,7 +14,7 @@
 //   platform — motherboard, PSU, fans, OS, cabling. Nobody picks these in the
 //              quiz but they cost real money, and a 4-GPU server needs a very
 //              different platform than an office box.
-//   labor    — flat build fee, plus a handling percentage on components.
+//   labor    — flat build fee, plus a handling percentage on the hardware.
 //
 // Part keys are named for the *job* the part does (game4k, aiFlagship,
 // creatorVideo), never for the silicon in it. Model names in keys mean the
@@ -33,10 +33,11 @@
   // and, said out loud, reads as competence rather than hedging.
   var VALID_DAYS = 7;
 
-  // Handling on components, disclosed on the summary. This is NOT margin for
-  // its own sake: between quoting and buying, prices move, and without it
-  // every move comes out of the build fee. Quoting at bare cost in a market
-  // like this one isn't generous, it's uninsured.
+  // Handling on every line bought at cost — components and platform alike —
+  // disclosed on the summary. This is NOT margin for its own sake: between
+  // quoting and buying, prices move, and without it every move comes out of
+  // the build fee. Quoting at bare cost in a market like this one isn't
+  // generous, it's uninsured.
   //
   // Whenever this changes, the disclosure copy in pc-builder.js reads it from
   // here — but the two prose mentions in pc-builder.html are hand-written.
@@ -217,10 +218,18 @@
   // every consumer of `platform` has to tolerate that.
   function finish(opts) {
     var componentsLo = opts.componentsLo, componentsHi = opts.componentsHi;
-    var handlingLo = componentsLo * PARTS_HANDLING;
-    var handlingHi = componentsHi * PARTS_HANDLING;
-    var partsLo = componentsLo + handlingLo;
-    var partsHi = componentsHi + handlingHi;
+    var platLo = opts.platform ? opts.platform.price[0] : 0;
+    var platHi = opts.platform ? opts.platform.price[1] : 0;
+
+    // Handling is charged on everything bought at cost — the parts picked in
+    // the quiz AND the platform. The platform is board, PSU, OS and cabling
+    // bought in the same market on the same curve; exempting it meant the
+    // build fee silently absorbed every price move on that share of the
+    // hardware, which on a high-end box is several hundred dollars.
+    var hardwareLo = componentsLo + platLo;
+    var hardwareHi = componentsHi + platHi;
+    var handlingLo = hardwareLo * PARTS_HANDLING;
+    var handlingHi = hardwareHi * PARTS_HANDLING;
 
     var laborTotal = opts.labor ? opts.labor.fee : 0;
     var modLines = opts.mods.map(function (m) {
@@ -229,10 +238,8 @@
       return mod;
     }).filter(Boolean);
 
-    var platLo = opts.platform ? opts.platform.price[0] : 0;
-    var platHi = opts.platform ? opts.platform.price[1] : 0;
-    var lo = partsLo + platLo + laborTotal;
-    var hi = partsHi + platHi + laborTotal;
+    var lo = hardwareLo + handlingLo + laborTotal;
+    var hi = hardwareHi + handlingHi + laborTotal;
 
     return {
       asOf: AS_OF,
@@ -245,7 +252,8 @@
       components: [Math.round(componentsLo), Math.round(componentsHi)],
       handlingPct: PARTS_HANDLING,
       handling: [Math.round(handlingLo), Math.round(handlingHi)],
-      parts: [Math.round(partsLo), Math.round(partsHi)],
+      // Everything bought at cost, handling included: components + platform.
+      parts: [Math.round(hardwareLo + handlingLo), Math.round(hardwareHi + handlingHi)],
       platform: opts.platform,
       labor: opts.labor,
       laborModifiers: modLines,

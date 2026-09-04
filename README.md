@@ -260,13 +260,27 @@ The catalog holds four things:
 | `labor` | Flat build fee per track. Local AI scales with GPU tier, because that work is systems integration, not assembly. |
 | `laborModifiers` | Custom loop, showpiece build, rack mounting. |
 
-Components are quoted at cost **plus 10% handling** (`PARTS_HANDLING`), shown
+Hardware is quoted at cost **plus 10% handling** (`PARTS_HANDLING`), shown
 as its own line on the summary rather than folded into the parts figure — a
 disclosed percentage is defensible, the same money hidden inside a component
 total is what people feel cheated by later. It isn't margin for its own sake:
 prices move between quoting and buying, and without it every one of those
 moves comes out of the build fee. Quoting at bare cost in this market isn't
 generous, it's uninsured.
+
+**Handling applies to the platform too, not just the parts picked in the
+quiz.** It didn't until September 2026, and that was a straight bug: the
+platform is $330–$4,000 of board, PSU, OS and cabling bought at cost in the
+same market, on the same curve, and exempting it meant the build fee quietly
+absorbed every price move on that share of the hardware — $25–$100 a build,
+more on a workstation. An appliance has no platform line, so appliance totals
+were never affected and did not change.
+
+Because of that, the summary prints the platform **above** the handling line.
+Someone checking 10% against the line above it has to land on the number
+shown; a disclosed fee that doesn't reconcile is worse than one that was
+never broken out. If you reorder those rows, the arithmetic stops being
+checkable from the page.
 
 Changing `PARTS_HANDLING` updates the estimate, the summary breakdown, the
 copied spec text and the pre-filled quote message automatically — they all

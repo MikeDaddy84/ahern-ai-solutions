@@ -619,11 +619,16 @@
     // components figure. A disclosed percentage is defensible; the same money
     // hidden inside a parts total is the thing people feel cheated by later.
     var rows = [
-      [(est.appliance ? 'Hardware' : 'Components (' + est.known + ')'), PRICING.range(est.components)],
-      [(est.appliance ? 'Hardware' : 'Parts') + ' handling (' + PRICING.pct(est.handlingPct) + ')', PRICING.range(est.handling)]
+      [(est.appliance ? 'Hardware' : 'Components (' + est.known + ')'), PRICING.range(est.components)]
     ];
     // An appliance has no separate platform to buy — it is the platform.
+    //
+    // The platform goes ABOVE the handling line, because handling is charged
+    // on it too. Someone checking the percentage against the line above it has
+    // to arrive at the number we printed — a disclosed fee that doesn't
+    // reconcile reads worse than one that was never broken out at all.
     if (est.platform) rows.push([est.platform.label, PRICING.range(est.platform.price)]);
+    rows.push([(est.appliance ? 'Hardware' : 'Parts') + ' handling (' + PRICING.pct(est.handlingPct) + ')', PRICING.range(est.handling)]);
     if (est.labor) rows.push([est.labor.label, PRICING.money(est.labor.fee)]);
     est.laborModifiers.forEach(function (m) { rows.push([m.label, PRICING.money(m.fee)]); });
 
@@ -633,7 +638,7 @@
       }).join('') +
       '<div class="spec-total-row is-grand"><span>Estimated total</span><span>' + escapeHtml(PRICING.range(est.total)) + '</span></div>' +
     '</div>' +
-    '<p class="spec-fine">' + (est.appliance ? 'Hardware is' : 'Components are') + ' quoted at our cost plus ' + PRICING.pct(est.handlingPct) +
+    '<p class="spec-fine">' + (est.appliance ? 'Hardware is' : 'Components and platform are') + ' quoted at our cost plus ' + PRICING.pct(est.handlingPct) +
       ' handling, priced as of ' + escapeHtml(est.asOf) + '. <strong>Good for ' + est.validDays +
       ' days</strong> — memory, storage and GPUs are currently moving 10–15% a quarter. Excludes shipping, tax, and peripherals. Final numbers are confirmed on your free consultation.</p>';
   }
@@ -706,8 +711,8 @@
     });
     if (est) {
       lines.push('', pad(est.appliance ? 'Hardware' : 'Components') + PRICING.range(est.components));
-      lines.push(pad('Handling ' + PRICING.pct(est.handlingPct)) + PRICING.range(est.handling));
       if (est.platform) lines.push(pad('Platform') + PRICING.range(est.platform.price) + '  (' + est.platform.label + ')');
+      lines.push(pad('Handling ' + PRICING.pct(est.handlingPct)) + PRICING.range(est.handling));
       if (est.labor) lines.push(pad('Build fee') + PRICING.money(est.labor.fee));
       est.laborModifiers.forEach(function (m) { lines.push(pad(m.label) + PRICING.money(m.fee)); });
       lines.push(pad('ESTIMATE') + PRICING.range(est.total));
@@ -718,7 +723,7 @@
       b.notes.forEach(function (n) { lines.push('  - ' + n); });
     }
     lines.push('',
-      'Components at our cost plus ' + PRICING.pct(PRICING.handlingPct) + ' handling, priced as of ' + (est ? est.asOf : PRICING.asOf) + '.',
+      'Components and platform at our cost plus ' + PRICING.pct(PRICING.handlingPct) + ' handling, priced as of ' + (est ? est.asOf : PRICING.asOf) + '.',
       'Good for ' + PRICING.validDays + ' days — parts are moving 10-15% a quarter. Excludes shipping, tax,',
       'and peripherals. Final numbers are confirmed on a free consultation.',
       shareUrl());

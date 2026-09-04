@@ -112,10 +112,9 @@ const OWNER_DRAW_ANNUAL = 125000;
 //   - the employer half of FICA becomes yours, on top of the half you paid
 //   - benefits that were an employer line item become a personal one
 // Modelling the draw at a flat $125k understates what has to be earned to stand
-// still. BENEFITS_MONTHLY is an estimate for family cover and should be replaced
-// with a real quote before this number is shown to anyone.
+// still. BENEFITS_MONTHLY is the real family cover figure, not an estimate.
 const SE_TAX_UPLIFT = 0.0765;
-const BENEFITS_MONTHLY = 1400;
+const BENEFITS_MONTHLY = 1250;   // actual family cover, not an estimate
 
 // Representative builds, priced by the live engine rather than typed in here.
 const BUILDS = {

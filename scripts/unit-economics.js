@@ -43,7 +43,17 @@ const HOUR = 150;     // founder hour, used to cost acquisition time
 // this before anything reaches a customer.
 const CAPACITY = [120, 140, 160];
 
-const SALES_SHARE = 0.22;
+// Outreach is committed as hours a week, not as a share of the calendar,
+// because that is how the discipline actually works: it is a standing block in
+// the diary, not a percentage that flexes with how busy the month feels.
+//
+// Modelling it as a share hid the most important structural fact in this
+// business. Outreach hours alone decide how many customers arrive; total hours
+// only decide how much idle delivery capacity sits behind them. Once this
+// number is fixed, working a longer week does not earn more money.
+const OUTREACH_HOURS_PER_WEEK = 7.5;
+const WEEKS_PER_MONTH = 52 / 12;
+const OUTREACH_MONTHLY = OUTREACH_HOURS_PER_WEEK * WEEKS_PER_MONTH;
 
 // Overhead is NOT a flat share of hours, and modelling it as one was wrong.
 //
@@ -190,17 +200,18 @@ function loadPerCustomer() {
 // This now depends on total hours, through the fixed overhead base: a bigger
 // week dilutes a constant 12 hours, so more of the calendar is available to
 // deliver with and the funnel has to be pushed harder to fill it.
-function optimalSalesShare(close, H, base) {
+// Outreach hours a month at which demand and delivery bind together — the point
+// past which selling more produces work that cannot be delivered.
+function saturatingOutreach(close, H, base) {
   base = base == null ? OVERHEAD_BASE_HOURS : base;
   const hpc = HOURS_PER_CUSTOMER_AT_15 * (0.15 / close);
-  return (hpc * (1 - base / H)) / (loadPerCustomer() + OVERHEAD_PER_CUSTOMER + hpc);
+  return (hpc * (H - base)) / (loadPerCustomer() + OVERHEAD_PER_CUSTOMER + hpc);
 }
 
-function capacity(H, close, base, salesShare) {
+function capacity(H, close, base, outreachHours) {
   base = base == null ? OVERHEAD_BASE_HOURS : base;
-  salesShare = salesShare == null ? SALES_SHARE : salesShare;
+  const sales = outreachHours == null ? OUTREACH_MONTHLY : outreachHours;
   const b = blend();
-  const sales = H * salesShare;
   const hoursPerCustomer = HOURS_PER_CUSTOMER_AT_15 * (0.15 / close);
 
   // Two ceilings: the funnel produces this many customers a month, and the
@@ -240,12 +251,18 @@ function ltv() {
 // The deepest point of the cumulative line is the capital the climb requires —
 // that trough IS the investment ask, and it is a larger number than the annual
 // shortfall, because the shortfall accumulates before it closes.
-function ramp(H, close, drawMonthly, months, salesShare) {
+// delayMonths models "build first, sell later": months at the start with no
+// outreach, and therefore no customers arriving. Fixed costs and the draw still
+// run. It is the most expensive option in this file and it is here to be priced
+// rather than argued about.
+function ramp(H, close, drawMonthly, months, outreachHours, delayMonths) {
   const b = blend();
-  const c = capacity(H, close, null, salesShare).custPerMo;
+  const full = capacity(H, close, null, outreachHours).custPerMo;
+  const delay = delayMonths || 0;
   let retainers = 0, cum = 0, trough = 0, troughMonth = 0, breakeven = null;
   const rows = [];
   for (let t = 1; t <= months; t++) {
+    const c = t <= delay ? 0 : full;
     // Existing retainers churn before the month's new ones attach.
     retainers = retainers * (1 - CHURN) + c * ATTACH;
     const gp = c * b.gp + retainers * RETAINER.gp - FIXED_MONTHLY;
@@ -255,7 +272,17 @@ function ramp(H, close, drawMonthly, months, salesShare) {
     if (breakeven === null && gp >= drawMonthly) breakeven = t;
     rows.push({ t, retainers, gp, net, cum });
   }
-  return { c, rows, breakeven, trough, troughMonth };
+  return { c: full, rows, breakeven, trough, troughMonth };
+}
+
+// The trough is the minimum that avoids running out of money on the worst day,
+// assuming every estimate in this file is right. Raising exactly that means
+// planning to hit zero. BUFFER_MONTHS is the margin for the estimates being
+// wrong and for wanting to work without watching the balance.
+const BUFFER_MONTHS = 6;
+
+function recommendedRaise(troughAmount, drawMonthly) {
+  return Math.ceil((troughAmount + BUFFER_MONTHS * drawMonthly) / 5000) * 5000;
 }
 
 // What the business must actually earn for the household to stand still.
@@ -291,8 +318,9 @@ console.log('  ' + 'BLENDED'.padEnd(24) + '     ' + '   rev ' + money(b.rev).pad
 console.log('\n  One customer eventually costs ' + loadPerCustomer().toFixed(1) +
             ' delivery hours, retainer included.');
 
-heading('Steady state at the planned split (outreach ' + pct(SALES_SHARE) +
-        ', overhead ' + OVERHEAD_BASE_HOURS + 'h + ' + OVERHEAD_PER_CUSTOMER + 'h/customer)');
+heading('Steady state at ' + OUTREACH_HOURS_PER_WEEK + ' outreach hrs/week (' +
+        OUTREACH_MONTHLY.toFixed(1) + '/month), overhead ' + OVERHEAD_BASE_HOURS +
+        'h + ' + OVERHEAD_PER_CUSTOMER + 'h/customer');
 console.log('hrs'.padEnd(5) + 'close'.padEnd(7) + 'cust/mo'.padStart(8) + 'retainers'.padStart(11) +
             'overhead'.padStart(11) + 'delivery'.padStart(13) + '  binds on'.padEnd(12) +
             'revenue/yr'.padStart(13) + 'GP/yr'.padStart(13));
@@ -305,20 +333,23 @@ for (const H of CAPACITY) for (const c of CLOSE_RATES) {
     ('  ' + x.binding).padEnd(12) + money(x.revYr).padStart(13) + money(x.gpYr).padStart(13));
 }
 
-heading('The split that makes both ceilings bind at once');
-for (const c of CLOSE_RATES) {
-  console.log('  close ' + pct(c) + ':');
-  for (const H of CAPACITY) {
-    const sh = optimalSalesShare(c, H);
-    const x = capacity(H, c, null, sh), base = capacity(H, c);
-    console.log('    ' + String(H).padStart(3) + 'h  outreach ' + pct(sh, 1).padStart(5) + ' = ' +
-      x.sales.toFixed(1).padStart(5) + ' hrs  ' +
-      x.custPerMo.toFixed(2) + ' cust/mo  ' + money(x.revYr).padStart(11) +
-      '  vs planned ' + (x.revYr >= base.revYr ? '+' : '') + pct(x.revYr / base.revYr - 1));
-  }
+heading('Outreach is the only input that moves revenue');
+console.log('  hrs/week   /month   close   cust/mo   revenue/yr        GP/yr   (at 140 total hrs)');
+for (const w of [5, 7.5, 10, 12.5, 15]) for (const c of CLOSE_RATES) {
+  const x = capacity(140, c, null, w * WEEKS_PER_MONTH);
+  console.log('  ' + String(w).padStart(5) + '     ' + (w * WEEKS_PER_MONTH).toFixed(1).padStart(6) +
+    pct(c).padStart(8) + x.custPerMo.toFixed(2).padStart(10) + money(x.revYr).padStart(13) +
+    money(x.gpYr).padStart(13) + ('   ' + x.binding).padEnd(12));
+}
+console.log('');
+console.log('  Saturation — outreach hours/month past which work is sold that cannot be built:');
+for (const H of CAPACITY) for (const c of CLOSE_RATES) {
+  console.log('    ' + String(H).padStart(3) + 'h total, close ' + pct(c) + ': ' +
+    saturatingOutreach(c, H).toFixed(1) + ' hrs/month (' +
+    (saturatingOutreach(c, H) / WEEKS_PER_MONTH).toFixed(1) + '/week)');
 }
 
-heading('What the fixed overhead base costs (140 hrs, planned split)');
+heading("What the fixed overhead base costs (140 hrs)");
 for (const b of [8, 12, 20, 30]) {
   const lo = capacity(140, 0.15, b), hi = capacity(140, 0.25, b);
   console.log('  base ' + String(b).padStart(2) + 'h/mo  delivery cap ' + lo.deliveryCap.toFixed(0).padStart(3) +
@@ -349,18 +380,25 @@ for (const H of CAPACITY) for (const c of CLOSE_RATES) {
   }
 }
 
-heading('What rebalancing outreach does to the ask (true cost of the draw)');
-console.log('hrs  close   split         cust/mo   covered      capital needed');
-for (const H of CAPACITY) for (const c of CLOSE_RATES) {
-  const planned = ramp(H, c, trueDrawMonthly(), 120);
-  const sh = optimalSalesShare(c, H);
-  const bal = ramp(H, c, trueDrawMonthly(), 120, sh);
-  console.log(String(H).padEnd(5) + pct(c).padEnd(7) + 'planned 22%'.padEnd(14) +
-    planned.c.toFixed(2).padStart(7) + ('  month ' + (planned.breakeven || '-')).padStart(11) +
-    money(-planned.trough).padStart(20));
-  console.log(String(H).padEnd(5) + pct(c).padEnd(7) + ('balanced ' + pct(sh, 1)).padEnd(14) +
-    bal.c.toFixed(2).padStart(7) + ('  month ' + (bal.breakeven || '-')).padStart(11) +
-    money(-bal.trough).padStart(20));
+heading('What outreach hours do to the ask (140 total hrs, true cost of the draw)');
+console.log('  hrs/week  close   cust/mo   covered      minimum      recommended raise');
+for (const w of [5, 7.5, 10, 12.5]) for (const c of CLOSE_RATES) {
+  const r = ramp(140, c, trueDrawMonthly(), 240, w * WEEKS_PER_MONTH);
+  console.log('  ' + String(w).padStart(5) + '   ' + pct(c).padStart(6) +
+    r.c.toFixed(2).padStart(9) + ('  month ' + (r.breakeven || '-')).padStart(12) +
+    money(-r.trough).padStart(13) +
+    money(recommendedRaise(-r.trough, trueDrawMonthly())).padStart(20));
+}
+
+heading('The cost of building first and selling later (7.5 hrs/wk, 15% close)');
+console.log('  delay   covered from   minimum capital   recommended raise   cost of the delay');
+const noDelay = ramp(140, 0.15, trueDrawMonthly(), 360, OUTREACH_MONTHLY, 0);
+for (const d of [0, 3, 6, 9, 12]) {
+  const r = ramp(140, 0.15, trueDrawMonthly(), 360, OUTREACH_MONTHLY, d);
+  console.log('  ' + (d + ' mo').padStart(5) + ('    month ' + (r.breakeven || '-')).padEnd(15) +
+    money(-r.trough).padStart(17) +
+    money(recommendedRaise(-r.trough, trueDrawMonthly())).padStart(20) +
+    (d === 0 ? '                  —' : money(r.trough * -1 - noDelay.trough * -1).padStart(19)));
 }
 
 heading('Month by month at 140 hrs, 15% close, true cost of the draw');

@@ -23,6 +23,66 @@
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=hero-demo-2" />
+
+  <!-- The one LocalBusiness node for the site. It lives here, on the home page,
+       rather than in lib/layout.js: crawlers expect a single such node at the
+       root, and a copy emitted on every rendered page is how two copies start
+       disagreeing. Blog posts carry BlogPosting instead (lib/seo.js).
+
+       Everything asserted below is something the site says elsewhere in visible
+       copy. Do not add openingHours, geo, aggregateRating or priceRange here
+       without a real source for them — invented structured data is a
+       manual-action risk, and a fake review rating is the fastest way to lose
+       the whole rich result. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": "https://ahernai.com/#business",
+    "name": "Ahern AI Solutions",
+    "alternateName": "Ahern AI",
+    "url": "https://ahernai.com/",
+    "image": "https://ahernai.com/brand/og-image.png",
+    "logo": "https://ahernai.com/brand/og-image.png",
+    "telephone": "+1-940-329-9337",
+    "description": "AI automation, custom PC builds, private local AI systems, and the websites wired into the workflow behind them, for businesses and power users across North Texas.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Gordon",
+      "addressRegion": "TX",
+      "addressCountry": "US"
+    },
+    "areaServed": {
+      "@type": "GeoCircle",
+      "name": "North Texas",
+      "geoMidpoint": {
+        "@type": "GeoCoordinates",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Gordon",
+          "addressRegion": "TX",
+          "addressCountry": "US"
+        }
+      }
+    },
+    "knowsAbout": [
+      "AI workflow automation",
+      "Custom PC building",
+      "Private local AI systems",
+      "On-premise large language model deployment"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Services",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI automation", "description": "Lead follow-up, scheduling, inbox triage, and repetitive admin, wired into the tools you already use." } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom PC builds", "description": "Gaming systems and professional workstations built around your software and performance targets." } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Private local AI systems", "description": "GPU-equipped systems running capable AI models on-site, so sensitive data never leaves the building." } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Websites and internal tools", "description": "Sites and tools built as the front end of an automated system behind them." } }
+      ]
+    }
+  }
+  </script>
 </head>
 <body>
   <canvas id="matrix-rain" aria-hidden="true"></canvas>
@@ -506,12 +566,14 @@
         <a href="#process">How it works</a>
         <a href="/blog">Blog</a>
         <a href="#faq">FAQ</a>
+        <a href="/about">About</a>
         <a href="#audit">Free consultation</a>
+        <a href="/privacy">Privacy</a>
       </nav>
       <div class="footer-meta">
         <p>Gordon, Texas · Serving the North Texas area</p>
         <p><a href="tel:+19403299337">(940) 329-9337</a></p>
-        <p class="footer-fine">&copy; 2026 Ahern AI Solutions. Built as a launch preview.</p>
+        <p class="footer-fine">&copy; 2026 Ahern AI Solutions.</p>
       </div>
     </div>
   </footer>

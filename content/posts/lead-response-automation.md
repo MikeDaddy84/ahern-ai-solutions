@@ -1,33 +1,37 @@
 ---
-title: Cutting lead response time from 6 hours to 90 seconds
+title: Cutting lead response time from hours to seconds
 date: 2026-05-12
-tag: Case study — AI automation
-excerpt: A local home services company was losing quotes to faster competitors. Here's the automation that fixed it without adding headcount.
+tag: Reference build — AI automation
+excerpt: Home services businesses lose quotes to whoever answers first. Here's how the automation that fixes it is put together, and what it costs.
 ---
 
 ## The problem
 
-A North Texas home services business was generating plenty of inbound leads through their website and Facebook ads — but by the time anyone got back to a lead, it had often gone cold. Average first-response time was sitting north of six hours, mostly because quote requests piled up in a shared inbox nobody had time to triage.
+This is a pattern I see constantly in home services: plenty of inbound leads from the website and Facebook ads, and a first-response time measured in hours because quote requests pile up in a shared inbox nobody has time to triage.
 
-Industry data is blunt about this: contacting a lead within five minutes makes you dramatically more likely to convert it than waiting even thirty. Every hour past that is lost revenue.
+Industry data is blunt about this. Contacting a lead within five minutes makes you dramatically more likely to convert it than waiting even thirty. Every hour past that is lost revenue, and the competitor who answers first usually wins the job regardless of price.
 
-## What we built
+## How this gets built
 
-Instead of a rip-and-replace CRM migration, we wired automation directly into the tools they already had:
+Not a rip-and-replace CRM migration. The automation wires into the tools a business already has:
 
 - **Instant intake parsing.** Every form submission and Facebook Lead Ad is parsed the moment it arrives — service type, urgency, and location get tagged automatically.
-- **AI-drafted responses.** A local AI model drafts a personalized reply referencing the specific service requested, ready to send or lightly edit.
-- **Smart routing.** Urgent jobs (same-day requests, emergency calls) get flagged and texted straight to the on-call tech instead of waiting in a queue.
-- **Follow-up sequencing.** Leads that don't respond in 24 hours get an automatic, non-pushy follow-up — no more leads quietly dying in the inbox.
+- **AI-drafted responses.** A model drafts a personalized reply referencing the specific service requested, ready to send or lightly edit. This can run locally if the lead data is sensitive.
+- **Smart routing.** Urgent jobs — same-day requests, emergency calls — get flagged and texted straight to the on-call tech instead of waiting in a queue.
+- **Follow-up sequencing.** Leads that don't respond in 24 hours get an automatic, non-pushy follow-up, so nothing quietly dies in the inbox.
 
-## The result
+## What to expect
 
-- First response time: **6+ hours → under 90 seconds**
-- Quote-to-close rate up meaningfully within the first month
-- Zero added headcount — the existing office staff now just approves AI-drafted replies instead of writing every one from scratch
+**Sub-minute first response is the design target**, and it is the part the automation can actually guarantee: parsing, drafting, and routing happen in seconds whether or not anyone is at a desk.
 
-## Why it worked
+What follows from that is a reasonable expectation rather than a promise. Faster first contact is one of the better-evidenced findings in sales research, but how much it moves *your* close rate depends on your market, your pricing, and what your competitors do. Anyone quoting you a specific percentage lift for your business is guessing.
 
-The automation didn't try to replace judgment — it removed the boring, time-sensitive parts (parsing, drafting, routing) so a human could focus on the parts that actually need a human. That's the pattern behind most of the automation work we do: find the bottleneck that's purely about speed and attention, not decision-making, and hand it to a system that doesn't get tired or distracted.
+The staffing effect is more predictable: office staff approve and send drafted replies instead of writing each one from scratch, which is a real reduction in the time each lead costs — without adding headcount.
 
-If your team is sitting on leads because everyone's busy doing the job itself, this is usually a fixable problem — and it's rarely as expensive as people expect.
+## Why it works
+
+The automation doesn't try to replace judgment. It removes the parts that are purely about speed and attention — parsing, drafting, routing — so a person can spend their time on the parts that actually need one. That's the pattern behind most automation worth building: find the bottleneck that isn't a decision, and hand it to something that doesn't get tired or distracted.
+
+If your team is sitting on leads because everyone is busy doing the job itself, this is usually fixable, and it is rarely as expensive as people expect. An **AI Quickstart** at $1,250 covers a single workflow like this one end to end.
+
+*This is a reference build — how I'd approach the problem, priced and scoped from real components. It isn't a report on a past client engagement.*

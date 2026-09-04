@@ -4,6 +4,7 @@ const express = require('express');
 const db = require('./lib/db');
 const blog = require('./lib/blog');
 const seo = require('./lib/seo');
+const pages = require('./lib/pages');
 const gate = require('./lib/gate');
 const { renderPage, escapeHtml } = require('./lib/layout');
 
@@ -37,6 +38,13 @@ app.get('/sitemap.xml', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
 // ---------- Blog ----------
+// Post dates are date-only strings, which Date parses as UTC midnight. Rendered
+// in a US timezone that lands on the previous evening, so a post dated the 30th
+// displayed as the 29th — and disagreed with the <time datetime> attribute and
+// the sitemap's lastmod, both of which are correct. Formatting in UTC keeps the
+// three in step.
+const POST_DATE_FORMAT = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+
 app.get('/blog', (req, res) => {
   const posts = blog.listPosts();
   const cards = posts
@@ -46,30 +54,30 @@ app.get('/blog', (req, res) => {
       <span class="tag">${escapeHtml(p.tag)}</span>
       <h2>${escapeHtml(p.title)}</h2>
       <p>${escapeHtml(p.excerpt)}</p>
-      ${p.date ? `<time datetime="${escapeHtml(p.date)}">${escapeHtml(new Date(p.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))}</time>` : ''}
+      ${p.date ? `<time datetime="${escapeHtml(p.date)}">${escapeHtml(new Date(p.date).toLocaleDateString('en-US', POST_DATE_FORMAT))}</time>` : ''}
     </a>`
     )
     .join('\n');
 
   const body = `
     <section class="container blog-hero">
-      <p class="eyebrow">From the field</p>
-      <h1>Case studies &amp; notes</h1>
-      <p>Real automation, hardware, and private-AI builds — what the problem was, what we built, and what changed.</p>
+      <p class="eyebrow">Reference builds</p>
+      <h1>How this work gets built</h1>
+      <p>Automation, hardware, and private-AI builds worked through end to end — the problem, the components, the cost, and the honest trade. Written from real pricing, not from past engagements.</p>
     </section>
     <section class="container">
       ${posts.length ? `<div class="blog-list">${cards}</div>` : '<p class="blog-empty">No posts yet — check back soon.</p>'}
     </section>
   `;
 
-  res.send(renderPage({ title: 'Blog — Ahern AI', description: 'Case studies in AI automation, custom PCs, and private local AI systems.', canonicalPath: '/blog', bodyHtml: body }));
+  res.send(renderPage({ title: 'Blog — Ahern AI', description: 'Reference builds in AI automation, custom PCs, and private local AI systems — how each one is put together and what it costs.', canonicalPath: '/blog', bodyHtml: body }));
 });
 
 app.get('/blog/:slug', (req, res) => {
   const post = blog.getPost(req.params.slug);
   if (!post) return res.status(404).send(renderPage({ title: 'Not found — Ahern AI', description: 'Page not found.', bodyHtml: '<section class="container post"><p>Post not found.</p><p><a href="/blog">&larr; Back to the blog</a></p></section>' }));
 
-  const dateStr = post.date ? new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  const dateStr = post.date ? new Date(post.date).toLocaleDateString('en-US', POST_DATE_FORMAT) : '';
   const body = `
     <article class="post container">
       <header class="post-header">
@@ -84,7 +92,29 @@ app.get('/blog/:slug', (req, res) => {
     </article>
   `;
 
-  res.send(renderPage({ title: `${post.title} — Ahern AI`, description: post.excerpt || post.title, canonicalPath: `/blog/${encodeURIComponent(post.slug)}`, ogType: 'article', bodyHtml: body }));
+  res.send(renderPage({ title: `${post.title} — Ahern AI`, description: post.excerpt || post.title, canonicalPath: `/blog/${encodeURIComponent(post.slug)}`, ogType: 'article', jsonLd: seo.blogPostingSchema(post), bodyHtml: body }));
+});
+
+// ---------- Content pages ----------
+// Server-rendered rather than static files so they pick up the same chrome,
+// canonical and OG tags as everything else. Both sit behind the gate like the
+// rest of the site.
+app.get('/about', (req, res) => {
+  res.send(renderPage({
+    title: 'About — Ahern AI',
+    description: 'One person handling AI automation, custom PCs, and private local AI for North Texas businesses. Who you are dealing with, and where this business actually is.',
+    canonicalPath: '/about',
+    bodyHtml: pages.aboutHtml()
+  }));
+});
+
+app.get('/privacy', (req, res) => {
+  res.send(renderPage({
+    title: 'Privacy — Ahern AI',
+    description: 'What this site collects, in plain English: a contact form you chose to fill in, and anonymous page counts. No cookies, no trackers, nothing sold.',
+    canonicalPath: '/privacy',
+    bodyHtml: pages.privacyHtml()
+  }));
 });
 
 // ---------- API: contact form ----------

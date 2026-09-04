@@ -419,7 +419,7 @@ FAQ, and **the footer nav carries the full set** — "PC builds" (`#hardware`)
 and "How it works" (`#process`) live there. Adding to the header means taking
 something out of it.
 
-## Blog / case studies
+## Blog / reference builds
 
 Posts live as Markdown files in [content/posts/](content/posts/) with
 front matter:
@@ -428,7 +428,7 @@ front matter:
 ---
 title: Post title
 date: 2026-05-12
-tag: Case study — AI automation
+tag: Reference build — AI automation
 excerpt: One-sentence summary shown on the blog index.
 ---
 
@@ -437,6 +437,63 @@ Body in Markdown...
 
 Add a `.md` file, commit, push — it shows up at `/blog` and
 `/blog/<filename-without-.md>` automatically. No build step, no CMS.
+
+**These are reference builds, not case studies, and the difference is not
+cosmetic.** They were originally written as case studies — first person
+plural, a named client type, results attached — before there was a first
+customer. Published, that is a claim about work that did not happen. They
+now describe how a problem gets solved, priced from real components, and
+each one closes by saying what it is.
+
+Keep it that way. A post may become a genuine case study **only** when there
+is a real engagement behind it and the client has agreed to be named. Until
+then the tag stays `Reference build`, results stay design targets rather
+than achievements, and the voice stays first person **singular** — the rest
+of the site says "I", and "we" implies a team that does not exist.
+
+Post dates are date-only strings. `server.js` formats them with
+`timeZone: 'UTC'` (`POST_DATE_FORMAT`); without it `new Date('2026-06-30')`
+is UTC midnight, renders as the 29th in any US timezone, and disagrees with
+both the `<time datetime>` attribute and the sitemap's `lastmod`.
+
+## About and Privacy
+
+[lib/pages.js](lib/pages.js) holds the markup for `/about` and `/privacy`,
+rendered through `renderPage()` like the blog rather than living as static
+files in `public/` — they need the same chrome, canonical and OG tags, and
+a third and fourth hand-written copy of the header and footer is how those
+copies start disagreeing.
+
+**The privacy page is specific, not boilerplate, and that makes it a
+maintenance obligation.** It names the exact columns [lib/db.js](lib/db.js)
+writes, states that no cookies are set, that no IP address is stored, and
+that Fontshare is the only third party the browser contacts. Every one of
+those is checkable against the code, which is the point — a generic policy
+mentioning advertising partners this site does not have would be worse than
+none, because the honest version is a selling point.
+
+If you add a tracker, an embed, a chat widget, or a column to either table,
+that page is now false. Update it in the same commit.
+
+## Structured data
+
+One `ProfessionalService` node, inline in [public/index.html](public/index.html),
+plus `BlogPosting` on each post from `seo.blogPostingSchema()`. The business
+node lives on the home page rather than in `renderPage()` on purpose:
+crawlers expect a single such node at the root, and emitting a copy on every
+rendered page is how two copies drift apart.
+
+Everything asserted in it appears in visible copy somewhere on the site. Do
+not add `aggregateRating`, `review`, `openingHours`, `geo` or `priceRange`
+without a real source — invented structured data is a manual-action risk,
+and a fabricated review rating is the fastest way to lose the rich result
+entirely.
+
+Server-rendered JSON-LD goes through `jsonLdText()` in
+[lib/layout.js](lib/layout.js), which escapes `<`, `>` and `&` to their JSON
+unicode forms. Without it a post title containing `</script` would close the
+element early and break the page open — the HTML parser does not care that
+the sequence is inside a JSON string.
 
 ## Analytics
 

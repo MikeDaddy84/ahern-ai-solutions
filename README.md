@@ -250,6 +250,53 @@ When this moves to live vendor pricing, `parts` is the seam: each entry
 grows a product id and `price` gets refreshed on a schedule. Nothing else
 needs to change.
 
+## Websites & custom tools
+
+The fourth offering, at `#web` on the homepage. It is deliberately **not** a
+fourth service pillar: the three pillars stay three, and websites are a
+footnote under them (`.pillars-aside`) plus a section of their own further down
+the page. That's positioning, not layout convenience — this work is on the menu
+because it pulls automation work behind it, not because it's something to chase.
+
+Two things in that section are load-bearing and shouldn't be "corrected":
+
+- **Website-only is priced *above* the bundle** — $9,500 minimum standalone
+  against $6,500–9,500 for the same site with the intake automation wired in.
+  That inversion is the whole mechanism. A site with no system behind it is
+  work with no follow-on, so it's priced as a deterrent, and the copy says why
+  in plain words rather than hiding it. Anyone who pays it has made it worth
+  the week.
+- **The rows are a list, not a card grid.** Four price cards in a row invite
+  comparison, and in that format a standalone tier costing more than the bundle
+  above it reads as a bug. As rows carrying their own reasoning, it reads as
+  the deliberate filter it is.
+
+The published floor ("Engagements start at $6,500") is the other half of the
+filter. It belongs on the page, not behind a "contact for pricing" — the number
+is what turns away the quick-brochure-site enquiries before they arrive, and
+hiding it means having exactly the conversation it exists to avoid.
+
+`.web-proof` is the portfolio for this pillar, and it's this site: Express,
+first-party analytics, no CMS, the URL-encoded configurator, the token-driven
+themes. The work was already done; it just wasn't labelled.
+
+Pricing here is **not** in [public/pricing.js](public/pricing.js) — that file is
+the PC Builder's cost model and nothing else. These figures are copy, and live
+in the markup.
+
+### The header nav holds six items
+
+Six is the cap, verified against the layout: the header is logo + nav +
+theme toggle + CTA inside a 1120px container, and a seventh item pushes the
+whole page into a horizontal scroll before the nav drops out at 820px. Labels
+also carry `white-space: nowrap`, because one item wrapping to two lines beside
+single-line neighbours makes the whole bar look broken.
+
+So the header carries Services / PC Builder / AI packages / Websites / Blog /
+FAQ, and **the footer nav carries the full set** — "PC builds" (`#hardware`)
+and "How it works" (`#process`) live there. Adding to the header means taking
+something out of it.
+
 ## Blog / case studies
 
 Posts live as Markdown files in [content/posts/](content/posts/) with

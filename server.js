@@ -11,6 +11,34 @@ const { renderPage, escapeHtml } = require('./lib/layout');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ---------- Last-resort process guards ----------
+// A stray rejected promise anywhere in the tree used to be fatal: Node >=15
+// escalates an unhandled rejection to an uncaught exception and the process
+// dies. On a single-instance free plan that is the whole site gone, usually
+// over something as minor as a database timeout. Log it and keep serving.
+process.on('unhandledRejection', (reason) => {
+  console.error('[process] unhandled rejection (site continues):', reason);
+});
+
+// Uncaught exceptions are different — after one, application state may be
+// garbage, so the textbook answer is to exit and let Render restart. That is
+// still right for real bugs, but not for transient socket noise, which would
+// just restart-loop the site. So: shrug off network errors, die on everything
+// else.
+const TRANSIENT_CODES = new Set([
+  'ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE', 'ENOTFOUND', 'EAI_AGAIN'
+]);
+process.on('uncaughtException', (err) => {
+  const code = (err && err.code) || (err && err.cause && err.cause.code) || '';
+  const transient = TRANSIENT_CODES.has(code) || String(code).startsWith('UND_ERR_');
+  if (transient) {
+    console.error('[process] transient uncaught exception (site continues):', err);
+    return;
+  }
+  console.error('[process] fatal uncaught exception, exiting for restart:', err);
+  process.exit(1);
+});
+
 app.disable('x-powered-by');
 // Render terminates TLS at its load balancer, so without this req.protocol is
 // always "http" and req.ip is the proxy — which would break the gate's secure
@@ -131,7 +159,11 @@ app.post('/api/contact', async (req, res) => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email));
     if (!emailOk) return res.status(400).json({ error: 'Please enter a valid email address.' });
 
-    await db.insertContact({
+    // Never throws. If Turso is unreachable the submission is written to the
+    // logs under [contact][UNPERSISTED] instead of being lost, and the visitor
+    // is still thanked — turning a lead away over our own outage is worse than
+    // recovering their details from stdout.
+    const result = await db.insertContact({
       name: String(name).slice(0, 200),
       email: String(email).slice(0, 200),
       business: business ? String(business).slice(0, 200) : null,
@@ -141,7 +173,7 @@ app.post('/api/contact', async (req, res) => {
       userAgent: req.get('user-agent') || null
     });
 
-    res.json({ ok: true });
+    res.json({ ok: true, persisted: result.persisted });
   } catch (err) {
     console.error('[contact] failed:', err);
     res.status(500).json({ error: 'Something went wrong on our end. Please call or text instead.' });
@@ -164,10 +196,13 @@ app.post('/api/track', async (req, res) => {
   }
 });
 
+// The old version reported db:true whenever the env var was a non-empty
+// string, which meant it printed "connected" while the connection was in fact
+// timing out. It now reports what the connection is actually doing.
 app.get('/health', (req, res) => {
-  res.json({ ok: true, db: db.isEnabled() });
+  res.json({ ok: true, db: db.status() });
 });
 
 app.listen(PORT, () => {
-  console.log(`Ahern AI site running on port ${PORT} (db: ${db.isEnabled() ? 'connected' : 'not configured'})`);
+  console.log(`Ahern AI site running on port ${PORT} (db: ${db.status().state})`);
 });

@@ -6,7 +6,11 @@ const blog = require('./lib/blog');
 const seo = require('./lib/seo');
 const pages = require('./lib/pages');
 const gate = require('./lib/gate');
+const leads = require('./lib/leads');
+const contact = require('./lib/contact');
+const notifications = require('./lib/notifications');
 const { renderPage, escapeHtml } = require('./lib/layout');
+const { services, serviceHtml } = require('./lib/services');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +68,9 @@ app.get('/sitemap.xml', (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
+// Only the browser build is public. No CDN requests or server package files.
+app.use('/vendor/three', express.static(path.join(__dirname, 'node_modules/three/build')));
+app.use('/vendor/three-addons', express.static(path.join(__dirname, 'node_modules/three/examples/jsm')));
 
 // ---------- Blog ----------
 // Post dates are date-only strings, which Date parses as UTC midnight. Rendered
@@ -124,6 +131,13 @@ app.get('/blog/:slug', (req, res) => {
 });
 
 // ---------- Content pages ----------
+app.get('/services/:service', (req, res, next) => {
+  const service = services[req.params.service];
+  if (!service) return next();
+  res.send(renderPage({ title: service.title + ' — Ahern AI', description: service.intro,
+    canonicalPath: '/services/' + req.params.service, bodyHtml: serviceHtml(req.params.service),
+    scripts: req.params.service === 'automation' ? ['/workflow-demo.js?v=studio-1'] : [] }));
+});
 // Server-rendered rather than static files so they pick up the same chrome,
 // canonical and OG tags as everything else. Both sit behind the gate like the
 // rest of the site.
@@ -139,45 +153,61 @@ app.get('/about', (req, res) => {
 app.get('/privacy', (req, res) => {
   res.send(renderPage({
     title: 'Privacy — Ahern AI',
-    description: 'What this site collects, in plain English: a contact form you chose to fill in, and anonymous page counts. No cookies, no trackers, nothing sold.',
+    description: 'What this site collects, in plain English: a contact form you chose to fill in, and anonymous page counts. No advertising trackers; nothing sold.',
     canonicalPath: '/privacy',
     bodyHtml: pages.privacyHtml()
   }));
 });
 
 // ---------- API: contact form ----------
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', contact.rateLimit(), async (req, res) => {
   try {
-    const { name, email, business, interest, message, botcheck } = req.body || {};
-
-    // Honeypot: bots fill every field, humans never see this one.
-    if (botcheck) return res.json({ ok: true });
-
-    if (!name || !email || !interest) {
-      return res.status(400).json({ error: 'Name, email, and interest are required.' });
-    }
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email));
-    if (!emailOk) return res.status(400).json({ error: 'Please enter a valid email address.' });
-
-    // Never throws. If Turso is unreachable the submission is written to the
-    // logs under [contact][UNPERSISTED] instead of being lost, and the visitor
-    // is still thanked — turning a lead away over our own outage is worse than
-    // recovering their details from stdout.
-    const result = await db.insertContact({
-      name: String(name).slice(0, 200),
-      email: String(email).slice(0, 200),
-      business: business ? String(business).slice(0, 200) : null,
-      interest: interest ? String(interest).slice(0, 100) : null,
-      message: message ? String(message).slice(0, 4000) : null,
-      referrer: req.get('referer') || null,
-      userAgent: req.get('user-agent') || null
-    });
-
-    res.json({ ok: true, persisted: result.persisted });
+    res.set('Cache-Control', 'no-store');
+    if (req.body?.botcheck) return res.json({ ok: true, persisted: true });
+    let validated;
+    try { validated = contact.validate(req.body); }
+    catch (err) { return res.status(400).json({ error: err.message }); }
+    const result = await db.withClient(client => leads.accept(client, {
+      ...validated.lead,
+      // Store path only; builder query strings can contain the full brief.
+      referrer: safeReferrer(req.get('referer')),
+      userAgent: (req.get('user-agent') || '').slice(0, 300)
+    }, validated.requestId));
+    res.json({ ok: true, persisted: true, reference: result.id });
+    flushNotifications();
   } catch (err) {
-    console.error('[contact] failed:', err);
-    res.status(500).json({ error: 'Something went wrong on our end. Please call or text instead.' });
+    if (err.status === 409) return res.status(409).json({ error: 'This request was already received with different details. Reload the page before sending a new request.' });
+    console.error('[contact] persistence unavailable');
+    res.status(503).json({ error: 'Your request could not be saved. Your details are still in the form—please try again, or call or text (940) 329-9337.' });
   }
+});
+
+function safeReferrer(value) {
+  try { const u = new URL(value); return (u.origin + u.pathname).slice(0, 300); }
+  catch (_) { return null; }
+}
+
+let flushing = false;
+let sender;
+async function flushNotifications() {
+  if (flushing || !notifications.configured() || !db.isEnabled()) return;
+  flushing = true;
+  try {
+    sender ||= notifications.createSender();
+    await db.withClient(client => leads.deliverBatch(client, sender));
+  } catch (_) { console.error('[notifications] queue unavailable; retrying on next cycle'); }
+  finally { flushing = false; }
+}
+
+app.get('/leads', contact.rateLimit({ limit: 30 }), contact.adminAuth, async (req, res) => {
+  try {
+    const rows = await db.withClient(leads.list);
+    const cards = rows.map(row => `<article class="lead-card"><div class="lead-meta"><strong>#${row.id} · ${escapeHtml(row.name)}</strong><span>${escapeHtml(row.created_at)} UTC</span></div>
+      <p>${escapeHtml(row.email)} · ${escapeHtml(row.business || 'Individual')} · ${escapeHtml(row.interest)}</p>
+      <p class="lead-message">${escapeHtml(row.message || '(No message)')}</p><p class="form-note">${escapeHtml(row.delivery)}${row.last_error ? ' · ' + escapeHtml(row.last_error) : ''}</p></article>`).join('');
+    // Standalone admin HTML avoids analytics, third-party fonts and external requests.
+    res.send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Inquiries — Ahern AI</title><link rel="stylesheet" href="/styles.css?v=studio-1"><link rel="stylesheet" href="/experience.css?v=studio-1"></head><body><main class="container section"><h1>Consultation requests</h1><p>Latest 100 inquiries · ${notifications.configured() ? 'Email delivery configured' : 'Email delivery needs configuration; requests are saved here'}</p>${cards || '<p>No inquiries yet.</p>'}</main></body></html>`);
+  } catch (_) { res.status(503).send('Inquiry storage is temporarily unavailable. Please retry.'); }
 });
 
 // ---------- API: first-party analytics beacon ----------
@@ -186,7 +216,7 @@ app.post('/api/track', async (req, res) => {
     const { path: p, referrer } = req.body || {};
     await db.insertPageview({
       path: p ? String(p).slice(0, 300) : '/',
-      referrer: referrer ? String(referrer).slice(0, 300) : null,
+      referrer: safeReferrer(referrer),
       userAgent: req.get('user-agent') || null
     });
     res.status(204).end();
@@ -203,6 +233,10 @@ app.get('/health', (req, res) => {
   res.json({ ok: true, db: db.status() });
 });
 
-app.listen(PORT, () => {
-  console.log(`Ahern AI site running on port ${PORT} (db: ${db.status().state})`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Ahern AI site running at http://localhost:${PORT} (db: ${db.status().state})`));
+  const notificationTimer = setInterval(flushNotifications, 60000);
+  notificationTimer.unref();
+  flushNotifications();
+}
+module.exports = app;

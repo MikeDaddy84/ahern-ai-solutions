@@ -5,12 +5,61 @@ private local AI systems, based in Gordon, TX.
 
 ## Stack
 
-- **Server:** Express (Node ≥18), serves the static homepage plus a
+- **Server:** Express (Node ≥20), serves the static homepage plus a
   Markdown-backed blog and two small JSON APIs.
 - **Database:** [Turso](https://turso.tech) (libSQL) — contact form
   submissions and first-party pageview analytics.
 - **Booking:** none — the contact form is the only inbound path.
 - **Hosting:** Render (Web Service, free tier).
+
+## Build studio and inquiry delivery — September 2026 update
+
+The existing Express/Render architecture is retained. Run `npm ci`,
+`npm test`, and `npm run build`; start with `npm start`. Node 20 or newer is
+required. There is no bundler: the build command validates the server/browser
+source and the self-hosted Three.js assets.
+
+- `/pc-builder` now has a procedural 3D showroom: representative RTX-style
+  graphics cards, motherboard, individually animated DIMMs, case, storage,
+  air/AIO/custom-loop cooling, and sealed appliances. Exact manufacturer CAD
+  and final compatibility are not implied. Brand/model selection stays in the
+  final quote. Models are in `public/builder-models.mjs`; animation, lighting,
+  soft shadows, bloom, rotation and motion preferences are in
+  `public/builder-scene.mjs`. Libraries are served locally, never from a CDN.
+- Editing an earlier compatible answer preserves the rest of the machine.
+  Changing the purpose or AI delivery fork resets incompatible answers.
+  An edited completed build asks the visitor to confirm the revised estimate.
+- URLs now include `#v=1&b=…`; unversioned links still work. Future question
+  schema changes must retain a v1 decoder, or explicitly reject old versions.
+  Comparisons retain an estimate snapshot in tab session storage; opening
+  a saved link uses the current price catalog.
+- Dedicated service pages live at `/services/automation`,
+  `/services/custom-pcs`, and `/services/local-ai`. The automation walkthrough
+  uses clearly labeled preset data and makes no external calls or claims of
+  actual client results.
+- New contact submissions and email jobs commit in one transaction.
+  Request IDs make retries idempotent. Failed writes return 503 and leave
+  the form intact. Notification failures remain queued with exponential
+  retries, capped at one hour. The worker runs once a minute while the service
+  is awake, on startup, and after a successful form submission. A sleeping
+  free Render service delays queued retries until it wakes.
+- Email delivery is disabled until `LEAD_NOTIFY_TO`, `LEAD_NOTIFY_FROM`, and
+  either `RESEND_API_KEY` or SMTP credentials are configured privately.
+  Resend uses HTTPS. SMTP requires a host/plan that permits outbound SMTP.
+  Sender addresses must be authorized with the provider. SMTP delivery is
+  at least once: a crash after provider acceptance can produce a duplicate.
+  No production email was sent as part of the automated tests.
+- `/leads` shows the latest 100 inquiries, including older records, and their
+  notification status. It is disabled until `LEADS_DASHBOARD_PASSWORD` is at
+  least 16 characters. Username: `mike`. Use a separate strong password and
+  HTTPS in production; do not reuse the pre-launch gate credential. The inbox
+  has no tracking, external fonts, or public navigation link.
+
+See `.env.example` for configuration names. Real credentials belong in Render,
+never in Git. The additive `contact_receipts` and `lead_notifications` tables
+are created on startup; existing contacts are retained and are not retroactively
+emailed. For a deletion request, remove the associated notification and receipt
+rows as well as the contact and any email copies.
 
 ## Brand
 

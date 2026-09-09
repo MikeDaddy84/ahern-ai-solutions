@@ -2,6 +2,14 @@
 // pageview beacon, and the matrix-rain background effect.
 (function () {
   var root = document.documentElement;
+  var mobileMenu = document.querySelector('.mobile-menu');
+  if (mobileMenu) {
+    mobileMenu.querySelectorAll('a').forEach(function (link) { link.addEventListener('click', function () { mobileMenu.open = false; }); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileMenu.open) { mobileMenu.open = false; mobileMenu.querySelector('summary').focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!mobileMenu.contains(e.target)) mobileMenu.open = false; });
+  }
   var toggle = document.querySelector('[data-theme-toggle]');
 
   var sunSVG =
@@ -63,6 +71,8 @@
   var success = document.getElementById('audit-success');
 
   if (form) {
+    var requestId = null;
+    var requestFingerprint = null;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -75,12 +85,19 @@
 
       var submitBtn = form.querySelector('button[type="submit"]');
       var data = {
-        name: form.name.value.trim(),
-        email: form.email.value.trim(),
-        business: form.business.value.trim(),
-        interest: form.interest.value,
-        message: form.message.value.trim()
+        name: form.elements.namedItem('name').value.trim(),
+        email: form.elements.namedItem('email').value.trim(),
+        business: form.elements.namedItem('business').value.trim(),
+        interest: form.elements.namedItem('interest').value,
+        message: form.elements.namedItem('message').value.trim(),
+        botcheck: !!(honeypot && honeypot.checked)
       };
+      var fingerprint = JSON.stringify(data);
+      if (!requestId || fingerprint !== requestFingerprint) {
+        requestId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        requestFingerprint = fingerprint;
+      }
+      data.requestId = requestId;
 
       if (!data.name || !data.email || !data.interest) {
         showResult('error', 'Please fill in your name, email, and what you’re interested in.');
@@ -96,7 +113,7 @@
       })
         .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
         .then(function (r) {
-          if (r.ok) {
+          if (r.ok && r.body.persisted === true) {
             showSuccess();
           } else {
             showResult('error', r.body && r.body.error ? r.body.error : 'Something went wrong. Please call or text instead.');

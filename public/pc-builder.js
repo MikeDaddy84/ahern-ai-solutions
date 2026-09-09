@@ -353,6 +353,12 @@
   var prevTotal = null;
   var pushDepth = 0;   // how many of our own history entries sit behind us
   var rigOpen = false; // mobile: is the build panel expanded
+  var editingIndex = null;
+  var comparison = null;
+  try {
+    var saved = JSON.parse(sessionStorage.getItem('ahern-build-comparison-v1') || 'null');
+    if (saved && typeof saved.title === 'string' && typeof saved.url === 'string' && saved.url.startsWith('/pc-builder#') && Array.isArray(saved.total) && saved.total.length === 2 && saved.total.every(Number.isFinite) && Array.isArray(saved.parts)) comparison = saved;
+  } catch (_) {}
 
   function defaultBuild() {
     return { track: null, trackLabel: null, interest: null, delivery: null, appliance: null, cpu: null, gpu: null, ram: null, storage: null, cooling: null, "case": null, expectation: null, notes: [] };
@@ -369,7 +375,7 @@
   }
 
   function getCurrentStep() {
-    return stepAt(state.answers.length);
+    return stepAt(editingIndex === null ? state.answers.length : editingIndex);
   }
 
   // Rebuilds `build` from scratch by replaying every stored answer in order.
@@ -422,7 +428,8 @@
     for (var i = 1; i < parts.length; i++) {
       var steps = stepsFor(probe);
       if (!steps || i - 1 >= steps.length) break;
-      var n = parseInt(parts[i], 10);
+      if (!/^\d+$/.test(parts[i])) break;
+      var n = Number(parts[i]);
       var opt = n >= 0 ? steps[i - 1].options[n] : null;
       if (!opt) break;
       answers.push(n);
@@ -432,13 +439,16 @@
   }
 
   function hashAnswers() {
+    var version = /(?:^|[#&])v=([^&]*)/.exec(location.hash || '');
+    if (version && version[1] !== '1') return [];
     var m = /(?:^|[#&])b=([^&]*)/.exec(location.hash || '');
-    return decodeAnswers(m ? decodeURIComponent(m[1]) : '');
+    try { return decodeAnswers(m ? decodeURIComponent(m[1]) : ''); }
+    catch (_) { return []; }
   }
 
   function urlFor(answers) {
     var enc = encodeAnswers(answers);
-    return location.pathname + (enc ? '#b=' + enc : '#start');
+    return location.pathname + (enc ? '#v=1&b=' + enc : '#start');
   }
 
   function isPrefix(shortArr, longArr) {
@@ -468,11 +478,24 @@
     // On mobile the build panel overlays the questions, so answering closes
     // it again; the estimate in the collapsed bar still updates live.
     rigOpen = false;
-    applyAnswers(state.answers.concat([index]), 'push', true);
+    var next;
+    if (editingIndex !== null) {
+      next = state.answers.slice();
+      var changed = next[editingIndex] !== index;
+      // A different purpose or delivery fork changes the meaning of later answers.
+      var fork = editingIndex === 0 || (state.build.track === 'ai' && editingIndex === 1);
+      if (changed && fork) next = next.slice(0, editingIndex);
+      next[editingIndex] = index;
+      // Preserve compatible parts while asking the visitor to recheck the total.
+      if (changed && !fork && state.finished && editingIndex < next.length - 1) next.pop();
+      editingIndex = null;
+    } else next = state.answers.concat([index]);
+    applyAnswers(next, 'push', true);
     announceChange(before, state.build, beforeEstimate, state.estimate);
   }
 
   function goBack() {
+    if (editingIndex !== null) { editingIndex = null; render(true); return; }
     if (!state.answers.length) return;
     // Unwind a real history entry when we have one, so this button and the
     // browser's own Back button stay in step with each other.
@@ -482,10 +505,12 @@
 
   function jumpTo(stepIndex) {
     if (stepIndex >= state.answers.length) return;
-    applyAnswers(state.answers.slice(0, stepIndex), 'push', true);
+    editingIndex = stepIndex;
+    render(true);
   }
 
   function restart() {
+    editingIndex = null;
     recalled = [];
     prevBuild = null;
     prevTotal = null;
@@ -493,6 +518,7 @@
   }
 
   window.addEventListener('popstate', function () {
+    editingIndex = null;
     var next = hashAnswers();
     if (next.length < state.answers.length) pushDepth = Math.max(0, pushDepth - 1);
     else if (next.length > state.answers.length) pushDepth++;
@@ -521,6 +547,9 @@
   function render(focus) {
     renderPanel();
     renderRig();
+    // The scene is a progressive enhancement; it never owns pricing or answers.
+    window.AHERN_BUILD = { build: state.build, estimate: state.estimate, finished: state.finished };
+    document.dispatchEvent(new CustomEvent('ahern:build-change', { detail: window.AHERN_BUILD }));
     if (focus) focusQuestion();
   }
 
@@ -566,15 +595,15 @@
   }
 
   function renderPanel() {
-    if (state.finished) return renderSummaryPanel();
+    if (state.finished && editingIndex === null) return renderSummaryPanel();
     var step = getCurrentStep();
     var total = state.trackSteps ? state.trackSteps.length + 1 : null;
-    var stepNum = state.answers.length + 1;
+    var stepNum = (editingIndex === null ? state.answers.length : editingIndex) + 1;
     var pct = total ? Math.round((state.answers.length / total) * 100) : 4;
-    var prior = recalled.length > state.answers.length ? recalled[state.answers.length] : null;
+    var prior = editingIndex !== null ? state.answers[editingIndex] : recalled.length > state.answers.length ? recalled[state.answers.length] : null;
 
     panelEl.innerHTML =
-      progressHtml(pct, total ? 'Step ' + stepNum + ' of ' + total : 'Step ' + stepNum) +
+      progressHtml(pct, editingIndex !== null ? 'Editing your choice · other parts stay in place' : total ? 'Step ' + stepNum + ' of ' + total : 'Step ' + stepNum) +
       trailHtml() +
       '<h2 class="builder-question" id="builder-question" tabindex="-1">' + escapeHtml(stepQuestion(step)) + '</h2>' +
       (step.sub ? '<p class="builder-sub">' + escapeHtml(step.sub) + '</p>' : '') +
@@ -665,7 +694,10 @@
         '<a class="btn btn-primary" href="' + escapeHtml(ctaHref(b)) + '">Get this build quoted <span aria-hidden="true">&rarr;</span></a>' +
         '<button type="button" class="btn btn-ghost" data-copy="spec">Copy spec</button>' +
         '<button type="button" class="btn btn-ghost" data-copy="link">Copy link</button>' +
+        '<button type="button" class="btn btn-ghost" id="compare-save">Save to compare</button>' +
       '</div>' +
+      comparisonHtml() +
+      '<details class="savings-note"><summary>Looking for a lower total?</summary><p>Try a simpler case, air cooling, or less storage first. Those can reduce cost without changing your core compute performance. For a smaller GPU or less memory, tell me your target and we will check the workload tradeoffs together.</p></details>' +
       '<p class="builder-copy-status" id="builder-copy-status" role="status"></p>' +
       '<div class="builder-nav">' +
         '<button type="button" class="btn btn-ghost btn-sm" id="builder-back"><span aria-hidden="true">&larr;</span> Change last answer</button>' +
@@ -673,6 +705,21 @@
       '</div>';
 
     wirePanel();
+  }
+
+
+  function comparisonHtml() {
+    if (!comparison) return '<p class="savings-note">Save this build, then try another configuration to compare them side by side. Saved only in this browser tab.</p>';
+    var current = state.estimate;
+    var rows = [['Estimated total', PRICING.range(comparison.total), PRICING.range(current.total)]];
+    var currentParts = slotsFor(state.build).filter(function (pair) { return state.build[pair[0]]; }).map(function (pair) { return [pair[1], state.build[pair[0]].label]; });
+    var labels = Array.from(new Set(comparison.parts.concat(currentParts).map(function (p) { return p[0]; })));
+    labels.forEach(function (label) {
+      var old = comparison.parts.find(function (p) { return p[0] === label; });
+      var now = currentParts.find(function (p) { return p[0] === label; });
+      rows.push([label, old ? old[1] : 'Included / not applicable', now ? now[1] : 'Included / not applicable']);
+    });
+    return '<section class="comparison"><h3>Compare your builds</h3><table><caption>Saved: ' + escapeHtml(comparison.title) + ' · prices as of ' + escapeHtml(comparison.asOf) + '</caption><thead><tr><th scope="col">Part</th><th scope="col">Saved build</th><th scope="col">This build</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><th scope="row">' + escapeHtml(r[0]) + '</th><td>' + escapeHtml(r[1]) + '</td><td>' + escapeHtml(r[2]) + '</td></tr>'; }).join('') + '</tbody></table><p>Saved numbers are a snapshot; reopening a build recalculates with the current catalog.</p><a class="text-link" href="' + escapeHtml(comparison.url) + '">Reopen saved build →</a><button type="button" class="btn btn-ghost btn-sm" id="compare-clear">Clear comparison</button></section>';
   }
 
   function wirePanel() {
@@ -689,6 +736,22 @@
     if (back) back.addEventListener('click', goBack);
     var restartBtn = document.getElementById('builder-restart-inline');
     if (restartBtn) restartBtn.addEventListener('click', restart);
+    var saveComparison = document.getElementById('compare-save');
+    if (saveComparison) saveComparison.addEventListener('click', function () {
+      comparison = { title: state.build.trackLabel, url: urlFor(state.answers), asOf: state.estimate.asOf, total: state.estimate.total.slice(), parts: slotsFor(state.build).filter(function (p) { return state.build[p[0]]; }).map(function (p) { return [p[1], state.build[p[0]].label]; }) };
+      try { sessionStorage.setItem('ahern-build-comparison-v1', JSON.stringify(comparison)); } catch (_) {}
+      renderPanel();
+      var status = document.getElementById('builder-copy-status');
+      status.textContent = 'Build saved for comparison. Change an answer or start a new build.';
+      status.classList.add('is-visible');
+      document.getElementById('compare-save').focus();
+    });
+    var clearComparison = document.getElementById('compare-clear');
+    if (clearComparison) clearComparison.addEventListener('click', function () {
+      comparison = null;
+      try { sessionStorage.removeItem('ahern-build-comparison-v1'); } catch (_) {}
+      renderPanel(); document.getElementById('compare-save').focus();
+    });
   }
 
   // ---------- Share / copy ----------

@@ -24,9 +24,12 @@
   <link rel="icon" type="image/png" href="/brand/favicon.png" />
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=hero-demo-2" />
+  <link rel="stylesheet" href="/styles.css?v=studio-2" />
+  <link rel="stylesheet" href="/experience.css?v=studio-2" />
+  <link rel="stylesheet" href="/studio.css?v=studio-2" />
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three-addons/"}}</script>
 </head>
-<body>
+<body class="builder-page">
   <canvas id="matrix-rain" aria-hidden="true"></canvas>
   <div class="bg-aurora" aria-hidden="true">
     <span class="aurora-blob aurora-1"></span>
@@ -53,6 +56,7 @@
         <a href="/#faq">FAQ</a>
       </nav>
       <div class="header-actions">
+        <details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile navigation"><a href="/services/automation">AI automation</a><a href="/services/custom-pcs">Custom PCs</a><a href="/services/local-ai">Local AI</a><a href="/pc-builder">3D build studio</a><a href="/#pricing">AI packages</a><a href="/#web">Websites</a><a href="/blog">Blog</a><a href="/about">About Mike</a><a href="/#audit">Free consultation</a></nav></details>
         <button class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" type="button"></button>
         <a class="btn btn-primary btn-sm" href="/#audit">Free consult</a>
       </div>
@@ -62,17 +66,33 @@
   <main id="main">
     <!-- BUILDER HERO -->
     <section class="container builder-hero">
-      <p class="eyebrow">Interactive sandbox</p>
-      <h1>Build your PC, one answer at a time.</h1>
-      <p>Answer a few plain-language questions and watch a build come together live, with a running cost estimate — say yes to VR and watch the GPU jump, then change your mind and watch the number come back down. Parts are quoted at cost plus 10% handling, on top of a flat build fee — and the estimate is good for 7 days, because memory, storage and GPUs are moving 10–15% a quarter right now. The exact spec gets locked in on your free consultation.</p>
+      <p class="eyebrow">The build studio</p>
+      <h1>Your next machine.<br><span>Piece by piece.</span></h1>
+      <p>Start with what you want to do. Watch the hardware come together as you find your fit.</p>
     </section>
 
     <!-- BUILDER -->
     <section class="section builder-section">
       <div class="container">
         <div class="builder-layout">
+          <div class="builder-showroom">
+            <section class="device-stage" aria-label="Interactive 3D build preview">
+              <div class="stage-heading"><span class="stage-kicker">AHERN / BUILD STUDIO</span><span class="stage-badge" id="device-type">Your blank canvas</span></div>
+              <div id="device-viewport" class="device-viewport">
+                <p id="device-fallback" class="device-fallback">Loading the 3D preview. Your build choices and estimate work independently below.</p>
+              </div>
+              <div class="stage-controls" id="stage-controls" hidden>
+                <button type="button" id="device-explode" aria-pressed="false">Explode view</button>
+                <button type="button" id="device-left" aria-label="Rotate device left">↶</button>
+                <button type="button" id="device-right" aria-label="Rotate device right">↷</button>
+                <button type="button" id="device-reset">Reset view</button>
+                <button type="button" id="device-motion" aria-pressed="true">Motion on</button>
+              </div>
+              <div class="stage-caption"><p id="device-caption">Choose a purpose to start your build.</p><span>Drag to rotate · representative parts, final models confirmed in your quote</span></div>
+            </section>
+            <aside class="builder-rig" id="builder-rig" aria-label="Your build so far"></aside>
+          </div>
           <div class="builder-panel" id="builder-panel"></div>
-          <aside class="builder-rig" id="builder-rig" aria-label="Your build so far"></aside>
         </div>
         <p class="sr-only" id="builder-live" role="status" aria-live="polite"></p>
       </div>
@@ -118,8 +138,9 @@
     </div>
   </footer>
 
-  <script src="/script.js?v=hero-demo-2"></script>
+  <script src="/script.js?v=studio-2"></script>
   <script src="/pricing.js?v=sept2026-2"></script>
-  <script src="/pc-builder.js?v=sept2026-3"></script>
+  <script src="/pc-builder.js?v=studio-2"></script>
+  <script type="module" src="/builder-scene.mjs?v=studio-2"></script>
 </body>
 </html>

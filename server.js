@@ -136,7 +136,7 @@ app.get('/services/:service', (req, res, next) => {
   if (!service) return next();
   res.send(renderPage({ title: service.title + ' — Ahern AI', description: service.intro,
     canonicalPath: '/services/' + req.params.service, bodyHtml: serviceHtml(req.params.service),
-    scripts: req.params.service === 'automation' ? ['/workflow-demo.js?v=studio-1'] :
+    scripts: req.params.service === 'automation' ? ['/workflow-demo.js?v=workflow-2'] :
       req.params.service === 'custom-pcs' ? ['/pricing.js?v=sept2026-2'] : [] }));
 });
 // Server-rendered rather than static files so they pick up the same chrome,

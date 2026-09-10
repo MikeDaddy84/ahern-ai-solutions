@@ -58,6 +58,44 @@
 .workflow-steps .is-complete > span { color: var(--color-primary); border-color: var(--color-primary); }
 .workflow-status { padding: 1rem 1.5rem; font-size: .875rem; color: var(--color-text-muted); border-top: 1px solid var(--color-border); }
 .demo-followup { margin-top: 1rem; }
+/* The same sample record travels through each stage of the proposed workflow. */
+.workflow-body { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
+.workflow-input, .workflow-process, .workflow-steps li > div { min-width: 0; }
+.workflow-input { align-self: stretch; }
+.workflow-input .eyebrow { font-size: .875rem; }
+.workflow-before { padding-block: 1rem; border-top: 1px solid var(--color-border); font-size: 1rem; }
+.workflow-controls { display: flex; flex-wrap: wrap; gap: .65rem; margin-block: 1.25rem; }
+.workflow-controls .btn { font-size: .875rem; white-space: normal; }
+.workflow-caption { font-size: .875rem; color: var(--color-text); }
+.workflow-sample { white-space: normal; font-size: .875rem; color: var(--color-text); }
+.workflow-progress { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: 1.25rem 1.5rem .8rem; font-size: .875rem; }
+.workflow-traveler { color: var(--color-primary); font-weight: 700; }
+.workflow-track { height: 3px; background: var(--color-border); margin-inline: 1.5rem; overflow: hidden; }
+.workflow-track span { display: block; width: 0; height: 100%; background: var(--color-primary); transition: width .55s ease; }
+.workflow-steps { gap: .75rem; }
+.workflow-steps li { position: relative; }
+.workflow-steps li:not(:last-child)::after { content: ''; position: absolute; left: 29px; top: 48px; bottom: -15px; width: 1px; background: var(--color-border); }
+.workflow-steps li[aria-current='step'] { border-color: var(--color-primary); }
+.workflow-steps li > div { flex: 1; }
+.workflow-steps li > span { position: relative; z-index: 1; background: var(--color-surface); }
+.workflow-steps .is-complete { background: transparent; border-color: transparent; }
+.workflow-steps p { color: var(--color-text); }
+.workflow-record { margin-top: .85rem; padding: 1rem; background: var(--color-primary-highlight); border-radius: .5rem; animation: workflow-arrive .4s ease-out; overflow-wrap: anywhere; }
+.workflow-record .workflow-record-label { color: var(--color-primary); font-weight: 700; margin-bottom: .75rem; }
+.workflow-record dl { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); gap: .4rem .75rem; font-size: .875rem; }
+.workflow-record dt { font-weight: 700; }
+.workflow-record dd { margin: 0; }
+.workflow-record blockquote { font-size: 1rem; line-height: 1.65; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--color-primary); }
+.workflow-result { padding: 1.5rem; background: var(--color-primary-highlight); border-top: 1px solid var(--color-primary); }
+.workflow-result h3 { font-size: 1.35rem; margin-block: .4rem .65rem; }
+.workflow-result > p:last-child { max-width: 80ch; font-size: 1rem; }
+.workflow-status { color: var(--color-text); }
+.workflow-demo button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.workflow-demo button:disabled { opacity: .55; cursor: default; }
+@keyframes workflow-arrive { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 820px) { .workflow-body { grid-template-columns: 1fr; } .workflow-input { border-right: 0; border-bottom: 1px solid var(--color-border); } }
+@media (max-width: 400px) { .workflow-record dl { grid-template-columns: 1fr; } .workflow-record dd + dt { margin-top: .5rem; } .workflow-steps li { gap: .6rem; padding-inline: .4rem; } .workflow-steps li:not(:last-child)::after { left: 23px; } }
+@media (prefers-reduced-motion: reduce) { .workflow-record { animation: none; } .workflow-track span { transition: none; } }
 .lead-card { padding: 1.5rem; border: 1px solid var(--color-border); border-radius: 1rem; margin-top: 1rem; }
 .lead-meta { display: flex; gap: 1rem; justify-content: space-between; flex-wrap: wrap; }
 .lead-meta span { font-size: .875rem; color: var(--color-text-muted); }

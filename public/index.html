@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=studio-1" />
-  <link rel="stylesheet" href="/experience.css?v=studio-1" />
+  <link rel="stylesheet" href="/experience.css?v=photos-1" />
 
   <!-- The one LocalBusiness node for the site. It lives here, on the home page,
        rather than in lib/layout.js: crawlers expect a single such node at the
@@ -110,15 +110,15 @@
         <span class="logo-type">Ahern AI</span>
       </a>
       <nav class="nav" aria-label="Primary">
-        <a href="#services">Services</a>
+        <a href="/services/automation">Automation</a>
+        <a href="/services/custom-pcs">Custom PCs</a>
+        <a href="/services/local-ai">Private AI</a>
+        <a href="/services/websites">Websites</a>
         <a href="/pc-builder">PC Builder</a>
-        <a href="#pricing">AI packages</a>
-        <a href="#web">Websites</a>
         <a href="/blog">Blog</a>
-        <a href="#faq">FAQ</a>
       </nav>
       <div class="header-actions">
-        <details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile navigation"><a href="/services/automation">AI automation</a><a href="/services/custom-pcs">Custom PCs</a><a href="/services/local-ai">Local AI</a><a href="/pc-builder">3D build studio</a><a href="/#pricing">AI packages</a><a href="/#web">Websites</a><a href="/blog">Blog</a><a href="/about">About Mike</a><a href="/#audit">Free consultation</a></nav></details>
+        <details class="mobile-menu"><summary>Menu</summary><nav aria-label="Mobile navigation"><a href="/services/automation">AI automation</a><a href="/services/custom-pcs">Custom PCs</a><a href="/services/local-ai">Local AI</a><a href="/pc-builder">3D build studio</a><a href="/services/automation#pricing">AI packages</a><a href="/services/websites">Websites</a><a href="/blog">Blog</a><a href="/about">About Mike</a><a href="/#audit">Free consultation</a></nav></details>
         <button class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" type="button"></button>
         <a class="btn btn-primary btn-sm" href="#audit">Free consult</a>
       </div>
@@ -133,60 +133,63 @@
       <div class="container hero-grid">
         <div class="hero-content">
           <p class="eyebrow">Software, hardware &amp; private AI</p>
-          <h1 class="hero-title glitch" data-text="Practical technology, built around how you work.">Practical technology, built around how you work.</h1>
-          <p class="hero-sub">AI automation, hand-built custom PCs, and private local AI systems for businesses and power users across North Texas.</p>
+          <h1 class="hero-title glitch" data-text="Less busywork. Better hardware. AI you control.">Less busywork. Better hardware. AI you control.</h1>
+          <p class="hero-sub">For business owners, gamers, and teams ready for private AI. Choose what you need; I’ll help you work out the details.</p>
           <div class="hero-cta">
-            <a class="btn btn-primary" href="#audit">Book a free consultation</a>
-            <a class="btn btn-ghost" href="#services">Explore services</a>
+            <a class="btn btn-primary" href="#services">Find your service</a>
+            <a class="btn btn-ghost" href="#audit">Not sure? Let’s talk</a>
           </div>
-          <ul class="hero-points" role="list">
-            <li><span aria-hidden="true">✓</span> Automation that saves time every week</li>
-            <li><span aria-hidden="true">✓</span> PCs built for your exact workload</li>
-            <li><span aria-hidden="true">✓</span> Private AI that runs on your own hardware</li>
-            <li><span aria-hidden="true">✓</span> Based in Gordon, serving the North Texas area</li>
-          </ul>
+          <p class="hero-location">Built by Mike in Gordon, Texas · Serving North Texas</p>
         </div>
-        <!-- Working software, not a picture of software. This is the real
-             pricing engine the PC Builder runs on — the numbers below are
-             computed, not typed in — and answering here carries the answer
-             into the full builder. The old decorative terminal printed fake
-             output; on a site whose whole claim is "I build things that
-             work", that was the wrong thing to put above the fold. -->
-        <div class="hero-visual">
-          <div class="terminal hero-demo" id="hero-demo">
-            <div class="terminal-bar">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <span class="terminal-label">build sandbox &middot; live</span>
-            </div>
-            <div class="terminal-body">
-              <p class="t-line hero-demo-q"><span class="t-prompt">?</span> What would you build?</p>
-              <div class="hero-demo-opts" role="group" aria-label="Pick a build type to see a real estimate">
-                <button type="button" class="hero-opt" data-track="gaming">Gaming</button>
-                <button type="button" class="hero-opt" data-track="creative">Creative work</button>
-                <button type="button" class="hero-opt" data-track="ai">Local AI</button>
-                <button type="button" class="hero-opt" data-track="everyday">Everyday</button>
-              </div>
-              <div class="hero-demo-out" id="hero-demo-out" role="status" aria-live="polite">
-                <p class="t-line t-out hero-demo-hint">Pick one. The estimate is real &mdash; and it moves.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <nav class="audience-paths" aria-label="Choose your service">
+          <p class="eyebrow">What brings you here?</p>
+          <a class="audience-path" href="/services/automation"><span class="audience-path-number">01</span><span><strong>Save time in my business</strong><span>AI automation · workflows, packages &amp; a live example</span></span><span aria-hidden="true">↗</span></a>
+          <a class="audience-path" href="/services/custom-pcs"><span class="audience-path-number">02</span><span><strong>Build my next PC</strong><span>Gaming &amp; workstations · explore a build and estimate</span></span><span aria-hidden="true">↗</span></a>
+          <a class="audience-path" href="/services/local-ai"><span class="audience-path-number">03</span><span><strong>Run AI on my own hardware</strong><span>Private AI · data control, setup &amp; hardware options</span></span><span aria-hidden="true">↗</span></a>
+        </nav>
       </div>
     </section>
 
-    <!-- THREE SERVICE PILLARS -->
+    <!-- PERSONAL BACKGROUND: drawn from the About page, not client results. -->
+    <section class="section founder-section" id="meet-mike" aria-labelledby="founder-title">
+      <div class="container">
+        <div class="founder-intro">
+          <figure class="founder-portrait">
+            <img src="/photos/mike-ahern.jpg" width="1852" height="2048" alt="Mike Ahern wearing a cap and round glasses in his office" loading="lazy" decoding="async" />
+            <figcaption>Mike Ahern · Founder, Ahern AI</figcaption>
+          </figure>
+          <div class="founder-copy">
+          <div class="founder-heading">
+            <p class="eyebrow">Meet your builder</p>
+            <h2 class="section-title" id="founder-title">I’m Mike Ahern.<br>The work stays with me.</h2>
+            <p class="founder-location">Gordon, Texas · Serving North Texas</p>
+          </div>
+          <div class="founder-story">
+            <p>I’ve spent twelve years installing networks, engineering phone systems, and leading IT. At NextLink, I helped build a phone service that grew to serve tens of thousands of customers. At KCS, I went from handling every support ticket to becoming VP/CTO in 2022.</p>
+            <p>I left that role to build Ahern AI. You work directly with me from the first conversation through the build and handoff. I’m the person who makes the technical decisions—and answers for them afterward.</p>
+            <a class="text-link" href="/about">More about my background <span aria-hidden="true">→</span></a>
+          </div>
+          </div>
+        </div>
+        <ul class="founder-credentials" aria-label="Mike’s experience">
+          <li><strong>Hands-on engineering</strong><span>From network installation to VoIP engineering at NextLink.</span></li>
+          <li><strong>Technical leadership</strong><span>Former KCS VP/CTO, after years as the entire support staff.</span></li>
+          <li><strong>Direct accountability</strong><span>The same person scopes, builds, and supports your project.</span></li>
+        </ul>
+      </div>
+    </section>
+
     <section class="section" id="services">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Three service pillars</p>
-          <h2 class="section-title">From the workflow to the machine running it.</h2>
-          <p class="section-sub">Start with the problem you need solved. I can improve the process, build the computer, or create a private local AI setup that brings both together.</p>
+          <p class="eyebrow">Choose your starting point</p>
+          <h2 class="section-title">What do you want to make better?</h2>
+          <p class="section-sub">Each service has its own guide, with the options, costs, and next steps that matter to you.</p>
         </div>
         <div class="service-pillars">
-          <article class="pillar-card">
+          <article class="pillar-card" id="pricing">
             <span class="pillar-number">01</span>
-            <p class="pillar-kicker">Workflows</p>
+            <p class="pillar-kicker">For business owners &amp; teams</p>
             <h3>AI Automation</h3>
             <p>Connect the tools you already use to handle lead follow-up, scheduling, inbox triage, data entry, and repetitive admin.</p>
             <ul class="tick-list" role="list">
@@ -196,9 +199,9 @@
             </ul>
             <a href="/services/automation" class="text-link">Explore automation <span aria-hidden="true">→</span></a>
           </article>
-          <article class="pillar-card">
+          <article class="pillar-card" id="hardware">
             <span class="pillar-number">02</span>
-            <p class="pillar-kicker">Hardware</p>
+            <p class="pillar-kicker">For gamers &amp; creators</p>
             <h3>Custom PC Builds</h3>
             <p>Purpose-built gaming rigs and professional workstations designed around your software, performance goals, style, and budget.</p>
             <ul class="tick-list" role="list">
@@ -210,9 +213,9 @@
           </article>
           <article class="pillar-card pillar-card-featured">
             <span class="pillar-number">03</span>
-            <p class="pillar-kicker">The bridge</p>
+            <p class="pillar-kicker">For private-AI customers</p>
             <h3>Local AI Systems</h3>
-            <p>GPU-equipped business PCs that run capable AI tools on-site, giving your team speed, control, and greater privacy.</p>
+            <p>Local assistants and document search on hardware you control. Explore data boundaries, setup needs, and the right machine for your workload.</p>
             <ul class="tick-list" role="list">
               <li>Private document search and chat</li>
               <li>Local models without per-use cloud fees</li>
@@ -223,232 +226,38 @@
         </div>
         <!-- Websites sit deliberately below the three pillars, not beside them:
              the work is available, but it isn't the headline. -->
-        <p class="pillars-aside">Need the website or the internal tool too? I build those as the front end of a system I've automated — <a href="#web">see how that's scoped and priced</a>.</p>
+        <p class="pillars-aside" id="web">Need the website or the internal tool too? I build those as the front end of a system I've automated — <a href="/services/websites">explore websites &amp; custom tools</a>.</p>
       </div>
     </section>
 
-    <section class="section section-alt" id="automation-demo"><div class="container">
-    <div class="section-head"><p class="eyebrow">See the workflow</p><h2 class="section-title">From incoming to handled.</h2><p class="section-sub">Pick a common bottleneck and walk through an example.</p></div>
-    <div class="workflow-demo" data-workflow-demo>
-      <div class="workflow-toolbar"><div class="workflow-tabs" role="group" aria-label="Example workflow">
-        <button type="button" data-scenario="leads" aria-pressed="true">Missed leads</button><button type="button" data-scenario="inbox" aria-pressed="false">Inbox overload</button><button type="button" data-scenario="entry" aria-pressed="false">Double entry</button>
-      </div><span class="workflow-sample">Sample data · nothing is sent</span></div>
-      <div class="workflow-body"><div class="workflow-input"><p class="eyebrow">01 / Incoming</p><h3 id="workflow-title">A new customer inquiry</h3><p id="workflow-source">Name: Taylor
-Business: Example Plumbing
-Request: A leaking water heater needs attention today.
-Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-run">Run this example <span aria-hidden="true">→</span></button></div>
-        <ol class="workflow-steps" id="workflow-steps"><li><span>02</span><div><h3>Extract the details</h3><p>Name, job, and preferred reply method.</p></div></li><li><span>03</span><div><h3>Route the work</h3><p>Urgent requests are flagged for a person.</p></div></li><li><span>04</span><div><h3>Prepare the next step</h3><p>A reply draft waits for approval.</p></div></li></ol></div>
-      <p class="workflow-status" id="workflow-status" role="status" aria-live="polite">An interactive walkthrough using preset examples, not a connected customer system.</p>
-    </div><p class="demo-followup"><a class="text-link" href="/?interest=AI%20automation#audit">Find a workflow worth automating in my business →</a></p>
-  </div></section>
-
-    <section class="section founder-section">
-      <div class="container founder-intro">
-        <div><p class="eyebrow">Meet your builder</p><h2 class="section-title">I'm Mike.<br>The work stays with me.</h2></div>
-        <div><p>From installing networks to engineering phone systems and leading IT as a VP/CTO, I've spent twelve years following technical problems all the way through.</p><p>At Ahern AI, the person who scopes your project is the person who builds it—and answers the phone afterward. Based in Gordon, serving North Texas.</p><a class="text-link" href="/about">Get to know the person behind the build →</a></div>
-      </div>
-    </section>
-
-    <!-- CUSTOM PC / LOCAL AI BUILDS -->
-    <section class="section section-alt" id="hardware">
+    <!-- Working software and reference designs have distinct labels. -->
+    <section class="section section-alt" id="work-samples" aria-labelledby="work-title">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Custom PC building</p>
-          <h2 class="section-title">No generic configurations. No mystery parts.</h2>
-          <p class="section-sub">Every system starts with a free consultation, where we settle the workload, performance target, upgrade path, and budget together before a single component is selected.</p>
+          <p class="eyebrow">Explore the work</p>
+          <h2 class="section-title" id="work-title">Try what I’ve built. See how I think.</h2>
+          <p class="section-sub">Ahern AI is a new business built on years of technical experience. Take a look at the hardware, try a working tool, or read how I would approach a project.</p>
         </div>
-        <div class="build-grid">
-          <article class="build-card">
-            <p class="build-label">Play</p>
-            <h3>Gaming PCs</h3>
-            <p>Balanced systems built around your games, resolution, frame-rate target, streaming needs, and preferred look.</p>
-            <p class="build-price">Consultation first</p>
-            <a href="/pc-builder?track=gaming" class="text-link build-start-link">Start this build <span aria-hidden="true">→</span></a>
-          </article>
-          <article class="build-card">
-            <p class="build-label">Create</p>
-            <h3>Professional Workstations</h3>
-            <p>Reliable, quiet performance for video, design, engineering, data, development, and demanding daily work.</p>
-            <p class="build-price">Consultation first</p>
-            <a href="/pc-builder?track=creative" class="text-link build-start-link">Start this build <span aria-hidden="true">→</span></a>
-          </article>
-          <article class="build-card build-card-ai">
-            <p class="build-label">Run AI locally</p>
-            <h3>Business AI Workstations</h3>
-            <p>Right-sized GPU systems for private assistants, document search, transcription, image generation, and internal AI workflows.</p>
-            <p class="build-price">Consultation first</p>
-            <a href="/pc-builder?track=ai" class="text-link build-start-link">Start this build <span aria-hidden="true">→</span></a>
-          </article>
+        <div class="project-photos" aria-label="PC and workspace photos">
+          <figure>
+            <img src="/photos/white-pc.jpg" width="2048" height="1536" alt="White desktop PC with liquid cooling, illuminated memory, and a system-monitoring display alongside it" loading="lazy" decoding="async" />
+            <figcaption><strong>Inside the machine</strong><span>A white tower with liquid cooling and a view of the hardware inside.</span></figcaption>
+          </figure>
+          <figure>
+            <img src="/photos/desktop-setup.jpg" width="2048" height="1536" alt="An illuminated desktop PC beside a dual-monitor setup with one screen mounted vertically" loading="lazy" decoding="async" />
+            <figcaption><strong>The complete setup</strong><span>A desktop build paired with two monitors, including a vertical display.</span></figcaption>
+          </figure>
         </div>
-        <div class="hardware-cta">
-          <p>Not sure what hardware you need? Try the interactive builder, or skip straight to a real conversation.</p>
-          <div class="hardware-cta-actions">
-            <a class="btn btn-ghost" href="/pc-builder">Try the PC builder</a>
-            <a class="btn btn-primary" href="#audit">Plan my build</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI SERVICES / PRICING -->
-    <section class="section" id="pricing">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">AI automation packages</p>
-          <h2 class="section-title">Put one useful workflow to work first.</h2>
-          <p class="section-sub">Start on a fixed price and a clear scope. When a problem has a real number attached, it can be priced against that number instead. Hardware builds are quoted separately after the free consultation.</p>
-        </div>
-        <div class="grid grid-pricing">
-          <article class="price-card">
-            <div class="price-card-head">
-              <h3>AI Workflow Audit</h3>
-              <p class="price-tag">Free</p>
-            </div>
-            <p class="price-desc">A 20-minute call plus a short written list of the two automations worth doing first.</p>
-            <ul class="tick-list" role="list">
-              <li>Where you're losing hours today</li>
-              <li>2 concrete automation ideas</li>
-              <li>What to tackle first, and why</li>
-            </ul>
-            <a class="btn btn-ghost btn-block" href="#audit">Request audit</a>
-          </article>
-          <article class="price-card price-card-featured">
-            <span class="badge">Most popular</span>
-            <div class="price-card-head">
-              <h3>AI Quickstart</h3>
-              <p class="price-tag">$1,250</p>
-            </div>
-            <p class="price-desc">One live automation built and handed off in about 7 days. Your first real AI win.</p>
-            <ul class="tick-list" role="list">
-              <li>One automation, end to end</li>
-              <li>e.g. instant lead-reply bot</li>
-              <li>Setup, testing &amp; handoff call</li>
-            </ul>
-            <a class="btn btn-primary btn-block" href="#audit">Start Quickstart</a>
-          </article>
-          <article class="price-card">
-            <div class="price-card-head">
-              <h3>Automation Sprint</h3>
-              <p class="price-tag">$4,500</p>
-            </div>
-            <p class="price-desc">Two to three connected automations over 2–3 weeks, for businesses ready to systemize.</p>
-            <ul class="tick-list" role="list">
-              <li>2–3 connected workflows</li>
-              <li>Lead capture → follow-up → scheduling</li>
-              <li>Team training and written handoff</li>
-              <li>30 days of tuning after launch</li>
-            </ul>
-            <a class="btn btn-ghost btn-block" href="#audit">Plan a Sprint</a>
-          </article>
-          <article class="price-card">
-            <div class="price-card-head">
-              <h3>Monthly AI Support</h3>
-              <p class="price-tag">$897<span class="price-unit">/mo</span></p>
-            </div>
-            <p class="price-desc">Ongoing tweaks, monitoring, and one new automation per month. Set it and forget it.</p>
-            <ul class="tick-list" role="list">
-              <li>Monthly maintenance &amp; monitoring</li>
-              <li>1 new automation per month</li>
-              <li>A monthly note on what it saved you</li>
-              <li>Priority support</li>
-            </ul>
-            <a class="btn btn-ghost btn-block" href="#audit">Add support</a>
-          </article>
-        </div>
-
-        <!-- Outcome-priced tier. Deliberately outside the card grid: it has no
-             fixed number, so sitting it in a row of price tags invites the
-             wrong comparison. -->
-        <article class="price-card price-card-value">
-          <div class="value-head">
-            <p class="value-kicker">Priced on outcome</p>
-            <h3>Outcome Partnership</h3>
-            <p class="value-desc">For work where the problem already has a number attached. I measure what the broken process costs you each month, in writing, then price the fix as a share of that figure &mdash; so the invoice stays a fraction of what the problem costs you without it.</p>
-          </div>
-          <div class="value-body">
-            <div class="value-figure">
-              <p class="price-tag">20&ndash;40<span class="price-unit-lg">%</span></p>
-              <p class="value-caption">of the monthly cost of the problem I remove</p>
-              <p class="value-example">A follow-up gap bleeding <strong>$8,000/month</strong> in lost work runs <strong>$1,600&ndash;3,200/month</strong> to close.</p>
-            </div>
-            <ul class="tick-list" role="list">
-              <li>We agree on the cost of the problem together, before any number is quoted</li>
-              <li>Built for recurring, high-volume workflows &mdash; not one-off tasks</li>
-              <li>Re-measured quarterly, so the price tracks the result</li>
-              <li>Month to month. No long-term contract</li>
-            </ul>
-          </div>
-          <a class="btn btn-primary btn-value" href="#audit">Size the problem</a>
+        <article class="work-example">
+          <div><p class="work-label">Working project · Ahern AI</p><h3>The PC build studio</h3></div>
+          <div><p>I built this site’s interactive configurator to turn your workload into a starting specification and estimate. Explore the 3D model, compare builds, and share a configuration.</p><p class="work-caption">The 3D model illustrates a configuration; it is not a photograph of a completed customer PC.</p><a class="text-link" href="/pc-builder">Try the build studio <span aria-hidden="true">→</span></a></div>
         </article>
-
-        <p class="pricing-note">Fixed-price packages use tools you already own where possible. No long-term contracts — cancel monthly support anytime.</p>
-      </div>
-    </section>
-
-    <!-- WEBSITES & CUSTOM TOOLS -->
-    <section class="section section-alt" id="web">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Websites &amp; custom tools</p>
-          <h2 class="section-title">Built as the front end of a system, not a brochure.</h2>
-          <p class="section-sub">Most of the value here isn't the page — it's the automation behind the form. A site I build arrives already wired into the workflow it feeds: intake parsed, replies drafted, urgent jobs routed, everything landing in the tools you already use. Engagements start at $6,500.</p>
-        </div>
-
-        <!-- Rows rather than a card grid. The standalone tier costs more than
-             the bundle above it; in a row of price cards that reads as a
-             mistake, but as a list with the reasoning attached it reads as the
-             deliberate filter it is. -->
-        <div class="web-tiers">
-          <article class="web-tier">
-            <div class="web-tier-body">
-              <h3>The Front Door</h3>
-              <p>The site plus the intake automation behind it — form parsing, an instant AI-drafted reply, urgency routing, and the write into whatever CRM or inbox you already run. Built, tested, and handed off on a training call.</p>
-            </div>
-            <p class="web-tier-price"><span class="price-tag">$6,500<span class="price-unit">–9,500</span></span></p>
-          </article>
-
-          <article class="web-tier web-tier-standalone">
-            <div class="web-tier-body">
-              <p class="web-tier-label">Standalone engagement</p>
-              <h3>Website only</h3>
-              <p>A site with no automation behind it, priced as its own engagement. This is the honest number: a website on its own is the one piece of this work I'd rather not build in isolation, and the price says so out loud. Most people are better served by The Front Door — for less.</p>
-            </div>
-            <p class="web-tier-price"><span class="price-tag">$9,500<span class="price-unit">&nbsp;min.</span></span></p>
-          </article>
-
-          <article class="web-tier">
-            <div class="web-tier-body">
-              <h3>Custom tool or internal app</h3>
-              <p>Dashboards, client portals, quoting tools, scheduling and workflow apps — scoped from the process they replace rather than from a feature list. Under $18,000, an Automation Sprint usually does the same job for a fraction of it, and I'll tell you when that's the case.</p>
-            </div>
-            <p class="web-tier-price"><span class="price-tag">$18k<span class="price-unit">–45k</span></span></p>
-          </article>
-
-          <article class="web-tier">
-            <div class="web-tier-body">
-              <h3>Care plan</h3>
-              <p>Included for the first 12 months on every build: hosting, updates, monitoring, backups, and small changes as you need them. The $399 tier adds content edits and a 48-hour turnaround commitment. Month to month after the first year.</p>
-            </div>
-            <p class="web-tier-price"><span class="price-tag">$249<span class="price-unit">–399/mo</span></span></p>
-          </article>
-        </div>
-
-        <p class="pricing-note">Anything outside a plan is billed at $150/hour. Every engagement starts with the same free consultation — and if the honest answer is that a $40-a-month website builder covers what you need, I'll tell you that instead.</p>
-
-        <!-- The portfolio for this pillar is the page it's printed on. -->
-        <div class="web-proof">
-          <p class="value-kicker">Built with the same hands</p>
-          <h3>This site is the work sample.</h3>
-          <p class="web-proof-desc">Everything here was designed and written from scratch — no page builder, no template, no plugin stack to maintain.</p>
-          <ul class="web-proof-list" role="list">
-            <li>Node and Express, deployed on a push to main</li>
-            <li>First-party analytics — no advertising cookies, no third-party tracking scripts</li>
-            <li>A Markdown blog with no CMS behind it</li>
-            <li>A live PC configurator that encodes a whole build in its URL</li>
-            <li>Light and dark themes built on one token system</li>
-            <li>Generated sitemap, robots, and link-preview card</li>
-          </ul>
-          <a href="/pc-builder" class="text-link">Try the configurator <span aria-hidden="true">→</span></a>
+        <div class="reference-projects" aria-labelledby="reference-title">
+          <div class="reference-intro"><h3 id="reference-title">Reference projects</h3><p>Proposed approaches and design targets, not completed customer engagements or measured client results.</p></div>
+          <div class="reference-links">
+            <a href="/blog/lead-response-automation"><span class="work-label">Reference project · Automation</span><strong>A faster path from inquiry to follow-up <span aria-hidden="true">↗</span></strong></a>
+            <a href="/blog/private-local-ai-law-office"><span class="work-label">Reference project · Private AI</span><strong>A local AI setup for a small law office <span aria-hidden="true">↗</span></strong></a>
+          </div>
         </div>
       </div>
     </section>
@@ -489,38 +298,10 @@ Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-ru
           <h2 class="section-title">Questions, answered plainly.</h2>
         </div>
         <div class="faq">
-          <details class="faq-item">
-            <summary>Do I need any technical experience?</summary>
-            <p>No. If you can use email and a calendar, you can run what I build. I handle the setup and walk you through everything on a short handoff call.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What tools do you work with?</summary>
-            <p>Common ones small businesses already use — Gmail/Outlook, Google Calendar, Calendly, spreadsheets, plus automation platforms like Zapier and Make. I work with what you have rather than forcing new software on you.</p>
-          </details>
-          <details class="faq-item">
-            <summary>How fast can we launch?</summary>
-            <p>The AI Quickstart is typically live in about 7 days. The free audit happens first, usually within a few days of reaching out.</p>
-          </details>
-          <details class="faq-item">
-            <summary>Do I need custom software for an automation?</summary>
-            <p>Usually not. The automation packages connect existing tools and platforms. If you need a purpose-built dashboard, client portal, or internal app, I also scope custom software separately—and explain when a simpler automation will do the job.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What if I don't know where to start?</summary>
-            <p>That is exactly what the free consultation is for &mdash; working out whether the right first move is better software, better hardware, or a combination of both.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What kinds of custom PCs do you build?</summary>
-            <p>Gaming PCs, streaming rigs, creator systems, and professional workstations. Each build is based on the applications you run, performance target, upgrade plans, appearance, and total budget.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What does “local AI” mean?</summary>
-            <p>Local AI runs on a computer your business controls instead of sending every request to a cloud service. It can improve privacy, reduce recurring usage fees, and keep internal documents closer to home. The right setup depends on the model, workload, and number of users.</p>
-          </details>
-          <details class="faq-item">
-            <summary>Do local AI systems work without the internet?</summary>
-            <p>Many local models can run without an internet connection after setup. Some business workflows still benefit from selective cloud services, so I will explain which parts are fully local and which require connectivity before the build begins.</p>
-          </details>
+          <details class="faq-item"><summary>What if I don’t know where to start?</summary><p>That is what the free consultation is for: working out whether the right first move is better software, better hardware, or a combination of both.</p></details>
+          <details class="faq-item"><summary>Do I need technical experience?</summary><p>No. Tell me what you want to accomplish. I handle the setup and walk you through how to use what I build.</p></details>
+          <details class="faq-item"><summary>Who will I work with?</summary><p>You work directly with me, Mike, from the first conversation through the build and handoff. I’m based in Gordon and serve the North Texas area.</p></details>
+          <details class="faq-item"><summary>Where can I find pricing and service details?</summary><p>See <a href="/services/automation#pricing">automation packages</a>, <a href="/services/custom-pcs">custom PC builds</a>, <a href="/services/local-ai">private AI systems</a>, or <a href="/services/websites#web">website and tool pricing</a>.</p></details>
         </div>
       </div>
     </section>
@@ -531,7 +312,7 @@ Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-ru
         <div class="cta-card">
           <div class="cta-text">
             <h2 class="section-title">Tell me what you want to build.</h2>
-            <p class="section-sub">Book a free consultation for AI automation, a custom PC, or a private local AI system. No pressure and no obligation.</p>
+            <p class="section-sub">Request a free consultation for automation, a custom PC, private AI, or a website. No pressure and no obligation.</p>
           </div>
           <form class="audit-form" id="audit-form" action="/api/contact" method="POST" novalidate>
             <input type="checkbox" name="botcheck" class="honeypot" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -544,7 +325,7 @@ Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-ru
               <input type="email" id="email" name="email" placeholder="you@business.com" required />
             </div>
             <div class="form-row">
-              <label for="biz">Business name</label>
+              <label for="biz">Business name (optional)</label>
               <input type="text" id="biz" name="business" placeholder="What do you do?" />
             </div>
             <div class="form-row">
@@ -589,10 +370,11 @@ Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-ru
       </div>
       <nav class="footer-nav" aria-label="Footer">
         <a href="#services">Services</a>
-        <a href="#hardware">PC builds</a>
+        <a href="/services/custom-pcs">Custom PCs</a>
+        <a href="/services/local-ai">Private AI</a>
         <a href="/pc-builder">PC Builder</a>
-        <a href="#pricing">AI packages</a>
-        <a href="#web">Websites</a>
+        <a href="/services/automation#pricing">AI packages</a>
+        <a href="/services/websites">Websites</a>
         <a href="#process">How it works</a>
         <a href="/blog">Blog</a>
         <a href="#faq">FAQ</a>
@@ -609,10 +391,7 @@ Reply by: Email</p><button type="button" class="btn btn-primary" id="workflow-ru
     </div>
   </footer>
 
-  <!-- The hero demo computes its estimates with the same pricing model the
-       PC Builder uses, so the two can never quietly disagree. -->
-  <script src="/pricing.js?v=sept2026-2"></script>
-  <script src="/script.js?v=studio-1"></script>
-<script src="/workflow-demo.js?v=studio-1"></script>
+
+  <script src="/script.js?v=audiences-1"></script>
 </body>
 </html>

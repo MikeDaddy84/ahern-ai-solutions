@@ -83,10 +83,11 @@
   // signing off on a number you have to go looking for isn't signing off.
   function expectationStep() {
     return {
+      kind: 'expectation',
       question: function (b, est) {
         return est
-          ? 'This build comes to ' + PRICING.range(est.total) + '. Does that land where you expected?'
-          : 'Does that land where you expected?';
+          ? 'Here’s your build: ' + PRICING.range(est.total) + '. How does the estimate feel?'
+          : 'How does the estimate feel?';
       },
       sub: 'Nothing is locked in either way — this just tells us where to start the conversation.',
       short: 'Expectation',
@@ -548,7 +549,9 @@
     renderPanel();
     renderRig();
     // The scene is a progressive enhancement; it never owns pricing or answers.
-    window.AHERN_BUILD = { build: state.build, estimate: state.estimate, finished: state.finished };
+    var phase = state.finished && editingIndex === null ? 'summary'
+      : getCurrentStep()?.kind === 'expectation' ? 'expectation' : 'configuring';
+    window.AHERN_BUILD = { build: state.build, estimate: state.estimate, finished: state.finished, phase: phase };
     document.dispatchEvent(new CustomEvent('ahern:build-change', { detail: window.AHERN_BUILD }));
     if (focus) focusQuestion();
   }

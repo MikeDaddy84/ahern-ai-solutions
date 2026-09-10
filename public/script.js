@@ -1,6 +1,22 @@
 // Ahern AI — theme toggle, header scroll state, contact form,
 // pageview beacon, and the matrix-rain background effect.
 (function () {
+  // Keep old homepage bookmarks useful after moving the detailed sections.
+  var movedSections = {
+    '#pricing': '/services/automation#pricing',
+    '#hardware': '/services/custom-pcs#hardware',
+    '#web': '/services/websites#web',
+    '#automation-demo': '/services/automation#automation-demo'
+  };
+  function followMovedSection() {
+    if ((location.pathname === '/' || location.pathname === '/index.html') && movedSections[location.hash]) {
+      var destination = new URL(movedSections[location.hash], location.origin);
+      destination.search = location.search;
+      location.replace(destination.href);
+    }
+  }
+  followMovedSection();
+  window.addEventListener('hashchange', followMovedSection);
   var root = document.documentElement;
   var mobileMenu = document.querySelector('.mobile-menu');
   if (mobileMenu) {
@@ -224,7 +240,7 @@
   }
 
   // ---------- Hero build demo ----------
-  // One question from the PC Builder, answerable in the hero, priced by the
+  // One question from the PC Builder, answerable on the PC service page, priced by the
   // real model. Every figure here comes out of AHERN_PRICING — nothing is
   // hardcoded — so it can't drift away from the builder the way a typed-in
   // number would. Answering carries the choice into the full flow.
@@ -322,10 +338,8 @@
     // Render one on load rather than waiting for a click. The point of
     // putting this above the fold is that a visitor sees working software
     // immediately — an empty box they have to poke first proves nothing, and
-    // leaves a dead rectangle in the hero. Local AI is the default because
-    // it's the pillar nobody else round here offers; change DEFAULT_TRACK to
-    // lead with something else.
-    var DEFAULT_TRACK = 'ai';
+    // leaves an empty demo. Each service page can select its starting track.
+    var DEFAULT_TRACK = demo.getAttribute('data-default-track') || 'ai';
     var initial = demo.querySelector('.hero-opt[data-track="' + DEFAULT_TRACK + '"]');
     if (initial) {
       initial.classList.add('is-active');

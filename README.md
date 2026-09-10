@@ -91,7 +91,57 @@ send when delivery is enabled. Older legacy contacts without outbox entries
 are not emailed. `.env.example` documents the addresses; changing it does not
 configure the production service. No mailbox password is needed for Resend.
 
+## Audience paths — September 2026
+
+The homepage is the starting point for three audiences: business automation
+buyers, gamers and creators, and private-AI customers. Its hero links directly
+to each service; detailed pricing and demos live on their relevant pages.
+
+- `/services/automation`: workflow examples, the interactive sample walkthrough,
+  all automation packages, and business-specific FAQs.
+- `/services/custom-pcs`: gaming, creative and everyday builds, the live estimate
+  demo, pricing explanation, and links into the appropriate builder track.
+- `/services/local-ai`: use cases, data boundaries, hardware tradeoffs, ongoing
+  costs, and a consultation or AI hardware exploration.
+- `/services/websites`: website and custom-tool scopes, full existing pricing,
+  care plans, and a focused consultation link.
+
+The homepage retains the founder introduction, process, general questions, and
+contact form. Service consultation links preselect the matching contact interest.
+Old homepage hashes for pricing, hardware, websites, and the automation demo
+forward to their new destinations while retaining query parameters. Pricing,
+hardware, and website anchors also retain a homepage service link without JS.
+
+Full pricing is unchanged. The relocated markup lives in
+`content/services/*.html`, loaded by `lib/services.js`. The sitemap includes all
+four service pages, each with its own title, description, and canonical URL.
+The existing Express/Render hosting is retained.
+
 ## Brand
+
+### Homepage credibility
+
+The `#meet-mike` introduction sits directly after the hero and draws from the
+About page: twelve years in technical work, VoIP engineering at NextLink, and
+Mike's progression to KCS VP/CTO in 2022. Keep these details aligned with
+`lib/pages.js`; they describe Mike's career, not Ahern AI client results.
+
+`#work-samples` links to the working PC builder and separately labels the two
+reference projects as proposed approaches rather than completed customer work.
+The builder's 3D model is described as an illustration, not a build photograph.
+
+Mike supplied photos in `public/photos/`. The homepage uses three unchanged
+copies with descriptive filenames: `mike-ahern.jpg` (black-and-white office
+portrait), `white-pc.jpg` (white tower), and `desktop-setup.jpg` (dual-monitor
+setup). Their source filenames are respectively `WhatsApp Image 2023-12-06 at
+15.01.03_90a4556b.jpg`, `WhatsApp Image 2026-09-10 at 10.34.41 AM.jpeg`, and
+`WhatsApp Image 2026-09-10 at 10.25.11 AM.jpeg`.
+
+Images have intrinsic dimensions, descriptive alt text, and lazy loading.
+Captions describe visible hardware without asserting customer engagements or
+results. Unselected originals stay in the local drop folder and are ignored by
+Git; only the three selected copies are included in a repository deployment.
+No stock portrait or generated build photo is used.
 
 The display brand is **Ahern AI**. The registered entity is still Ahern AI
 Solutions, and that longer name stays on the copyright line in the footer and
@@ -246,42 +296,40 @@ shape is offering a booking link only to people who finish a build, rather
 than putting it on the homepage for anyone. Whatever the mechanism, the
 principle holds: qualify first, then offer the calendar.
 
-## The hero demo
+## The service-page build demo
 
-The terminal in the hero is **working software, not a picture of it**. It runs
-one question from the PC Builder, prices the answer with the real model
-(`window.AHERN_PRICING`, the same one the builder uses), and hands the choice
-off to `/pc-builder?track=…` so nothing the visitor did is thrown away.
+The live estimate terminal now lives on `/services/custom-pcs`, below the build
+options. The homepage hero instead offers the three audience paths. The demo
+still reads the shared `public/pricing.js` model and hands the selected track
+to the full builder. Its markup is in `content/services/builderDemo.html`.
 
-It replaced a decorative terminal that printed fake output — invented status
-lines about workflows being automated. On a site whose entire claim is *I
-build things that work*, a mock-up of working software was the wrong thing to
-put above the fold, and it was the most valuable real estate on the page.
-
-Details that matter:
-
-- **Every figure is computed.** `TYPICAL` in [public/script.js](public/script.js)
-  holds a representative mid-range build per track — roughly what the middle
-  answers produce in the real builder — and the estimate comes out of
-  `PRICING.estimate()`. Nothing is hardcoded, so the hero can't drift away from
-  the builder the way a typed-in number would. It's labelled "typical build"
-  on screen because that's exactly what it is.
-- **It renders on load** rather than waiting for a click, so a visitor who
-  never interacts still sees working software. `DEFAULT_TRACK` is `'ai'` —
-  local AI is the pillar nobody else in the area offers. Change that one
-  constant to lead with something else.
-- **It degrades to something useful.** If `pricing.js` fails to load, the
-  buttons stop quoting and just navigate to the builder. A broken widget above
-  the fold would be worse than no widget.
-- **The hero visual no longer leads on mobile.** It used to carry `order: -1`
-  at ≤960px, which was fine for decoration but now puts a real price above the
-  headline — a phone visitor would meet "$4,500–$5,925" before learning what
-  the business does. The copy comes first; the demo follows it.
-- It is **not** `aria-hidden` any more (the old one was, correctly, since it
-  was decoration). Buttons carry `aria-pressed`, and the output is a polite
-  live region.
+The page loads the pricing model before `public/script.js`. Its
+`data-default-track="gaming"` selects the initial estimate; buttons still link
+to the builder if the pricing model is unavailable. Estimates remain labeled
+as typical builds, and the output is a polite live region.
 
 ## PC Builder sandbox
+
+### Final-step startup preview
+
+The final expectation question now powers on the 3D preview. A case/appliance
+indicator fades on first; visible fan rotors accelerate and settle, and selected
+ARGB fades in. Other cases retain ordinary unlit fans. Sealed appliances show
+their status indicator without invented external fans or rainbow lighting.
+
+`public/pc-builder.js` emits a presentation `phase` (`configuring`, `expectation`,
+or `summary`) with each `ahern:build-change`. The scene starts only when the
+estimate is complete and the visitor is reviewing the estimate or summary.
+Answering that question does not replay startup. Editing an earlier answer
+returns the preview to idle; returning to review powers it on again. Saved
+complete builds also start up after the hardware finishes assembling.
+
+Timing and lighting behavior are in `public/builder-power.mjs`, separately from
+prices and answers. Startup takes about 2.8 seconds after assembly, advances
+only while the preview is visible, and never delays the question or quote CTA.
+The motion toggle and reduced-motion preference show a static powered state
+immediately. No audio is used. The camera gently settles into the assembled view
+on startup; rotation and other view controls remain available.
 
 `/pc-builder` is a data-driven quiz that assembles a possible build live as
 the visitor answers plain-language questions. All of it lives in
@@ -307,7 +355,7 @@ a mangled link still lands on a usable step.
 Other entry points:
 
 - `?track=gaming|creative|ai|everyday` skips the first question (used by the
-  "Start this build" links on the homepage) and is rewritten to a `#b=` hash
+  "Start this build" links on the custom PC service page) and is rewritten to a `#b=` hash
   on load.
 - The CTA hands off to the homepage contact form via `?interest=&build=`,
   read by `prefillFromBuilder()` in [public/script.js](public/script.js).
@@ -453,10 +501,9 @@ needs to change.
 
 ## Websites & custom tools
 
-The fourth offering, at `#web` on the homepage. It is deliberately **not** a
+The fourth offering, at `/services/websites`. It is deliberately **not** a
 fourth service pillar: the three pillars stay three, and websites are a
-footnote under them (`.pillars-aside`) plus a section of their own further down
-the page. That's positioning, not layout convenience — this work is on the menu
+footnote under them (`.pillars-aside`) linking to their dedicated page. That's positioning, not layout convenience — this work is on the menu
 because it pulls automation work behind it, not because it's something to chase.
 
 Two things in that section are load-bearing and shouldn't be "corrected":
@@ -493,9 +540,9 @@ whole page into a horizontal scroll before the nav drops out at 820px. Labels
 also carry `white-space: nowrap`, because one item wrapping to two lines beside
 single-line neighbours makes the whole bar look broken.
 
-So the header carries Services / PC Builder / AI packages / Websites / Blog /
-FAQ, and **the footer nav carries the full set** — "PC builds" (`#hardware`)
-and "How it works" (`#process`) live there. Adding to the header means taking
+So the header carries Automation / Custom PCs / Private AI / Websites /
+PC Builder / Blog, and **the footer nav carries the full set**, including
+automation pricing, How it works, FAQ, About, and contact. Adding to the header means taking
 something out of it.
 
 ## Blog / reference builds

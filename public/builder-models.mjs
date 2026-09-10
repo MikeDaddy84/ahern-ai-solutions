@@ -51,10 +51,10 @@ export function makeHardware(THREE, slot, spec) {
     const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)));
     const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, radius, 8, false), material); mesh.castShadow = true; parent.add(mesh); return mesh;
   }
-  function lightMaterial(phase = 0, enabled = spec.rgb, capable = true) {
-    const material = mat(enabled ? 0x77ffdc : 0xc2c9ce, .15, .3);
-    material.emissive.setHex(enabled ? 0x1effc0 : 0); material.emissiveIntensity = enabled ? 2 : 0;
-    root.userData.lights.push({ material, phase, enabled, capable }); return material;
+  function lightMaterial(phase = 0, enabled = spec.rgb, capable = true, role = 'rgb') {
+    const material = mat(0x69757d, .15, .3);
+    material.emissiveIntensity = 0;
+    root.userData.lights.push({ material, phase, enabled, capable, role }); return material;
   }
   function label(text, width, height, x, y, z, parent = root, color = '#d8dfe1', background = null) {
     if (typeof document === 'undefined') return;
@@ -125,7 +125,7 @@ export function makeHardware(THREE, slot, spec) {
     bank(.024, .15, .01, 15, .045, .14, -1.41, .85, black);
     [-.84, .84].forEach(x => [-.7, .7].forEach(z => box(.23, .14, .3, x, -1.78, z, rubber, root, .035)));
     [-1.075, 1.075].forEach(x => [-1.56, 1.56].forEach(y => screw(x, y, .98)));
-    disc(.052, .02, 1.055, 1.54, .57, lightMaterial(.7, spec.rgb));
+    disc(.052, .02, 1.055, 1.54, .57, lightMaterial(.7, true, true, 'power'));
     box(.13, .04, .025, .85, 1.59, .97, black);
     if (spec.chassis === 'rack') [-1.22, 1.22].forEach(x => { box(.23, 3.4, .12, x, 0, .92, alloy); [-1.3, 1.3].forEach(y => disc(.035, .14, x, y, 1, black)); });
     // Visible cable loom emerging from the PSU compartment.
@@ -249,7 +249,7 @@ export function makeHardware(THREE, slot, spec) {
       box(1.57, h, 1.66, x, -.4, 0, silverBox ? alloy : charcoal, root, .075);
       box(1.36, .06, 1.4, x, -.4 - h / 2, 0, black, root, .02);
       bank(.014, h * .54, .015, 48, .029, x - .68, -.35, .838, black);
-      box(.045, .02, .02, x + .6, -.65, .841, lightMaterial(0, true));
+      box(.045, .02, .02, x + .6, -.65, .841, lightMaterial(0, true, true, 'power'));
       [-.46, -.2].forEach(p => box(.17, .055, .014, x + p, -.64, .841, black, root, .01));
       label(silverBox ? 'AI STUDIO' : /spark/i.test(spec.appliance) ? 'DGX SPARK CLASS' : 'LOCAL AI', .69, .07, x, -.16, .846);
     }

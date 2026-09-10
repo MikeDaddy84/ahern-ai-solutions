@@ -27,6 +27,41 @@ test('all four tracks and both AI delivery forks reach a quote with a finite est
   }
 });
 
+test('startup is requested at the estimate question on every track, with answers immediately usable', () => {
+  for (const track of ['gaming', 'creative', 'everyday', 'ai']) {
+    for (const delivery of track === 'ai' ? [0, 1] : [0]) {
+      const dom = studio('#b=' + track);
+      if (track === 'ai') choose(dom, delivery);
+      let steps = 0;
+      while (dom.window.AHERN_BUILD.phase === 'configuring' && steps++ < 15) choose(dom, 0);
+      assert.equal(dom.window.AHERN_BUILD.phase, 'expectation', track);
+      assert.equal(dom.window.AHERN_BUILD.finished, false);
+      assert.equal(dom.window.AHERN_BUILD.estimate.complete, true);
+      assert.match(dom.window.document.querySelector('.builder-question').textContent, /How does the estimate feel/);
+      assert.equal(dom.window.document.querySelectorAll('.builder-option:disabled').length, 0);
+      const price = Array.from(dom.window.AHERN_BUILD.estimate.total);
+      choose(dom, 2);
+      assert.equal(dom.window.AHERN_BUILD.phase, 'summary');
+      assert.deepEqual(Array.from(dom.window.AHERN_BUILD.estimate.total), price);
+      dom.window.document.querySelector('[data-step="0"]').click();
+      assert.equal(dom.window.AHERN_BUILD.phase, 'configuring', 'Editing pauses the powered preview even for a completed build');
+      dom.window.document.querySelector('#builder-back').click();
+      assert.equal(dom.window.AHERN_BUILD.phase, 'summary');
+      dom.window.close();
+    }
+  }
+});
+
+test('saved complete builds request startup and changed hardware returns to the estimate check', () => {
+  const dom = studio('#v=1&b=gaming.0.0.1.1.0.2.2');
+  assert.equal(dom.window.AHERN_BUILD.phase, 'summary');
+  dom.window.document.querySelector('[data-step="3"]').click();
+  assert.equal(dom.window.AHERN_BUILD.phase, 'configuring');
+  choose(dom, 2);
+  assert.equal(dom.window.AHERN_BUILD.phase, 'expectation');
+  dom.window.close();
+});
+
 test('editing RAM keeps the machine assembled and preserves GPU, chassis, and cooling', () => {
   const dom = studio('#b=gaming.1.1.0.1.0.1.0');
   const before = dom.window.AHERN_BUILD.build;

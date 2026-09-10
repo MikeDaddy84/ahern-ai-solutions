@@ -6,3 +6,10 @@ node_modules/
 
 # Local dev-server config for the preview pane, not part of the deploy.
 .claude/
+
+# Photo drop folder: publish only the selected website copies.
+public/photos/*
+!public/photos/.gitkeep
+!public/photos/mike-ahern.jpg
+!public/photos/white-pc.jpg
+!public/photos/desktop-setup.jpg

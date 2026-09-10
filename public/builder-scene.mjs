@@ -4,7 +4,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { describeBuild, makeHardware } from './builder-models.mjs?v=studio-2';
+import { describeBuild, makeHardware } from './builder-models.mjs?v=startup-1';
+import { createPowerSequence, applyHardwarePower } from './builder-power.mjs?v=startup-1';
 
 const viewport = document.getElementById('device-viewport');
 const fallback = document.getElementById('device-fallback');
@@ -58,6 +59,8 @@ try {
   const animate = () => motion && !reduceMotion.matches;
   const smooth = t => t < .5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2;
   let lastSpec = null;
+  const powerSequence = createPowerSequence();
+  let powerClock = 0, idleCaption = '';
   const pieces = new Map();
   const retiring = [];
   const directions = { case: [-1.35, .4, -.5], board: [0, .15, -.8], cpu: [-1, 1, 1.2], gpu: [-.65, -.1, 1.9], ram: [1.4, 1, .8], storage: [1.1, -.7, 1], cooling: [0, 1.5, 1.7], appliance: [0, .3, 0] };
@@ -71,6 +74,13 @@ try {
     frame = 0;
     if (!active || lost || document.hidden) return;
     const delta = Math.min(.05, (now - (previousTime || now)) / 1000); previousTime = now;
+    // Advance startup only while the preview is visible, including on phones.
+    powerClock += delta * 1000;
+    const power = powerSequence.sample(powerClock, animate());
+    viewport.dataset.power = power.phase;
+    const powerCaption = power.phase === 'starting' ? 'Starting up your build…'
+      : power.phase === 'running' ? 'Your build, powered on. How does the estimate feel?' : idleCaption;
+    if (caption.textContent !== powerCaption) caption.textContent = powerCaption;
     let moving = false, spinning = false;
     pieces.forEach((p, slot) => {
       const elapsed = Math.max(0, (now - p.start) / 1150);
@@ -87,15 +97,7 @@ try {
         unit.group.position.copy(unit.home); unit.group.position.z += (1 - smooth(unitT)) * .24;
         if (unitT < 1) moving = true;
       }
-      if (animate()) for (const rotor of p.group.userData.rotors) { rotor.rotation.z -= delta * 2.1; spinning = true; }
-      for (const led of p.group.userData.lights) {
-        const enabled = led.capable && (lastSpec?.rgb || lastSpec?.kind === 'appliance');
-        if (enabled) {
-          const hue = ((animate() ? now * .000025 : .43) + led.phase) % 1;
-          led.material.color.setHSL(hue, .7, .62); led.material.emissive.setHSL(hue, .95, .5); led.material.emissiveIntensity = 1.7;
-          if (animate()) spinning = true;
-        } else { led.material.color.setHex(0x9ba6ac); led.material.emissive.setHex(0); led.material.emissiveIntensity = 0; }
-      }
+      if (applyHardwarePower(p.group, lastSpec, power, { delta, now: powerClock, motion: animate() })) spinning = true;
       if (t < 1) moving = true;
     });
     for (let i = retiring.length - 1; i >= 0; i--) {
@@ -106,7 +108,7 @@ try {
       p.materials.forEach(m => { m.transparent = true; m.opacity = m.userData.departureOpacity * (1 - Math.max(0, (t - .45) / .55)); });
       if (t >= 1) { dispose(p.group); retiring.splice(i, 1); } else moving = true;
     }
-    const blend = animate() ? 1 - Math.exp(-delta * 10) : 1;
+    const blend = animate() ? 1 - Math.exp(-delta * (power.phase === 'starting' ? 2.4 : 10)) : 1;
     yaw += (targetYaw - yaw) * blend; pitch += (targetPitch - pitch) * blend;
     const wantedDistance = exploded ? 12 : camera.aspect < .95 ? 10.1 : 8.6;
     distance += (wantedDistance - distance) * blend;
@@ -114,10 +116,10 @@ try {
     camera.position.set(Math.sin(yaw) * Math.cos(pitch) * distance, Math.sin(pitch) * distance + .2, Math.cos(yaw) * Math.cos(pitch) * distance);
     camera.lookAt(0, -.08, 0);
     composer.render();
-    if (moving) schedule();
+    if (moving || power.phase === 'starting') schedule();
     else if (spinning) setTimeout(schedule, 24);
   }
-  function update({ build = {}, estimate } = {}) {
+  function update({ build = {}, estimate, phase } = {}) {
     const spec = describeBuild(build, window.AHERN_PRICING);
     const now = performance.now();
     // Stable identities: lighting changes never tear the whole machine apart.
@@ -144,21 +146,26 @@ try {
     }
     badge.textContent = build.trackLabel || 'Your blank canvas';
     const changed = lastSpec ? Object.keys(spec.slots).filter(k => spec.slots[k] && spec.slots[k] !== lastSpec.slots[k]) : [];
-    caption.textContent = !build.track ? 'Choose a purpose to start your build.'
+    idleCaption = !build.track ? 'Choose a purpose to start your build.'
       : spec.kind === 'appliance' ? 'A complete system. Memory and compute live inside the enclosure.'
       : changed.length ? changed.map(k => ({ case: 'Chassis', board: 'Platform', cpu: 'CPU', gpu: 'Graphics', ram: 'Memory', cooling: 'Cooling', storage: 'Storage' }[k])).join(' + ') + ' updated.'
       : estimate?.complete ? 'Your hardware is ready. Fine-tune any answer to make it yours.' : 'Your machine is taking shape.';
+    const ready = !!estimate?.complete && (phase === 'expectation' || phase === 'summary');
+    if (ready && exploded) setExploded(false);
+    const installDelay = Math.max(0, ...Array.from(pieces.values(), p =>
+      p.start + 1150 + (p.install ? Math.max(0, p.group.userData.units.length - 1) * 65 : 0) - now));
+    const started = powerSequence.update({ ready, hardwareKey: JSON.stringify(spec), now: powerClock, installDelay, motion: animate() });
+    if (started) { targetYaw = .55; targetPitch = .23; }
     lastSpec = spec; schedule();
   }
   document.addEventListener('ahern:build-change', event => update(event.detail));
-  if (window.AHERN_BUILD) update(window.AHERN_BUILD);
   const resize = new ResizeObserver(entries => {
     const { width, height } = entries[0].contentRect;
     if (!width || !height) return;
     renderer.setSize(width, height, false); composer.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix(); schedule();
   }); resize.observe(viewport);
-  const visible = new IntersectionObserver(entries => { active = entries[0].isIntersecting; if (active) schedule(); }); visible.observe(viewport);
-  document.addEventListener('visibilitychange', schedule);
+  const visible = new IntersectionObserver(entries => { active = entries[0].isIntersecting; previousTime = 0; if (active) schedule(); }); visible.observe(viewport);
+  document.addEventListener('visibilitychange', () => { previousTime = 0; schedule(); });
   function updateMotion() { motionButton.setAttribute('aria-pressed', String(animate())); motionButton.textContent = animate() ? 'Motion on' : 'Motion off'; schedule(); }
   motionButton.onclick = () => { motion = !animate(); updateMotion(); };
   reduceMotion.addEventListener('change', updateMotion); updateMotion();
@@ -183,6 +190,8 @@ try {
   }
   explodeButton.onclick = () => setExploded(!exploded);
   document.getElementById('device-reset').onclick = () => { targetYaw = .42; targetPitch = .2; setExploded(false); };
+  // Controls must exist before restoring a saved, already-complete build.
+  if (window.AHERN_BUILD) update(window.AHERN_BUILD);
   renderer.domElement.addEventListener('webglcontextlost', e => {
     e.preventDefault(); lost = true; controls.hidden = true; fallback.hidden = false;
     fallback.textContent = 'The 3D preview is paused. Your choices and estimate still work; reload to restore the preview.';

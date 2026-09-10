@@ -48,7 +48,7 @@
       { key: 'ai', label: 'Business or local AI', sub: 'Flagship open-source LLMs & agents, on hardware you control',
         effect: function (b) { b.track = 'ai'; b.trackLabel = 'Local AI workstation'; b.interest = 'Business local AI system'; } },
       { key: 'everyday', label: 'Everyday & office use', sub: 'Browsing, email, calls, light work',
-        effect: function (b) { b.track = 'everyday'; b.trackLabel = 'Everyday PC'; b.interest = 'Not sure yet'; } }
+        effect: function (b) { b.track = 'everyday'; b.trackLabel = 'Everyday PC'; b.interest = 'Everyday or office PC'; } }
     ]
   };
 
@@ -677,6 +677,7 @@
 
   function renderSummaryPanel() {
     var b = state.build;
+    if (window.ahernTrack) window.ahernTrack('assessment_completed', b.track === 'ai' ? 'local-ai' : 'custom-pcs');
     var est = state.estimate;
     panelEl.innerHTML =
       progressHtml(100, 'Build complete') +
@@ -692,6 +693,7 @@
           : '') +
       '</div>' +
       totalsHtml(est) +
+      '<div class="builder-rationale"><h3>Why this is a starting fit</h3><p>' + escapeHtml(buildRationale(b)) + '</p><p>Your final quote confirms exact components and compatibility. We agree the test workload and provide setup notes at handoff. Migration, application setup, and ongoing care are optional, separately scoped services.</p></div>' +
       (b.expectation ? '<p class="builder-close">' + escapeHtml(b.expectation.close) + '</p>' : '') +
       '<div class="builder-cta-row">' +
         '<a class="btn btn-primary" href="' + escapeHtml(ctaHref(b)) + '">Get this build quoted <span aria-hidden="true">&rarr;</span></a>' +
@@ -708,6 +710,16 @@
       '</div>';
 
     wirePanel();
+  }
+
+  function buildRationale(b) {
+    if (b.appliance) return 'This appliance brings the core hardware together in a compact system. Validate model fit, response time, simultaneous users, and upgrade limits before purchase.';
+    return {
+      gaming: 'Your answers balance the graphics, processor, cooling, and memory around how you play. We confirm the games, display resolution, noise preference, and upgrade plan before choosing exact parts.',
+      creative: 'This configuration starts with your creative workload. We check your actual applications, project sizes, memory needs, and storage workflow before finalizing the workstation.',
+      everyday: 'This configuration focuses on responsive everyday work and comfortable multitasking. We check your applications, desk space, and existing peripherals before finalizing it.',
+      ai: 'This configuration starts with your model and capacity choices. A representative workload must validate memory fit, response time, power, and cooling before the hardware is confirmed.'
+    }[b.track] || 'We confirm the intended workload, budget, and exact components before purchase.';
   }
 
 

@@ -24,6 +24,7 @@
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css?v=studio-1" />
   <link rel="stylesheet" href="/experience.css?v=photos-1" />
+  <link rel="stylesheet" href="/growth.css?v=growth-1" />
 
   <!-- The one LocalBusiness node for the site. It lives here, on the home page,
        rather than in lib/layout.js: crawlers expect a single such node at the
@@ -146,6 +147,7 @@
           <a class="audience-path" href="/services/automation"><span class="audience-path-number">01</span><span><strong>Save time in my business</strong><span>AI automation · workflows, packages &amp; a live example</span></span><span aria-hidden="true">↗</span></a>
           <a class="audience-path" href="/services/custom-pcs"><span class="audience-path-number">02</span><span><strong>Build my next PC</strong><span>Gaming &amp; workstations · explore a build and estimate</span></span><span aria-hidden="true">↗</span></a>
           <a class="audience-path" href="/services/local-ai"><span class="audience-path-number">03</span><span><strong>Run AI on my own hardware</strong><span>Private AI · data control, setup &amp; hardware options</span></span><span aria-hidden="true">↗</span></a>
+          <a class="audience-path" href="/services/websites"><span class="audience-path-number">04</span><span><strong>Connect my website to my business</strong><span>Websites &amp; custom tools · from inquiry to next step</span></span><span aria-hidden="true">↗</span></a>
         </nav>
       </div>
     </section>
@@ -186,7 +188,7 @@
           <h2 class="section-title">What do you want to make better?</h2>
           <p class="section-sub">Each service has its own guide, with the options, costs, and next steps that matter to you.</p>
         </div>
-        <div class="service-pillars">
+        <div class="service-pillars home-services">
           <article class="pillar-card" id="pricing">
             <span class="pillar-number">01</span>
             <p class="pillar-kicker">For business owners &amp; teams</p>
@@ -212,7 +214,7 @@
             </ul>
             <a href="/services/custom-pcs" class="text-link">Explore PC builds <span aria-hidden="true">→</span></a>
           </article>
-          <article class="pillar-card pillar-card-featured">
+          <article class="pillar-card">
             <span class="pillar-number">03</span>
             <p class="pillar-kicker">For private-AI customers</p>
             <h3>Local AI Systems</h3>
@@ -224,10 +226,9 @@
             </ul>
             <a href="/services/local-ai" class="text-link">See local AI options <span aria-hidden="true">→</span></a>
           </article>
+        <article class="pillar-card website-pillar" id="web"><span class="pillar-number">04</span><p class="pillar-kicker">FOR BUSINESSES READY TO CONNECT THE WORK</p><h3>Websites &amp; Custom Tools</h3><p>A clear next step for your visitors, with inquiries flowing into the tools your team uses. Websites, dashboards, and client portals with a defined scope.</p><ul class="tick-list" role="list"><li>Connected website packages from $6,500</li><li>Intake, routing, and human handoff</li><li>Clearly scoped care after launch</li></ul><a class="text-link" href="/services/websites">Explore websites &amp; tools →</a></article>
         </div>
-        <!-- Websites sit deliberately below the three pillars, not beside them:
-             the work is available, but it isn't the headline. -->
-        <p class="pillars-aside" id="web">Need the website or the internal tool too? I build those as the front end of a system I've automated — <a href="/services/websites">explore websites &amp; custom tools</a>.</p>
+        <p class="pillars-aside"><a class="text-link" href="/resources">Not ready for a call? Start with a free project checklist →</a></p>
       </div>
     </section>
 
@@ -336,6 +337,7 @@
                 <option value="AI automation">AI automation</option>
                 <option value="Custom gaming PC">Custom gaming PC</option>
                 <option value="Professional workstation">Professional workstation</option>
+                <option value="Everyday or office PC">Everyday or office PC</option>
                 <option value="Business local AI system">Business local AI system</option>
                 <option value="Website or custom app">Website or custom app</option>
                 <option value="Not sure yet">Not sure yet</option>
@@ -345,6 +347,13 @@
               <label for="msg">What do you want to accomplish? (optional)</label>
               <textarea id="msg" name="message" rows="3" placeholder="Tell me about the workflow, games, software, or AI use case"></textarea>
             </div>
+            <fieldset class="qualification"><legend>A little context (optional)</legend>
+              <label for="project-budget">Approximate project budget<select id="project-budget" name="budget"><option value="">Not sure yet</option><option>Under $1,500</option><option>$1,500–5,000</option><option>$5,000–10,000</option><option>$10,000–25,000</option><option>$25,000+</option></select></label>
+              <label for="project-timeline">Ideal timing<select id="project-timeline" name="timeline"><option value="">Just exploring</option><option>This month</option><option>This quarter</option><option>Later this year</option></select></label>
+              <label for="project-details"><span id="project-details-label">Main tools, workload, or requirements</span><input id="project-details" name="projectDetails" maxlength="600" placeholder="The details that matter to your project"></label>
+              <label for="plan-context" id="plan-context-label" hidden>Your planning notes<textarea id="plan-context" name="context" rows="6" maxlength="3000"></textarea></label>
+              <p class="form-note">No private documents, passwords, or account access needed. Personal email addresses are welcome.</p>
+            </fieldset>
             <button type="submit" class="btn btn-primary btn-block">Request my free consultation</button>
             <p class="form-note">No spam, no list — you'll get a reply to schedule your consultation. See what this site collects in the <a href="/privacy">privacy policy</a>.</p>
             <p class="form-result" id="form-result" role="status" aria-live="polite"></p>
@@ -378,7 +387,7 @@
         <a href="/services/websites">Websites</a>
         <a href="#process">How it works</a>
         <a href="/blog">Blog</a>
-        <a href="#faq">FAQ</a>
+        <a href="/resources">Planning guides</a><a href="#faq">FAQ</a>
         <a href="/about">About</a>
         <a href="#audit">Free consultation</a>
         <a href="/privacy">Privacy</a>
@@ -393,6 +402,6 @@
   </footer>
 
 
-  <script src="/script.js?v=audiences-1"></script>
+  <script src="/script.js?v=growth-1"></script>
 </body>
 </html>

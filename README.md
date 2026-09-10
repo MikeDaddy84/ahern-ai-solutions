@@ -1,16 +1,76 @@
 # Ahern AI — Website
 
-Node/Express site for Ahern AI: AI automation, custom PCs, and
-private local AI systems, based in Gordon, TX.
+Node/Express site for Ahern AI: AI automation, custom PCs,
+private local AI systems, and websites and custom tools, based in Gordon, TX.
 
 ## Stack
 
 - **Server:** Express (Node ≥20), serves the static homepage plus a
-  Markdown-backed blog and two small JSON APIs.
+  Markdown-backed blog, inquiry delivery, and first-party activity APIs.
 - **Database:** [Turso](https://turso.tech) (libSQL) — contact form
   submissions and first-party pageview analytics.
 - **Booking:** none — the contact form is the only inbound path.
 - **Hosting:** Render (Web Service, free tier).
+
+## Service growth implementation — September 2026
+
+All four services have equal homepage entry points. Existing pricing anchors,
+the PC configurator, and Express/Render/Turso hosting are retained.
+
+- Automation adds scoped Quickstart examples and a capacity-value calculator.
+  The calculator subtracts review time and ongoing costs, including optional
+  support when entered. It estimates capacity value, not guaranteed cash savings.
+- PCs add workload rationale to the final estimate and offer separately quoted
+  migration, setup, testing/handoff, and care. Everyday builds keep their own
+  inquiry category. No benchmark results or new warranty terms are invented.
+- Private AI adds a use-case fit planner, an explicitly preset document-answer
+  demonstration, and a paid-pilot → deployment → optional care path. Pilot and
+  care pricing require individual quotes.
+- Websites add an intake planner and a fictional four-step inquiry demo.
+  Standalone website scope remains available. New integrations and improvement
+  projects are separate from care.
+- `/resources` offers four ungated, printable project checklists. Service-page
+  shortcuts make these and the planners accessible without scrolling the page.
+- Planner handoffs use tab session storage, expire for form use after 24 hours,
+  and appear as editable notes only on the matching service inquiry. No planner
+  answers are sent until the visitor submits the form. Optional budget, timing,
+  and service-specific context are appended to the stored inquiry and email.
+- `/leads` adds stages, sale amounts, direct costs, hours, and outcome notes.
+  Saving uses the existing separate Basic credentials and an inquiry-bound
+  anti-forgery token. Reload after a process restart to refresh tokens. Totals
+  are sale less direct costs, **before labor, overhead, and tax**; unknown values
+  stay blank. This is an inquiry tracker, not accounting software.
+- `/api/events` accepts only known events and service categories. Stored events
+  have no contact fields, answers, visitor identifiers, or query strings. The
+  dashboard shows 30-day counts, not unique people or attributed conversions.
+  Client blocking and retries affect counts; saved leads are the sales record.
+
+Additive `lead_pipeline` and `site_events` tables initialize automatically.
+Existing inquiries appear at stage `new` and gain a pipeline record when edited;
+they are never resent by this migration. Include `lead_pipeline` when removing
+an inquiry for a deletion request. Activity reporting can be cleared separately.
+
+### Scope and delivery capacity
+
+New monthly automation support scopes name covered workflows and include up to
+two hours of support/improvements, with no rollover and additional work quoted.
+Website care includes the agreed first year in the project price: $249 allows
+30 minutes of minor changes monthly; $399 allows one hour including content
+edits. Maintenance, backup coverage, service hours, and extra work belong in the
+written scope. Existing signed agreements retain their terms. Budget the first
+year's hosting and service obligations in every website quote.
+
+These limits and the individually quoted PC/private-AI add-ons need to be
+reflected in each proposal. The older investor model in
+`scripts/unit-economics.js` still uses historical assumptions (including 1.5
+retainer hours) and does not reserve a website's included care year; it is not a
+quote calculator or evidence of the new offers' margins. Use actual delivery
+hours and direct costs from the dashboard to revise the business model.
+
+Validation: `npm test` covers planner mathematics, carry-forward boundaries,
+inquiry persistence/retries, authenticated status changes, migration, event
+storage, service links, and the existing builder/demo flows. Tests use local
+databases and mocked email; they do not send production notifications.
 
 ## Build studio and inquiry delivery — September 2026 update
 

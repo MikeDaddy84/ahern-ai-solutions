@@ -86,6 +86,38 @@
   var result = document.getElementById('form-result');
   var success = document.getElementById('audit-success');
 
+  var serviceNames = { 'AI automation': 'automation', 'Custom gaming PC': 'custom-pcs', 'Professional workstation': 'custom-pcs', 'Everyday or office PC': 'custom-pcs', 'Business local AI system': 'local-ai', 'Website or custom app': 'websites' };
+  var pendingPlan = null;
+  if (form) {
+    var interestField = form.elements.namedItem('interest');
+    var detailsLabel = document.getElementById('project-details-label');
+    var detailsInput = document.getElementById('project-details');
+    var prompts = {
+      'automation': ['Tools and task volume', 'e.g. Outlook, a spreadsheet, and 50 inquiries a week'],
+      'custom-pcs': ['Games or apps, setup needs, and delivery area', 'e.g. video editing, data migration, pickup in North Texas'],
+      'local-ai': ['Document types, users, and cloud restrictions', 'e.g. searchable PDFs, three users, local processing'],
+      'websites': ['Current website and where inquiries should go', 'e.g. mybusiness.com; inquiries should reach our shared inbox']
+    };
+    try {
+      var carried = JSON.parse(sessionStorage.getItem('ahern-plan') || 'null');
+      var requested = new URLSearchParams(location.search).get('plan');
+      if (carried && carried.service === requested && carried.service === serviceNames[interestField.value] && typeof carried.summary === 'string' && carried.summary.length <= 3000 && Number.isFinite(carried.createdAt) && Date.now() - carried.createdAt >= 0 && Date.now() - carried.createdAt < 86400000) pendingPlan = carried;
+    } catch (_) {}
+    function updateQualification() {
+      var slug = serviceNames[interestField.value], prompt = prompts[slug];
+      if (detailsLabel) detailsLabel.textContent = prompt ? prompt[0] : 'Main tools, workload, or requirements';
+      if (detailsInput) detailsInput.placeholder = prompt ? prompt[1] : 'The details that matter to your project';
+      var context = form.elements.namedItem('context'), label = document.getElementById('plan-context-label');
+      if (context && label) {
+        label.hidden = !(pendingPlan && pendingPlan.service === slug);
+        if (label.hidden) context.value = '';
+        else if (!context.value) context.value = pendingPlan.summary;
+      }
+    }
+    interestField.addEventListener('change', updateQualification);
+    updateQualification();
+  }
+
   if (form) {
     var requestId = null;
     var requestFingerprint = null;
@@ -108,6 +140,10 @@
         message: form.elements.namedItem('message').value.trim(),
         botcheck: !!(honeypot && honeypot.checked)
       };
+      ['budget', 'timeline', 'projectDetails', 'context'].forEach(function (key) {
+        var field = form.elements.namedItem(key);
+        if (field && field.value.trim()) data[key] = field.value.trim();
+      });
       var fingerprint = JSON.stringify(data);
       if (!requestId || fingerprint !== requestFingerprint) {
         requestId = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
@@ -130,6 +166,8 @@
         .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
         .then(function (r) {
           if (r.ok && r.body.persisted === true) {
+            if (window.ahernTrack) window.ahernTrack('inquiry_received', serviceNames[data.interest]);
+            try { sessionStorage.removeItem('ahern-plan'); } catch (_) {}
             showSuccess();
           } else {
             showResult('error', r.body && r.body.error ? r.body.error : 'Something went wrong. Please call or text instead.');
@@ -164,6 +202,27 @@
     body: JSON.stringify({ path: location.pathname, referrer: document.referrer || null }),
     keepalive: true
   }).catch(function () {});
+
+  // Only allowlisted event names and service slugs leave the page. No answers,
+  // query strings, visitor IDs, or contact details are included in analytics.
+  var recordedEvents = new Set();
+  window.ahernTrack = function (event, service) {
+    if (!['service_selected','assessment_completed','demo_completed','quote_requested','inquiry_received'].includes(event) || !['automation','custom-pcs','local-ai','websites'].includes(service)) return;
+    var key = event + ':' + service;
+    if (recordedEvents.has(key)) return;
+    recordedEvents.add(key);
+    fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: event, service: service }), keepalive: true }).catch(function () {});
+  };
+  document.addEventListener('click', function (ev) {
+    if (ev.defaultPrevented) return;
+    var link = ev.target.closest('a[href]');
+    if (!link) return;
+    var url = new URL(link.href, location.href);
+    if (url.origin !== location.origin) return;
+    var match = url.pathname.match(/^\/services\/(automation|custom-pcs|local-ai|websites)$/);
+    if (match) window.ahernTrack('service_selected', match[1]);
+    if (url.searchParams.has('interest')) window.ahernTrack('quote_requested', serviceNames[url.searchParams.get('interest')]);
+  });
 
   // ---------- Matrix rain background ----------
   initMatrixRain();

@@ -93,6 +93,7 @@
     el('traveler').textContent = scenario.id + ' · ' + step.destination;
     status.textContent = 'Step ' + completed + ' of 3: ' + scenario.id + ' → ' + step.destination + '. ' + step.fields[step.fields.length - 1].join(': ') + '.';
     if (completed === 3) {
+      if (window.ahernTrack) window.ahernTrack('demo_completed', 'automation');
       stop(); el('result-title').textContent = scenario.result; el('result-copy').textContent = scenario.outcome;
       el('result').hidden = false;
       status.textContent += '. Example complete. ' + scenario.result + ' Sample data only; nothing was sent or saved.';

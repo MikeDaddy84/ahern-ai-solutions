@@ -13,7 +13,7 @@ test('pages, self-hosted 3D libraries, and service sitemap are available', async
   assert.match(await (await fetch(origin + '/sitemap.xml')).text(), /services\/local-ai/);
 });
 test('audience journeys retain content, valid destinations, metadata, and inquiry handoffs', async () => {
-  const paths = ['/', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/pc-builder'];
+  const paths = ['/', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/pc-builder', '/resources'];
   const docs = new Map();
   for (const path of paths) {
     const response = await fetch(origin + path);
@@ -21,7 +21,8 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
     docs.set(path, new JSDOM(await response.text()).window.document);
   }
   const home = docs.get('/');
-  assert.equal(home.querySelectorAll('.audience-paths a').length, 3);
+  assert.equal(home.querySelectorAll('.audience-paths a').length, 4);
+  assert.equal(home.querySelectorAll('.home-services > .pillar-card').length, 4);
   assert.ok(home.querySelector('#services'));
   assert.ok(home.querySelector('.founder-section'));
   assert.equal(home.querySelectorAll('.grid-pricing, .web-tiers, #hero-demo, [data-workflow-demo]').length, 0);

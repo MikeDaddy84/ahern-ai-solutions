@@ -136,9 +136,13 @@ app.get('/services/:service', (req, res, next) => {
   if (!service) return next();
   res.send(renderPage({ title: service.title + ' — Ahern AI', description: service.intro,
     canonicalPath: '/services/' + req.params.service, bodyHtml: serviceHtml(req.params.service),
-    scripts: req.params.service === 'automation' ? ['/workflow-demo.js?v=workflow-2'] :
-      req.params.service === 'custom-pcs' ? ['/pricing.js?v=sept2026-2'] : [] }));
+    scripts: [...(req.params.service === 'automation' ? ['/workflow-demo.js?v=growth-1'] :
+      req.params.service === 'custom-pcs' ? ['/pricing.js?v=sept2026-2'] : []), '/planning.js?v=growth-1'] }));
 });
+app.get('/resources', (req, res) => res.send(renderPage({
+  title: 'Free project planning guides — Ahern AI', description: 'Prepare for an automation, PC build, private AI pilot, or connected website with four practical checklists. No email required.',
+  canonicalPath: '/resources', bodyHtml: require('./lib/growth').resourcesHtml(), scripts: ['/planning.js?v=growth-1']
+})));
 // Server-rendered rather than static files so they pick up the same chrome,
 // canonical and OG tags as everything else. Both sit behind the gate like the
 // rest of the site.
@@ -203,12 +207,30 @@ async function flushNotifications() {
 app.get('/leads', contact.rateLimit({ limit: 30 }), contact.adminAuth, async (req, res) => {
   try {
     const rows = await db.withClient(leads.list);
+    const pipeline = require('./lib/pipeline');
+    const events = await db.withClient(db.eventCounts);
     const cards = rows.map(row => `<article class="lead-card"><div class="lead-meta"><strong>#${row.id} · ${escapeHtml(row.name)}</strong><span>${escapeHtml(row.created_at)} UTC</span></div>
       <p>${escapeHtml(row.email)} · ${escapeHtml(row.business || 'Individual')} · ${escapeHtml(row.interest)}</p>
-      <p class="lead-message">${escapeHtml(row.message || '(No message)')}</p><p class="form-note">${escapeHtml(row.delivery)}${row.last_error ? ' · ' + escapeHtml(row.last_error) : ''}</p></article>`).join('');
+      <p class="lead-message">${escapeHtml(row.message || '(No message)')}</p><p class="form-note">${escapeHtml(row.delivery)}${row.last_error ? ' · ' + escapeHtml(row.last_error) : ''}</p>${pipeline.form(row)}</article>`).join('');
     // Standalone admin HTML avoids analytics, third-party fonts and external requests.
-    res.send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Inquiries — Ahern AI</title><link rel="stylesheet" href="/styles.css?v=studio-1"><link rel="stylesheet" href="/experience.css?v=studio-1"></head><body><main class="container section"><h1>Consultation requests</h1><p>Latest 100 inquiries · ${notifications.configured() ? 'Email delivery configured' : 'Email delivery needs configuration; requests are saved here'}</p>${cards || '<p>No inquiries yet.</p>'}</main></body></html>`);
+    res.send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Inquiries — Ahern AI</title><link rel="stylesheet" href="/styles.css?v=studio-1"><link rel="stylesheet" href="/experience.css?v=studio-1"><link rel="stylesheet" href="/growth.css?v=growth-1"></head><body><main class="container section"><h1>Consultation requests</h1><p>Latest 100 inquiries · ${notifications.configured() ? 'Email delivery configured' : 'Email delivery needs configuration; requests are saved here'}</p>${pipeline.summary(rows,events)}${cards || '<p>No inquiries yet.</p>'}</main></body></html>`);
   } catch (_) { res.status(503).send('Inquiry storage is temporarily unavailable. Please retry.'); }
+});
+app.post('/leads/:id/stage', contact.rateLimit({ limit: 60 }), contact.adminAuth, express.urlencoded({ extended: false, limit: '4kb' }), async (req,res) => {
+  const id=Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id<1 || !require('./lib/pipeline').validToken(id,req.body?.csrf)) return res.status(403).send('This form expired. Reload the inquiry dashboard and try again.');
+  let values;
+  try { values=leads.validatePipeline(req.body); } catch(err) { return res.status(400).send(err.message); }
+  try {
+    if (!await db.withClient(client=>leads.updatePipeline(client,id,values))) return res.status(404).send('Inquiry not found.');
+    res.redirect(303,'/leads');
+  } catch(_) { res.status(503).send('Status could not be saved. Please return to the dashboard and retry.'); }
+});
+
+app.post('/api/events', contact.rateLimit({ limit: 90 }), async (req,res) => {
+  if (!db.validEvent(req.body)) return res.status(400).json({error:'Unknown event.'});
+  await db.insertEvent(req.body).catch(()=>{});
+  res.status(204).end();
 });
 
 // ---------- API: first-party analytics beacon ----------

@@ -61,6 +61,36 @@ are created on startup; existing contacts are retained and are not retroactively
 emailed. For a deletion request, remove the associated notification and receipt
 rows as well as the contact and any email copies.
 
+### Inquiry email setup
+
+Google Workspace hosts `mike@ahernai.com`; `hello@ahernai.com` is its public
+contact alias. Send website notifications to Mike once, without copying the alias.
+The customer address is the notification's Reply-To, so Reply opens a response to
+the customer while the sender stays on the verified Ahern AI domain.
+
+The existing Resend HTTPS integration works with Render's free service, which
+[blocks outbound SMTP ports 25, 465, and 587](https://render.com/docs/free#other-limitations).
+To enable it:
+
+1. Verify `ahernai.com` in Resend using the exact sending DNS records it provides.
+   Keep Google Workspace's existing mail-receiving MX records. Do not enable
+   Resend inbound receiving or replace the Workspace records.
+2. Create a Resend sending API key scoped to the verified domain. In the Render
+   service's Environment settings, set `RESEND_API_KEY` privately,
+   `LEAD_NOTIFY_TO` to `mike@ahernai.com`, and `LEAD_NOTIFY_FROM` to
+   `Ahern AI <hello@ahernai.com>` (without surrounding quotes in the Render UI).
+3. Optionally set a unique `LEADS_DASHBOARD_PASSWORD` of at least 16 characters
+   to enable `https://ahernai.com/leads`; username is `mike`.
+4. Save and deploy. Submit one clearly labeled test inquiry, confirm it arrives
+   in Mike's inbox, and verify Reply addresses the test customer. Provider
+   acceptance alone does not prove inbox delivery. This test sends an actual
+   email and should be done only during the authorized setup.
+
+Pending notifications accumulated since the outbox was introduced will also
+send when delivery is enabled. Older legacy contacts without outbox entries
+are not emailed. `.env.example` documents the addresses; changing it does not
+configure the production service. No mailbox password is needed for Resend.
+
 ## Brand
 
 The display brand is **Ahern AI**. The registered entity is still Ahern AI

@@ -11,5 +11,21 @@
 .satori-host #celebration-overlay { z-index:90; }.satori-host input,.satori-host select { background:#14231b; color:#daf7e2; }
 .satori-host #btn-logout { display:none; }.satori-host .today-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .satori-host [hidden] { display:none!important; }
+.satori-host { background:var(--bg-color); color:var(--text-primary); --border-color:var(--border-green); --accent-red:var(--accent-magenta); }
+[data-theme='light'] .satori-host { --bg-color:#edf3ed; --bg-card:#f9fcf8; --bg-card-hover:#e1ece1; --text-primary:#245c38; --text-muted:#536b59; --text-dim:#416749; --accent-cyan:#116572; --accent-magenta:#943b70; --accent-amber:#805700; --border-green:#b7ccb9; --border-green-glow:#7d9f81; --glow-shadow:0 2px 8px #244b3010; --glow-shadow-cyan:0 2px 8px #11657215; --glow-shadow-magenta:0 2px 8px #943b7015; }
+.satori-host .cyber-input,.satori-host .cyber-select { background:var(--bg-card); color:var(--text-primary); border-color:var(--border-green); }
+.satori-host .cyber-input::placeholder { color:var(--text-muted); opacity:1; }
+[data-theme='light'] .satori-host :is(.task-item,.task-card,.status-panel,.badge-count,.fab-add) { background:var(--bg-card); border-color:var(--border-green); }
+[data-theme='light'] .satori-host .task-item:hover { background:var(--bg-card-hover); }
+[data-theme='light'] .satori-host .category-col { box-shadow:0 2px 8px #244b3010; }
+[data-theme='light'] .satori-host .category-col.have_to { border-color:#9bbb9e; }
+[data-theme='light'] .satori-host .category-col.need_to { border-color:#94bdc4; }
+[data-theme='light'] .satori-host .category-col.want_to { border-color:#c7a2ba; }
+[data-theme='light'] .satori-host :is(.logo-title,.pretty-date,.tab-btn.active,.terminal-loader,.celebration-msg) { text-shadow:none; }
+[data-theme='light'] .satori-host .fab-add { box-shadow:0 3px 14px #244b3026; }
+[data-theme='light'] .satori-host .check-svg { stroke:#fff; }
+[data-theme='light'] .satori-host .modal-backdrop { background:#28382d66; }
+[data-theme='light'] .satori-host #celebration-overlay { background:#edf3edf5; }
+[data-theme='light'] .satori-host #list-history>div { background:var(--bg-card)!important; }
 @media(max-width:1050px) { .satori-host .today-grid { grid-template-columns:1fr; }.satori-host .header-top { flex-wrap:wrap; gap:1rem; } }
 @media(max-width:700px) { .satori-host { padding:.65rem; }.satori-host #app { padding:.3rem; }.satori-host .view-tabs { gap:.3rem; }.satori-host .tab-btn { padding:.6rem; flex:1; } }

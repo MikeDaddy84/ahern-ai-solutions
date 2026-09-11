@@ -186,7 +186,7 @@ app.post('/api/contact', contact.rateLimit(), async (req, res) => {
   } catch (err) {
     if (err.status === 409) return res.status(409).json({ error: 'This request was already received with different details. Reload the page before sending a new request.' });
     console.error('[contact] persistence unavailable');
-    res.status(503).json({ error: 'Your request could not be saved. Your details are still in the form—please try again, or call or text (940) 329-9337.' });
+    res.status(503).json({ error: 'Your request could not be saved. Your details are still in the form—please try again, or call or text (254) 693-4919.' });
   }
 });
 

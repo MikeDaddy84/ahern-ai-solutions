@@ -14,6 +14,7 @@
     "build": "node scripts/build-satori.js && node scripts/validate-build.js",
     "postinstall": "npm ci --prefix apps/satori --include=dev --ignore-scripts",
     "portal:user": "node scripts/portal-user.js",
+    "portal:setup": "node scripts/portal-setup.js",
     "portal:db": "node scripts/portal-db.js"
   },
   "dependencies": {

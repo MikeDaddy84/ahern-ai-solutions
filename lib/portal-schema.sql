@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS portal_sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_portal_sessions_user ON portal_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_portal_sessions_expiry ON portal_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS portal_account_setup (
+  token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES portal_users(id),
+  expires_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS portal_satori_tasks (
   workspace_key TEXT NOT NULL, id TEXT NOT NULL, text TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('have_to','need_to','want_to')),

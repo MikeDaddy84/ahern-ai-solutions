@@ -1,4 +1,26 @@
 (() => {
+  const setup=document.getElementById('setup-form');
+  if(setup) {
+    // Keep the bearer token in memory, out of requests for the page and its URL.
+    let setupToken=location.hash.slice(1);
+    history.replaceState(null,'',location.pathname);
+    const message=document.getElementById('setup-message');
+    const button=setup.querySelector('[type=submit]');
+    if(!/^[a-f0-9]{64}$/.test(setupToken)) {button.disabled=true;message.textContent='Open the private setup link provided for your account.';}
+    setup.addEventListener('submit',async event=>{
+      event.preventDefault();
+      const password=document.getElementById('setup-password').value;
+      if(password!==document.getElementById('setup-confirm').value) {message.textContent='The passwords do not match.';return;}
+      button.disabled=true;message.textContent='Activating your account…';
+      try {
+        const res=await fetch('/api/portal/setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:setupToken,password})});
+        const data=await res.json();if(!res.ok) throw new Error(data.error);
+        setupToken='';setup.reset();setup.replaceChildren();
+        const done=document.createElement('p');done.textContent='Your account is ready. Sign in with your email and new password.';
+        const link=document.createElement('a');link.href='/login';link.className='portal-button';link.textContent='Continue to sign in →';setup.append(done,link);
+      } catch(error) {message.textContent=error.message || 'Unable to activate your account.';button.disabled=false;}
+    });
+  }
   const date = document.getElementById('workspace-date');
   if (date) { date.dateTime = new Date().toISOString(); date.textContent = new Intl.DateTimeFormat('en-US', { weekday:'long', month:'long', day:'numeric' }).format(new Date()); }
   const show = document.getElementById('show-password');

@@ -99,6 +99,28 @@ test('all accounts reuse the existing DB while workspace context and calendars r
   delete process.env.SATORI_WORKSPACE_CALENDARS_JSON;
   process.env.NODE_ENV='production';assert.equal(auth.cookieOptions().secure,true);process.env.NODE_ENV='test';
 });
+test('account setup is create-only, expires, consumes once, and activates only its bound owner',async()=> {
+  const value=await store.setupAccount({email:'new-owner@example.test',name:'New owner',workspace:'new-owner',role:'owner'});
+  const row=(await store.client.execute("SELECT * FROM portal_users WHERE email='new-owner@example.test'")).rows[0];
+  assert.equal(row.disabled,1);
+  const setupRow=(await store.client.execute({sql:'SELECT * FROM portal_account_setup WHERE user_id=?',args:[row.id]})).rows[0];
+  assert.notEqual(setupRow.token_hash,value);
+  await assert.rejects(()=>store.setupAccount({email:'new-owner@example.test',name:'Replacement',workspace:'replacement'}));
+  const body={token:value,password:pass};
+  assert.equal((await call('/api/portal/setup',{method:'POST',source:'https://evil.example',body})).status,403);
+  assert.equal((await call('/api/portal/setup',{method:'POST',body:{...body,password:'short'}})).status,400);
+  assert.equal((await call('/api/portal/setup',{method:'POST',body:{...body,token:'0'.repeat(64)}})).status,400);
+  const results=await Promise.all([call('/api/portal/setup',{method:'POST',body}),call('/api/portal/setup',{method:'POST',body})]);
+  assert.deepEqual(results.map(r=>r.status).sort(),[200,400]);
+  const session=await store.login('new-owner@example.test',pass);
+  const user=await store.session(session);assert.equal(user.role,'owner');assert.equal(user.workspace_key,'new-owner');
+  assert.equal(await store.finishSetup(value,'replacement-password-123'),false);
+  const expired=await store.setupAccount({email:'expired@example.test',name:'Expired',workspace:'expired'});
+  await store.client.execute('UPDATE portal_account_setup SET expires_at=0');
+  assert.equal(await store.finishSetup(expired,pass),false);
+  assert.equal(await store.login('expired@example.test',pass),null);
+  const page=await call('/portal/setup');assert.equal(page.status,200);assert.equal(page.headers.get('cache-control'),'no-store');assert.match(await page.text(),/autocomplete="new-password"/);
+});
 test('rollover, same-ID updates, history upserts and retention stay inside the workspace',async()=> {
   const old=Date.now()-100*86400000;
   for(const key of ['alice','bob']) {

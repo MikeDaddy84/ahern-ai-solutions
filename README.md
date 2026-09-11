@@ -29,7 +29,7 @@ are listed in `apps/satori/PORTAL-INTEGRATION.md`.
 ### Account and workspace boundaries
 
 All portal records use Satori's existing Turso database. The additive schema in
-`lib/portal-schema.sql` creates `portal_users`, `portal_sessions`,
+`lib/portal-schema.sql` creates `portal_users`, `portal_sessions`, `portal_account_setup`,
 `portal_satori_tasks`, `portal_satori_meta`, and `portal_satori_day_log`.
 Original `tasks`, `app_meta`, and `day_log` tables are not changed or copied.
 Passwords use salted scrypt hashes; session tokens
@@ -78,13 +78,20 @@ preview history/calendar are empty and daily rollover requires a real workspace.
    `SATORI_AUTH_TOKEN` privately on the website service using the values from
    Satori's `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. The website's own
    contact/analytics connection is independent and is not a fallback.
-   Run `npm run portal:db` to apply and verify the additive five-table schema;
+   Run `npm run portal:db` to apply and verify the additive six-table schema;
    runtime initialization also applies it idempotently. No new database is needed.
 3. Optionally configure `SATORI_WORKSPACE_CALENDARS_JSON` as an object keyed
    by workspace names, with `calendarUrl` / `familyCalendarUrl` per key.
    These are server-only HTTPS feeds. A user without configured feeds does not
    inherit another user's calendars. Per-user database settings are not used.
-4. In a private operator environment connected to the account database, set
+4. For a new account, set `PORTAL_USER_EMAIL`, `PORTAL_USER_NAME`,
+   `PORTAL_USER_WORKSPACE`, and `PORTAL_USER_ROLE` in the private hosting shell,
+   then run `npm run portal:setup`. Deliver the returned setup URL privately to
+   that account holder. It expires in 24 hours and can be consumed once. The
+   account remains disabled until the holder sets a password. Only a hash of
+   the setup token is stored; the URL fragment is removed by the setup page.
+   Existing accounts cannot be overwritten by this command.
+   Alternatively, for operator password resets, set
    `PORTAL_USER_EMAIL`, `PORTAL_USER_NAME`, `PORTAL_USER_PASSWORD` (14–256
    characters), `PORTAL_USER_WORKSPACE`, and `PORTAL_USER_ROLE`, then run
    `npm run portal:user`. Remove the password variable afterward. Never pass

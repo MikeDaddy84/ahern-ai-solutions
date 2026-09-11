@@ -1,5 +1,14 @@
 .portal { background: var(--color-bg); font-size: 1rem; --portal-muted:#62675f; --portal-sidebar:#eeeee8; --portal-error:#944621; }
 [data-theme='dark'] .portal { --portal-muted:#a6b8af; --portal-sidebar:#111a16; --portal-error:#ffb293; }
+/* Hosaka's walnut backdrop, shared by overview, settings, and Satori. */
+.portal-main {
+  --portal-wood-overlay:#f7f6f2d9;
+  background-color:#15120f;
+  background-image:linear-gradient(var(--portal-wood-overlay),var(--portal-wood-overlay)),url('/textures/dark-walnut.png');
+  background-size:auto,1200px 800px;
+  background-repeat:repeat;
+}
+[data-theme='dark'] .portal-main { --portal-wood-overlay:#080d1238; }
 .portal .portal-theme-toggle { position:fixed; top:1rem; right:max(1.2rem,env(safe-area-inset-right)); width:44px; height:44px; z-index:110; color:var(--color-text); background:var(--color-surface-2); box-shadow:var(--shadow-sm); }
 .portal-theme-toggle .theme-sun { display:none; }
 [data-theme='dark'] .portal-theme-toggle .theme-sun { display:block; }

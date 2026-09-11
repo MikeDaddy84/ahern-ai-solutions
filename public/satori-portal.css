@@ -1,0 +1,15 @@
+.satori-host { position:relative; isolation:isolate; border-radius:1rem; background:#0e1814; --bg-color:#0e1814; --bg-card:#14231b; --bg-card-hover:#1b3024; --text-primary:#a7f3bf; --text-muted:#a4bbae; --text-dim:#93be9e; --accent-cyan:#a5e6e7; --accent-magenta:#ff9acb; --border-green:#355740; --font-mono:'Share Tech Mono',monospace; font-size:1rem; padding:1rem; }
+.satori-host #app { min-height:540px; padding:.5rem; padding-bottom:5rem; }
+.satori-host #bg-canvas,.satori-host .crt-overlay { display:none; }
+.satori-host h1,.satori-host h2,.satori-host h3 { font-family:var(--font-mono); }
+.satori-host .header-actions { gap:.5rem; }.satori-host .logo-title { font-size:2rem; }
+.satori-host .pretty-date { font-size:.9rem; }.satori-host .task-text { font-size:1rem; }
+.satori-host .cyber-btn,.satori-host .tab-btn { font-size:.875rem; min-height:44px; }
+.satori-host .fab-add { position:sticky; display:block; bottom:1rem; margin-left:auto; margin-top:1rem; z-index:10; }
+.satori-host .bottom-nav { display:none; }.satori-host .view-tabs { display:flex; flex-wrap:wrap; }
+.satori-host .modal-backdrop { position:fixed; z-index:100; }.satori-host .modal-card { width:min(92vw,500px); }
+.satori-host #celebration-overlay { z-index:90; }.satori-host input,.satori-host select { background:#14231b; color:#daf7e2; }
+.satori-host #btn-logout { display:none; }.satori-host .today-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.satori-host [hidden] { display:none!important; }
+@media(max-width:1050px) { .satori-host .today-grid { grid-template-columns:1fr; }.satori-host .header-top { flex-wrap:wrap; gap:1rem; } }
+@media(max-width:700px) { .satori-host { padding:.65rem; }.satori-host #app { padding:.3rem; }.satori-host .view-tabs { gap:.3rem; }.satori-host .tab-btn { padding:.6rem; flex:1; } }

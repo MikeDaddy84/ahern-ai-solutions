@@ -54,6 +54,9 @@ app.use(express.json({ limit: '20kb' }));
 // every request with a password page. See lib/gate.js.
 app.use(gate.createGate());
 
+// Portal routes own their privacy headers and authentication boundary.
+app.use(require('./lib/portal').createRouter());
+
 // ---------- SEO ----------
 // Both of these change shape with the gate, so neither can be a static file.
 app.get('/robots.txt', (req, res) => {

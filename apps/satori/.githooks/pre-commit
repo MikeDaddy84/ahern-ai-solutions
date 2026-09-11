@@ -1,0 +1,48 @@
+#!/bin/bash
+# Pre-commit hook to prevent committing real credentials.
+# Bypass using: git commit --no-verify
+
+FILES=$(git diff --cached --name-only --diff-filter=d)
+
+if [ -z "$FILES" ]; then
+  exit 0
+fi
+
+FAIL=0
+
+for FILE in $FILES; do
+  # Check for structural JWT (3 base64url segments separated by dots)
+  if git diff --cached "$FILE" | grep -E '^\+.*eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+' > /dev/null; then
+    echo "ERROR: Potential real JWT found in $FILE"
+    FAIL=1
+  fi
+  
+  # Check for structural bcrypt hash (prefix + 53 chars from ./A-Za-z0-9)
+  if git diff --cached "$FILE" | grep -E '^\+.*\$2[abxy]\$[0-9]{2}\$[./A-Za-z0-9]{53}' > /dev/null; then
+    echo "ERROR: Potential real bcrypt hash found in $FILE"
+    FAIL=1
+  fi
+
+  # Check for real Turso DB URL (libsql:// followed by alphanumeric/hyphens)
+  if git diff --cached "$FILE" | grep -E '^\+.*libsql://[a-zA-Z0-9-]+\.turso\.io' > /dev/null; then
+    echo "ERROR: Potential real Turso DB URL found in $FILE"
+    FAIL=1
+  fi
+
+  # Check for TURSO_AUTH_TOKEN= with a non-placeholder value (alphanumeric start)
+  if git diff --cached "$FILE" | grep -E '^\+.*TURSO_AUTH_TOKEN=[a-zA-Z0-9]' > /dev/null; then
+    echo "ERROR: TURSO_AUTH_TOKEN with a value found in $FILE"
+    FAIL=1
+  fi
+done
+
+if [ $FAIL -ne 0 ]; then
+  echo ""
+  echo "Commit rejected: Real credential detected."
+  echo "If this is a false positive, you can bypass this hook with:"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+exit 0
+

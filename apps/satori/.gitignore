@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+coverage
+.env.bak.*
+.env.*.bak
+cookies.txt
+*-debug.*
+.scratch/
+

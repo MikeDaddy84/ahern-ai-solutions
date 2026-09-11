@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: satori
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: main
+    autoDeploy: false
+    plan: free
+    region: ohio
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: America/Chicago
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: PORTAL_PASSWORD_HASH
+        sync: false
+      - key: CALENDAR_ICS_URL
+        sync: false
+      - key: FAMILY_CALENDAR_ICS_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+

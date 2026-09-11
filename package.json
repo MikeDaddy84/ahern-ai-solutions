@@ -11,7 +11,10 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test": "node --test test/*.test.js",
-    "build": "node scripts/validate-build.js"
+    "build": "node scripts/build-satori.js && node scripts/validate-build.js",
+    "postinstall": "npm ci --prefix apps/satori --include=dev --ignore-scripts",
+    "portal:user": "node scripts/portal-user.js",
+    "portal:db": "node scripts/portal-db.js"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

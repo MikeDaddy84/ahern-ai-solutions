@@ -1,0 +1,991 @@
+// ============================================================
+//  TOOLBOX - Daily Agenda Manager
+//  v2.2.0 — Claude Opus 4.6
+//
+//  CHANGELOG v2.2.0:
+//    - FIX: archiveCompletedItems now finds the first empty
+//      Task cell (col B) on the Completed sheet instead of
+//      trusting getLastRow(), which was fooled by pre-formatted
+//      checkbox rows. Items were being written below visible
+//      range while deletes ran fine — looked like data loss.
+//    - FIX: addToToDoList uses same first-empty-Task-cell
+//      approach to avoid the identical bug on To Do List if
+//      it ever gets pre-formatted rows.
+//    - NEW: findFirstEmptyTaskRow() helper centralises the
+//      pattern for both sheets.
+// ============================================================
+
+// ---- CONFIGURATION ----
+const CONFIG = {
+  TEMPLATE_SHEET: "Template",
+  TODO_SHEET: "To Do List",
+  COMPLETED_SHEET: "Completed",
+  TASK_START_ROW: 4,
+  TASK_END_ROW: 20,
+  HEADER_ROW: 2,
+  CATEGORY_ROW: 3,
+  COLS: {
+    HAVE_TO: { task: 2, check: 3, type: "Have To" },
+    NEED_TO: { task: 4, check: 5, type: "Need To" },
+    WANT_TO: { task: 6, check: 7, type: "Want To" },
+  },
+  TODO: {
+    TASK_COL: 2,       // B
+    TYPE_COL: 3,       // C
+    DATE_ADDED_COL: 4, // D
+    DONE_COL: 5,       // E
+    DATE_DONE_COL: 6,  // F
+    DATA_START_ROW: 4,
+    LAST_COL: 6,
+  },
+  DATE_FORMAT: "M.d.yy",
+  KEEP_VISIBLE_DAYS: 3,
+  MAX_AGE_DAYS: 90,
+  DAILY_CAP: 10,
+  DAILY_OVERFLOW: 13,
+  ARCHIVE_AFTER_DAYS: 7,
+  PROTECTED_SHEETS: [
+    "Template",
+    "To Do List",
+    "Completed",
+    "Notes",
+  ],
+};
+
+// ============================================================
+//  CUSTOM MENU
+// ============================================================
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu("ToolBox")
+    .addItem("New Day", "createNewDay")
+    .addSeparator()
+    .addItem("Import Calendar Events", "importCalendarEvents")
+    .addSeparator()
+    .addItem("Set Midnight Auto-Trigger", "setMidnightTrigger")
+    .addItem("Remove Midnight Trigger", "removeMidnightTrigger")
+    .addSeparator()
+    .addItem("Enable Auto-Fireworks", "installEditTrigger")
+    .addItem("Check for Fireworks!", "checkFireworks")
+    .addSeparator()
+    .addItem("Hide Old Day Sheets", "manageSheetVisibility")
+    .addItem("Purge Sheets > 90 Days", "purgeOldSheets")
+    .addItem("Archive Completed (7+ days)", "archiveCompletedItems")
+    .addItem("Sort To Do List", "sortToDoList")
+    .addToUi();
+}
+
+// ============================================================
+//  FIND FIRST EMPTY TASK ROW
+//  Scans column taskCol from dataStartRow downward, returns
+//  the first row where the Task cell is blank. If sheet has
+//  pre-formatted rows (checkboxes, dropdowns, etc.), those
+//  don't fool this — only actual Task text counts.
+//  Falls back to lastRow + 1 if every scanned row has data,
+//  or dataStartRow if the sheet is effectively empty.
+// ============================================================
+function findFirstEmptyTaskRow(sheet, taskCol, dataStartRow) {
+  const lastRow = sheet.getLastRow();
+
+  // Sheet has no data rows at all (only headers or truly empty)
+  if (lastRow < dataStartRow) return dataStartRow;
+
+  // Batch-read the entire Task column from dataStartRow to lastRow
+  const numRows = lastRow - dataStartRow + 1;
+  const values = sheet.getRange(dataStartRow, taskCol, numRows, 1).getValues();
+
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][0] === "" || values[i][0] === null) {
+      return dataStartRow + i;
+    }
+  }
+
+  // Every row has task text — append after the last one
+  return lastRow + 1;
+}
+
+// ============================================================
+//  PARSE DATE FROM SHEET NAME (M.d.yy format)
+// ============================================================
+function parseDateSheetName(name) {
+  const parts = name.split(".");
+  if (parts.length !== 3) return null;
+
+  const month = parseInt(parts[0], 10);
+  const day   = parseInt(parts[1], 10);
+  let year    = parseInt(parts[2], 10);
+
+  if (isNaN(month) || isNaN(day) || isNaN(year)) return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  if (year < 100) year += 2000;
+
+  const date = new Date(year, month - 1, day);
+  if (date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+
+  return date;
+}
+
+// ============================================================
+//  GET ALL DATE SHEETS (sorted newest-first)
+// ============================================================
+function getDateSheets(ss) {
+  const results = [];
+  const sheets = ss.getSheets();
+
+  sheets.forEach(function(sheet) {
+    const name = sheet.getName();
+    if (CONFIG.PROTECTED_SHEETS.includes(name)) return;
+
+    const date = parseDateSheetName(name);
+    if (date) {
+      results.push({ sheet: sheet, date: date, name: name });
+    }
+  });
+
+  results.sort(function(a, b) { return b.date.getTime() - a.date.getTime(); });
+  return results;
+}
+
+// ============================================================
+//  MANAGE SHEET VISIBILITY
+// ============================================================
+function manageSheetVisibility() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dateSheets = getDateSheets(ss);
+  const keepVisible = CONFIG.KEEP_VISIBLE_DAYS;
+
+  let hiddenCount = 0;
+  dateSheets.forEach(function(entry, index) {
+    if (index < keepVisible) {
+      entry.sheet.showSheet();
+    } else {
+      entry.sheet.hideSheet();
+      hiddenCount++;
+    }
+  });
+
+  if (hiddenCount > 0) {
+    Logger.log("Sheet visibility managed: " + keepVisible + " visible, " + hiddenCount + " hidden.");
+  }
+  return hiddenCount;
+}
+
+// ============================================================
+//  PURGE OLD SHEETS (older than MAX_AGE_DAYS)
+// ============================================================
+function purgeOldSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dateSheets = getDateSheets(ss);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - CONFIG.MAX_AGE_DAYS);
+  cutoff.setHours(0, 0, 0, 0);
+
+  let deletedCount = 0;
+  const deletedNames = [];
+
+  dateSheets.forEach(function(entry) {
+    if (entry.date < cutoff) {
+      deletedNames.push(entry.name);
+      ss.deleteSheet(entry.sheet);
+      deletedCount++;
+    }
+  });
+
+  if (deletedCount > 0) {
+    Logger.log("Purged " + deletedCount + " old sheet(s): " + deletedNames.join(", "));
+  }
+  return deletedCount;
+}
+
+// ============================================================
+//  NEW DAY — Core Function
+//  1. Template copy → new daily sheet
+//  2. Carry over uncompleted tasks from yesterday
+//  3. Import calendar events
+//  4. Pull from To Do List (smart cap, oldest-first)
+//  5. Overflow safety net (>13 → trim to 10, return to To Do)
+//  6. Archive done+7day items from To Do List → Completed
+//  7. Sort To Do List (undone oldest-first)
+//  8. Visibility + purge
+// ============================================================
+function createNewDay() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const template = ss.getSheetByName(CONFIG.TEMPLATE_SHEET);
+  if (!template) {
+    SpreadsheetApp.getUi().alert('Template sheet not found! Need a sheet named "' + CONFIG.TEMPLATE_SHEET + '".');
+    return;
+  }
+
+  const today = new Date();
+  const sheetName = Utilities.formatDate(today, Session.getScriptTimeZone(), CONFIG.DATE_FORMAT);
+
+  if (ss.getSheetByName(sheetName)) {
+    SpreadsheetApp.getUi().alert("Today's sheet (" + sheetName + ") already exists!");
+    return;
+  }
+
+  // 1. Copy template and rename
+  const newSheet = template.copyTo(ss);
+  newSheet.setName(sheetName);
+  ss.setActiveSheet(newSheet);
+  ss.moveActiveSheet(1);
+
+  const prettyDate = getPrettyDate(today);
+  newSheet.getRange(CONFIG.HEADER_ROW, 2).setValue("Agenda for Today ~ " + prettyDate);
+
+  // 2. Carry over uncompleted tasks from yesterday
+  const yesterday = getPreviousDaySheet(ss, sheetName);
+  if (yesterday) {
+    carryOverTasks(yesterday, newSheet);
+  }
+
+  // 3. Import calendar events
+  try {
+    importCalendarEventsToSheet(newSheet, today);
+  } catch (e) {
+    Logger.log("Calendar import skipped: " + e.message);
+  }
+
+  // 4. Pull from To Do List
+  const pullResult = pullFromToDoList(ss, newSheet);
+
+  // 5. Overflow safety net
+  const overflowResult = overflowFromDailySheet(ss, newSheet);
+
+  // 6. Archive completed items (done ≥7 days) from To Do List
+  const archivedCount = archiveCompletedItems();
+
+  // 7. Sort To Do List
+  sortToDoList();
+
+  // 8. Housekeeping
+  const hiddenCount = manageSheetVisibility();
+  const purgedCount = purgeOldSheets();
+
+  // Summary
+  let summary = "New day created: " + prettyDate;
+  summary += "\nUncompleted tasks carried over.";
+  if (pullResult.total > 0) summary += "\n📋 Pulled " + pullResult.total + " item(s) from To Do List.";
+  if (overflowResult > 0) summary += "\n⚠️ " + overflowResult + " overflow item(s) returned to To Do List.";
+  if (archivedCount > 0) summary += "\n📦 " + archivedCount + " completed item(s) archived.";
+  if (hiddenCount > 0) summary += "\n📁 " + hiddenCount + " older day sheet(s) hidden.";
+  if (purgedCount > 0) summary += "\n🗑️ " + purgedCount + " sheet(s) older than " + CONFIG.MAX_AGE_DAYS + " days deleted.";
+  summary += "\n\nLet's get it done!";
+
+  SpreadsheetApp.getUi().alert(summary);
+}
+
+// ============================================================
+//  CARRY OVER UNCOMPLETED TASKS
+// ============================================================
+function carryOverTasks(oldSheet, newSheet) {
+  const categories = Object.values(CONFIG.COLS);
+
+  categories.forEach(function(col) {
+    const tasks = [];
+    for (let row = CONFIG.TASK_START_ROW; row <= CONFIG.TASK_END_ROW; row++) {
+      const taskValue = oldSheet.getRange(row, col.task).getValue();
+      const isChecked = oldSheet.getRange(row, col.check).getValue();
+
+      if (taskValue !== "" && isChecked !== true) {
+        tasks.push(taskValue);
+      }
+    }
+
+    tasks.forEach(function(task, index) {
+      const targetRow = CONFIG.TASK_START_ROW + index;
+      if (targetRow <= CONFIG.TASK_END_ROW) {
+        newSheet.getRange(targetRow, col.task).setValue(task);
+        newSheet.getRange(targetRow, col.check).setValue(false);
+      }
+    });
+  });
+}
+
+// ============================================================
+//  FIND PREVIOUS DAY SHEET
+// ============================================================
+function getPreviousDaySheet(ss, todayName) {
+  const dateSheets = getDateSheets(ss);
+
+  for (let i = 0; i < dateSheets.length; i++) {
+    if (dateSheets[i].name !== todayName) {
+      return dateSheets[i].sheet;
+    }
+  }
+  return null;
+}
+
+// ============================================================
+//  PULL FROM TO DO LIST
+//  - Have To: ALL undone, oldest-first, up to remaining cap
+//  - Need To: ONE oldest undone, if under cap
+//  - Want To: ONE oldest undone, if under cap
+//  Deduplicates against tasks already on the daily sheet.
+//  Returns { total, haveTo, needTo, wantTo } counts.
+// ============================================================
+function pullFromToDoList(ss, dailySheet) {
+  const result = { total: 0, haveTo: 0, needTo: 0, wantTo: 0 };
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (!todoSheet) return result;
+
+  const lastRow = todoSheet.getLastRow();
+  if (lastRow < CONFIG.TODO.DATA_START_ROW) return result;
+
+  // Batch-read To Do List data
+  const numRows = lastRow - CONFIG.TODO.DATA_START_ROW + 1;
+  const todoData = todoSheet.getRange(CONFIG.TODO.DATA_START_ROW, 1, numRows, CONFIG.TODO.LAST_COL).getValues();
+
+  // Build undone items by type, preserving sheet order (oldest first if sorted)
+  const undoneByType = { "Have To": [], "Need To": [], "Want To": [] };
+
+  todoData.forEach(function(row) {
+    const task = row[CONFIG.TODO.TASK_COL - 1];
+    const type = (row[CONFIG.TODO.TYPE_COL - 1] || "").toString().trim();
+    const done = row[CONFIG.TODO.DONE_COL - 1];
+
+    if (task && task !== "" && done !== true && undoneByType.hasOwnProperty(type)) {
+      undoneByType[type].push(task.toString().trim());
+    }
+  });
+
+  // Get existing tasks already on the daily sheet per category
+  const existingTasks = getExistingDailyTasks(dailySheet);
+
+  // Have To: ALL undone, oldest-first, up to cap
+  result.haveTo = pullCategoryItems(
+    dailySheet, CONFIG.COLS.HAVE_TO, undoneByType["Have To"], existingTasks["Have To"]
+  );
+
+  // Need To: ONE oldest
+  result.needTo = pullCategoryItems(
+    dailySheet, CONFIG.COLS.NEED_TO, undoneByType["Need To"].slice(0, 1), existingTasks["Need To"]
+  );
+
+  // Want To: ONE oldest
+  result.wantTo = pullCategoryItems(
+    dailySheet, CONFIG.COLS.WANT_TO, undoneByType["Want To"].slice(0, 1), existingTasks["Want To"]
+  );
+
+  result.total = result.haveTo + result.needTo + result.wantTo;
+  return result;
+}
+
+// ============================================================
+//  GET EXISTING TASKS ON DAILY SHEET (batch read)
+//  Returns { "Have To": [...], "Need To": [...], "Want To": [...] }
+// ============================================================
+function getExistingDailyTasks(sheet) {
+  const result = { "Have To": [], "Need To": [], "Want To": [] };
+  const numRows = CONFIG.TASK_END_ROW - CONFIG.TASK_START_ROW + 1;
+
+  const haveToVals = sheet.getRange(CONFIG.TASK_START_ROW, CONFIG.COLS.HAVE_TO.task, numRows, 1).getValues();
+  const needToVals = sheet.getRange(CONFIG.TASK_START_ROW, CONFIG.COLS.NEED_TO.task, numRows, 1).getValues();
+  const wantToVals = sheet.getRange(CONFIG.TASK_START_ROW, CONFIG.COLS.WANT_TO.task, numRows, 1).getValues();
+
+  haveToVals.forEach(function(r) { if (r[0] !== "") result["Have To"].push(r[0].toString().trim()); });
+  needToVals.forEach(function(r) { if (r[0] !== "") result["Need To"].push(r[0].toString().trim()); });
+  wantToVals.forEach(function(r) { if (r[0] !== "") result["Want To"].push(r[0].toString().trim()); });
+
+  return result;
+}
+
+// ============================================================
+//  PULL CATEGORY ITEMS INTO DAILY SHEET
+//  Adds items oldest-first, deduplicating, respecting cap.
+//  Returns number of items added.
+// ============================================================
+function pullCategoryItems(dailySheet, colConfig, todoItems, existingTasks) {
+  if (!todoItems || todoItems.length === 0) return 0;
+
+  const existingCount = existingTasks.length;
+  if (existingCount >= CONFIG.DAILY_CAP) return 0;
+
+  const slotsAvailable = CONFIG.DAILY_CAP - existingCount;
+
+  // Find first empty row in this category column
+  let insertRow = -1;
+  for (let row = CONFIG.TASK_START_ROW; row <= CONFIG.TASK_END_ROW; row++) {
+    if (dailySheet.getRange(row, colConfig.task).getValue() === "") {
+      insertRow = row;
+      break;
+    }
+  }
+  if (insertRow === -1) return 0; // Column is full (all 17 rows occupied)
+
+  let added = 0;
+  todoItems.forEach(function(task) {
+    if (added >= slotsAvailable) return;
+    if (insertRow > CONFIG.TASK_END_ROW) return;
+
+    // Deduplicate — skip if already on today's sheet
+    if (existingTasks.includes(task)) return;
+
+    dailySheet.getRange(insertRow, colConfig.task).setValue(task);
+    dailySheet.getRange(insertRow, colConfig.check).setValue(false);
+    existingTasks.push(task); // Track for subsequent dedup checks
+    insertRow++;
+    added++;
+  });
+
+  return added;
+}
+
+// ============================================================
+//  OVERFLOW FROM DAILY SHEET
+//  If any category exceeds DAILY_OVERFLOW (13), trim from the
+//  bottom back to DAILY_CAP (10). Excess items are returned to
+//  the To Do List with correct type and today's date.
+//  Returns total number of items returned.
+// ============================================================
+function overflowFromDailySheet(ss, dailySheet) {
+  let totalReturned = 0;
+
+  Object.keys(CONFIG.COLS).forEach(function(key) {
+    const colConfig = CONFIG.COLS[key];
+
+    // Collect all non-empty tasks in this category
+    const tasks = [];
+    for (let row = CONFIG.TASK_START_ROW; row <= CONFIG.TASK_END_ROW; row++) {
+      const task = dailySheet.getRange(row, colConfig.task).getValue();
+      if (task !== "") {
+        tasks.push({ row: row, text: task.toString().trim() });
+      }
+    }
+
+    if (tasks.length > CONFIG.DAILY_OVERFLOW) {
+      // Trim from the bottom back to cap
+      const toRemoveCount = tasks.length - CONFIG.DAILY_CAP;
+      const toRemove = tasks.slice(-toRemoveCount);
+
+      toRemove.forEach(function(item) {
+        // Return to To Do List
+        addToToDoList(ss, item.text, colConfig.type);
+
+        // Clear from daily sheet
+        dailySheet.getRange(item.row, colConfig.task).setValue("");
+        dailySheet.getRange(item.row, colConfig.check).setValue(false);
+      });
+
+      totalReturned += toRemove.length;
+    }
+  });
+
+  return totalReturned;
+}
+
+// ============================================================
+//  ADD ITEM TO TO DO LIST
+//  Appends a new row with task text, type dropdown, date added,
+//  and an unchecked Done checkbox.
+//  Uses findFirstEmptyTaskRow() so pre-formatted rows with
+//  checkboxes/dropdowns don't push inserts below visible range.
+// ============================================================
+function addToToDoList(ss, taskText, type) {
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (!todoSheet) return;
+
+  const newRow = findFirstEmptyTaskRow(todoSheet, CONFIG.TODO.TASK_COL, CONFIG.TODO.DATA_START_ROW);
+
+  // Task text
+  todoSheet.getRange(newRow, CONFIG.TODO.TASK_COL).setValue(taskText);
+
+  // Type dropdown
+  const typeRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(["Have To", "Need To", "Want To"], true)
+    .setAllowInvalid(false)
+    .build();
+  todoSheet.getRange(newRow, CONFIG.TODO.TYPE_COL)
+    .setDataValidation(typeRule)
+    .setValue(type);
+
+  // Date Added
+  todoSheet.getRange(newRow, CONFIG.TODO.DATE_ADDED_COL).setValue(new Date());
+
+  // Done checkbox (unchecked)
+  todoSheet.getRange(newRow, CONFIG.TODO.DONE_COL).insertCheckboxes().setValue(false);
+}
+
+// ============================================================
+//  SYNC TASK COMPLETION → TO DO LIST
+//  Finds exact text match on the To Do List and marks it done.
+//  Fills Date Done with today's date. Only marks the first
+//  undone match (in case of duplicates).
+//  Returns true if a match was found and updated.
+// ============================================================
+function syncTaskToToDoList(taskText) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (!todoSheet) return false;
+
+  const lastRow = todoSheet.getLastRow();
+  if (lastRow < CONFIG.TODO.DATA_START_ROW) return false;
+
+  const numRows = lastRow - CONFIG.TODO.DATA_START_ROW + 1;
+  const tasks = todoSheet.getRange(CONFIG.TODO.DATA_START_ROW, CONFIG.TODO.TASK_COL, numRows, 1).getValues();
+  const doneCol = todoSheet.getRange(CONFIG.TODO.DATA_START_ROW, CONFIG.TODO.DONE_COL, numRows, 1).getValues();
+
+  for (let i = 0; i < tasks.length; i++) {
+    const text = tasks[i][0].toString().trim();
+    const done = doneCol[i][0];
+
+    if (text === taskText && done !== true) {
+      const row = CONFIG.TODO.DATA_START_ROW + i;
+      todoSheet.getRange(row, CONFIG.TODO.DONE_COL).setValue(true);
+      todoSheet.getRange(row, CONFIG.TODO.DATE_DONE_COL).setValue(new Date());
+      return true;
+    }
+  }
+  return false;
+}
+
+// ============================================================
+//  ARCHIVE COMPLETED ITEMS
+//  Moves items from To Do List where Done=true AND Date Done
+//  is ≥7 days old to the Completed tab.
+//  Uses findFirstEmptyTaskRow() so pre-formatted rows on the
+//  Completed sheet don't push inserts below visible range.
+//  Returns number of items archived.
+// ============================================================
+function archiveCompletedItems() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (!todoSheet) return 0;
+
+  const lastRow = todoSheet.getLastRow();
+  if (lastRow < CONFIG.TODO.DATA_START_ROW) return 0;
+
+  const numRows = lastRow - CONFIG.TODO.DATA_START_ROW + 1;
+  const data = todoSheet.getRange(CONFIG.TODO.DATA_START_ROW, 1, numRows, CONFIG.TODO.LAST_COL).getValues();
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - CONFIG.ARCHIVE_AFTER_DAYS);
+  cutoff.setHours(0, 0, 0, 0);
+
+  const rowsToArchive = [];
+
+  data.forEach(function(row, index) {
+    const done = row[CONFIG.TODO.DONE_COL - 1];
+    const dateDone = row[CONFIG.TODO.DATE_DONE_COL - 1];
+
+    if (done === true && dateDone instanceof Date && dateDone < cutoff) {
+      rowsToArchive.push({
+        data: row,
+        sheetRow: CONFIG.TODO.DATA_START_ROW + index,
+      });
+    }
+  });
+
+  if (rowsToArchive.length === 0) return 0;
+
+  // Ensure Completed sheet exists
+  const completedSheet = ensureCompletedSheet(ss);
+
+  // Find actual first empty row by scanning Task column (col B)
+  let insertRow = findFirstEmptyTaskRow(completedSheet, CONFIG.TODO.TASK_COL, CONFIG.TODO.DATA_START_ROW);
+
+  // Append archived rows to Completed sheet
+  rowsToArchive.forEach(function(item) {
+    completedSheet.getRange(insertRow, 1, 1, item.data.length).setValues([item.data]);
+    // Re-apply checkbox (values copy loses data validation)
+    completedSheet.getRange(insertRow, CONFIG.TODO.DONE_COL).insertCheckboxes().setValue(true);
+    insertRow++;
+  });
+
+  // Delete from To Do List (bottom-up so row indices don't shift)
+  for (let i = rowsToArchive.length - 1; i >= 0; i--) {
+    todoSheet.deleteRow(rowsToArchive[i].sheetRow);
+  }
+
+  Logger.log("Archived " + rowsToArchive.length + " completed item(s) to " + CONFIG.COMPLETED_SHEET);
+  return rowsToArchive.length;
+}
+
+// ============================================================
+//  ENSURE COMPLETED SHEET EXISTS
+//  Creates it with headers cloned from To Do List if missing.
+// ============================================================
+function ensureCompletedSheet(ss) {
+  let sheet = ss.getSheetByName(CONFIG.COMPLETED_SHEET);
+  if (sheet) return sheet;
+
+  sheet = ss.insertSheet(CONFIG.COMPLETED_SHEET);
+
+  // Clone header formatting + values from To Do List
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (todoSheet) {
+    const headerRange = todoSheet.getRange(1, 1, 3, CONFIG.TODO.LAST_COL);
+    headerRange.copyTo(
+      sheet.getRange(1, 1),
+      SpreadsheetApp.CopyPasteType.PASTE_NORMAL,
+      false
+    );
+    // Update the title row
+    sheet.getRange(2, 2).setValue('Completed Items ~ Archive');
+
+    // Match column widths
+    for (let col = 1; col <= CONFIG.TODO.LAST_COL; col++) {
+      sheet.setColumnWidth(col, todoSheet.getColumnWidth(col));
+    }
+  }
+
+  // Move to the end so it's out of the way
+  ss.setActiveSheet(sheet);
+  ss.moveActiveSheet(ss.getNumSheets());
+
+  Logger.log("Created '" + CONFIG.COMPLETED_SHEET + "' sheet.");
+  return sheet;
+}
+
+// ============================================================
+//  SORT TO DO LIST
+//  Undone items first (ascending = false before true),
+//  then by Date Added ascending (oldest at top).
+//  Uses Range.sort() which preserves formatting, data
+//  validation, and checkboxes.
+// ============================================================
+function sortToDoList() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const todoSheet = ss.getSheetByName(CONFIG.TODO_SHEET);
+  if (!todoSheet) return;
+
+  const lastRow = todoSheet.getLastRow();
+  if (lastRow < CONFIG.TODO.DATA_START_ROW) return;
+
+  const numRows = lastRow - CONFIG.TODO.DATA_START_ROW + 1;
+  const dataRange = todoSheet.getRange(CONFIG.TODO.DATA_START_ROW, 1, numRows, CONFIG.TODO.LAST_COL);
+
+  dataRange.sort([
+    { column: CONFIG.TODO.DONE_COL, ascending: true },      // false (undone) sorts before true (done)
+    { column: CONFIG.TODO.DATE_ADDED_COL, ascending: true }, // oldest first
+  ]);
+}
+
+// ============================================================
+//  GOOGLE CALENDAR INTEGRATION
+// ============================================================
+function importCalendarEvents() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const today = new Date();
+
+  try {
+    const count = importCalendarEventsToSheet(sheet, today);
+    SpreadsheetApp.getUi().alert("Imported " + count + " calendar event(s) into the active sheet.");
+  } catch (e) {
+    SpreadsheetApp.getUi().alert("Error importing calendar: " + e.message);
+  }
+}
+
+function importCalendarEventsToSheet(sheet, date) {
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+  const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+
+  const calendar = CalendarApp.getDefaultCalendar();
+  const events = calendar.getEvents(startOfDay, endOfDay);
+
+  if (events.length === 0) return 0;
+
+  const col = CONFIG.COLS.HAVE_TO;
+  let insertRow = CONFIG.TASK_START_ROW;
+
+  // Find first empty row in Have To
+  for (let row = CONFIG.TASK_START_ROW; row <= CONFIG.TASK_END_ROW; row++) {
+    if (sheet.getRange(row, col.task).getValue() !== "") {
+      insertRow = row + 1;
+    } else {
+      insertRow = row;
+      break;
+    }
+  }
+
+  let count = 0;
+  events.forEach(function(event) {
+    if (insertRow > CONFIG.TASK_END_ROW) return;
+
+    const title = event.getTitle();
+    const startTime = Utilities.formatDate(event.getStartTime(), Session.getScriptTimeZone(), "h:mm a");
+    const isAllDay = event.isAllDayEvent();
+
+    let shortTitle = shortenTitle(title);
+    let entry = isAllDay
+      ? "📅 " + shortTitle
+      : "📅 " + startTime + " - " + shortTitle;
+
+    sheet.getRange(insertRow, col.task).setValue(entry);
+    sheet.getRange(insertRow, col.check).setValue(false);
+    insertRow++;
+    count++;
+  });
+
+  return count;
+}
+
+// ============================================================
+//  MIDNIGHT AUTO-TRIGGER
+// ============================================================
+function setMidnightTrigger() {
+  removeMidnightTrigger();
+
+  ScriptApp.newTrigger("createNewDay")
+    .timeBased()
+    .atHour(0)
+    .nearMinute(5)
+    .everyDays(1)
+    .create();
+
+  SpreadsheetApp.getUi().alert("Midnight trigger set! New day auto-created every night around 12:05 AM.");
+}
+
+function removeMidnightTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === "createNewDay") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+}
+
+// ============================================================
+//  PRETTY DATE — "Friday, February 19th 2026"
+// ============================================================
+function getPrettyDate(date) {
+  const tz = Session.getScriptTimeZone();
+  const dayName = Utilities.formatDate(date, tz, "EEEE");
+  const month = Utilities.formatDate(date, tz, "MMMM");
+  const day = date.getDate();
+  const year = Utilities.formatDate(date, tz, "yyyy");
+  return dayName + ", " + month + " " + day + getOrdinal(day) + " " + year;
+}
+
+function getOrdinal(n) {
+  if (n >= 11 && n <= 13) return "th";
+  switch (n % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+// ============================================================
+//  SHORTEN TITLE — Cleans up verbose calendar event names
+// ============================================================
+function shortenTitle(title) {
+  title = title.replace(/https?:\/\/\S+/gi, "").trim();
+
+  const fillerWords = [
+    /\bmeeting\s+(about|regarding|re|for|to discuss)\b/gi,
+    /\b(quick\s+)?(sync|standup|stand-up|check[\s-]?in|catch[\s-]?up|huddle|touchpoint|touch base)\b/gi,
+    /\b(regarding|re:|concerning|with respect to)\b/gi,
+    /\b(appointment|appt)\s+(for|with)\b/gi,
+  ];
+
+  fillerWords.forEach(function(pattern) {
+    title = title.replace(pattern, "").trim();
+  });
+
+  title = title.replace(/\s{2,}/g, " ").trim();
+
+  if (title.length > 40) {
+    title = title.substring(0, 40);
+    const lastSpace = title.lastIndexOf(" ");
+    if (lastSpace > 20) {
+      title = title.substring(0, lastSpace);
+    }
+    title += "…";
+  }
+
+  return title;
+}
+
+// ============================================================
+//  FIREWORKS — Celebration when "Have To" hits zero!
+// ============================================================
+function checkFireworks() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const count = getHaveToCount(sheet);
+
+  if (count === 0) {
+    showFireworks();
+  } else {
+    SpreadsheetApp.getUi().alert("Almost there! You still have " + count + " 'Have To' task(s) remaining. Keep going!");
+  }
+}
+
+function getHaveToCount(sheet) {
+  const col = CONFIG.COLS.HAVE_TO;
+  let count = 0;
+  for (let row = CONFIG.TASK_START_ROW; row <= CONFIG.TASK_END_ROW; row++) {
+    const task = sheet.getRange(row, col.task).getValue();
+    const checked = sheet.getRange(row, col.check).getValue();
+    if (task !== "" && checked !== true) {
+      count++;
+    }
+  }
+  return count;
+}
+
+// ============================================================
+//  INSTALLABLE EDIT TRIGGER
+//  Handles both sync-back to To Do List AND fireworks.
+// ============================================================
+function installEditTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === "onEditInstallable") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  ScriptApp.newTrigger("onEditInstallable")
+    .forSpreadsheet(SpreadsheetApp.getActive())
+    .onEdit()
+    .create();
+
+  SpreadsheetApp.getUi().alert(
+    "Auto-Fireworks + Sync enabled! 🎆\n" +
+    "• Fireworks pop when all Have To tasks are done.\n" +
+    "• Checking off any task syncs it back to the To Do List."
+  );
+}
+
+function onEditInstallable(e) {
+  if (!e || !e.range) return;
+  const sheet = e.range.getSheet();
+  const sheetName = sheet.getName();
+  const col = e.range.getColumn();
+  const row = e.range.getRow();
+
+  // Only trigger on checkbox columns within task rows
+  const checkCols = [CONFIG.COLS.HAVE_TO.check, CONFIG.COLS.NEED_TO.check, CONFIG.COLS.WANT_TO.check];
+  if (!checkCols.includes(col)) return;
+  if (row < CONFIG.TASK_START_ROW || row > CONFIG.TASK_END_ROW) return;
+
+  // Only process edits on date sheets (daily agendas), not protected sheets
+  if (CONFIG.PROTECTED_SHEETS.includes(sheetName)) return;
+  if (!parseDateSheetName(sheetName)) return;
+
+  // Only on check (TRUE), not uncheck
+  if (e.value !== "TRUE") return;
+
+  // --- Sync to To Do List ---
+  // Task column is always check column - 1 (B/C, D/E, F/G)
+  const taskCol = col - 1;
+  const taskText = sheet.getRange(row, taskCol).getValue().toString().trim();
+  if (taskText) {
+    syncTaskToToDoList(taskText);
+  }
+
+  // --- Fireworks check (Have To only) ---
+  if (col === CONFIG.COLS.HAVE_TO.check) {
+    const count = getHaveToCount(sheet);
+    if (count === 0) {
+      showFireworks();
+    }
+  }
+}
+
+// ============================================================
+//  FIREWORKS HTML DIALOG
+// ============================================================
+function showFireworks() {
+  const html = HtmlService.createHtmlOutput(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        * { margin: 0; padding: 0; }
+        body { background: #000; overflow: hidden; }
+        canvas { display: block; }
+        .message {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: #fff;
+          font-family: 'Arial Black', sans-serif;
+          font-size: 28px;
+          text-align: center;
+          text-shadow: 0 0 20px #ff0, 0 0 40px #f80, 0 0 60px #f00;
+          pointer-events: none;
+          animation: pulse 1.5s ease-in-out infinite;
+          z-index: 10;
+        }
+        @keyframes pulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+      </style>
+    </head>
+    <body>
+      <canvas id="c"></canvas>
+      <div class="message">ALL DONE!<br>🎉 You crushed it! 🎉</div>
+      <script>
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 480;
+        canvas.height = 360;
+
+        const particles = [];
+        const colors = ['#ff0', '#f80', '#f00', '#0ff', '#0f0', '#f0f', '#fff', '#88f'];
+
+        function launch() {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height * 0.5;
+          const count = 40 + Math.floor(Math.random() * 30);
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 / count) * i + Math.random() * 0.3;
+            const speed = 2 + Math.random() * 4;
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              life: 80 + Math.random() * 40,
+              maxLife: 120,
+              color: color,
+              size: 2 + Math.random() * 2,
+            });
+          }
+        }
+
+        function animate() {
+          ctx.fillStyle = 'rgba(0,0,0,0.15)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.04;
+            p.life--;
+            if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+            const alpha = p.life / p.maxLife;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = alpha;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+
+          requestAnimationFrame(animate);
+        }
+
+        launch(); launch(); launch();
+        setInterval(launch, 600);
+        animate();
+      </script>
+    </body>
+    </html>
+  `)
+  .setWidth(500)
+  .setHeight(400)
+  .setTitle("🎆 ALL HAVE-TO TASKS COMPLETE! 🎆");
+
+  SpreadsheetApp.getUi().showModelessDialog(html, "🎆 ALL HAVE-TO TASKS COMPLETE! 🎆");
+}
+

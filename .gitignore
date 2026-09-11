@@ -3,6 +3,11 @@ Thumbs.db
 node_modules/
 .env
 .env.local
+tmp/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
 
 # Local dev-server config for the preview pane, not part of the deploy.
 .claude/

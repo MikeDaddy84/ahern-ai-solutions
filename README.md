@@ -12,6 +12,101 @@ private local AI systems, and websites and custom tools, based in Gordon, TX.
 - **Booking:** none — the contact form is the only inbound path.
 - **Hosting:** Render (Web Service, free tier).
 
+## Login portal and embedded Satori — September 11, 2026
+
+The website now includes `/login`, `/portal`, `/portal/settings`, and
+`/portal/satori`. The website navigation links to sign-in. An explicitly labeled
+sample workspace at `/portal/preview` lets Mike review the experience before
+production accounts are configured. It uses no real agenda data.
+
+All 59 source files from `MikeDaddy84/satori` at commit
+`3ea09a794bf751fdbf063928830830eb3afe909c` are imported under `apps/satori`.
+Satori is compiled and rendered inside the website's portal shell. It is not
+an iframe, external link, or second HTTP service. Existing task, backlog,
+calendar, history, and rollover behavior comes from that source. Adaptations
+are listed in `apps/satori/PORTAL-INTEGRATION.md`.
+
+### Account and workspace boundaries
+
+All portal records use Satori's existing Turso database. The additive schema in
+`lib/portal-schema.sql` creates `portal_users`, `portal_sessions`,
+`portal_satori_tasks`, `portal_satori_meta`, and `portal_satori_day_log`.
+Original `tasks`, `app_meta`, and `day_log` tables are not changed or copied.
+Passwords use salted scrypt hashes; session tokens
+are random and stored as SHA-256 hashes. Cookies are HttpOnly, SameSite=Strict,
+and Secure in production. Sessions expire after 12 hours. Writes check both
+origin and a session CSRF token. Sign-in attempts are limited in memory per
+email and IP; this assumes the current single website process. Revisit rate
+limiting before running multiple replicas.
+
+Each account is bound to one unique workspace key. Every portal agenda query
+includes that key, taken from the authenticated account. Inserts use a
+server-side default, and task/history/meta keys include workspace ownership.
+This applies to direct task changes, history, rollover, backlog pulls,
+calendar deduplication, and retention cleanup. Requests cannot select a different
+workspace. New accounts require no new database or database configuration.
+A worker thread loads Satori services for each active workspace to isolate
+calendar and rollover caches. Workers never listen on a port. Requests are
+serialized per workspace. Four workers may be active; idle ones are recycled
+and stop after five minutes. Revisit memory, durable rate limiting, and
+scheduling before scaling beyond a small rollout.
+
+Roles (`owner`, `employee`, `client`, `member`) currently label accounts. They
+do not grant access to another person's agenda or to `/leads`. There is no
+organization sharing, admin impersonation, invitation UI, MFA, automated
+password-reset email, or automatic client provisioning yet. The
+operator CLI creates accounts and resets passwords, revoking their sessions.
+Changing a user's workspace moves their access; it does not migrate their data.
+
+### Build and verify
+
+Run `npm ci`, `npm run build`, `npm test`, and `npm test --prefix apps/satori`.
+The root install also installs Satori's pinned dependencies. The root build
+compiles Satori and validates the existing Express site. `npm start` serves
+everything from the existing website process. `npm run test:tz-chicago --prefix
+apps/satori` checks Satori's DST fixtures in Central Time.
+
+Without configured account storage, login reports unavailable and the preview
+still works after a build. Preview task changes are tab-local sample state;
+preview history/calendar are empty and daily rollover requires a real workspace.
+
+### Enable on the existing Render service
+
+1. Use build command `npm ci && npm run build`, start command `npm start`,
+   `NODE_ENV=production`, and `SITE_URL=https://ahernai.com`.
+2. Reuse the **existing Satori database**. Set `SATORI_DATABASE_URL` and
+   `SATORI_AUTH_TOKEN` privately on the website service using the values from
+   Satori's `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. The website's own
+   contact/analytics connection is independent and is not a fallback.
+   Run `npm run portal:db` to apply and verify the additive five-table schema;
+   runtime initialization also applies it idempotently. No new database is needed.
+3. Optionally configure `SATORI_WORKSPACE_CALENDARS_JSON` as an object keyed
+   by workspace names, with `calendarUrl` / `familyCalendarUrl` per key.
+   These are server-only HTTPS feeds. A user without configured feeds does not
+   inherit another user's calendars. Per-user database settings are not used.
+4. In a private operator environment connected to the account database, set
+   `PORTAL_USER_EMAIL`, `PORTAL_USER_NAME`, `PORTAL_USER_PASSWORD` (14–256
+   characters), `PORTAL_USER_WORKSPACE`, and `PORTAL_USER_ROLE`, then run
+   `npm run portal:user`. Remove the password variable afterward. Never pass
+   passwords on the command line or place credentials in committed files.
+5. Deploy through the existing Render/GitHub workflow and verify sign-in,
+   persistence, and sign-out. New portal accounts start with empty agendas.
+   Existing standalone Satori records stay in the original tables. Copying
+   Mike's existing records into his portal workspace is a separate explicit
+   data migration, not something account creation does automatically.
+
+The existing pre-launch gate still applies before portal login. Remove it only
+when the public website is ready. Render sleeping may delay the first request;
+check the chosen plan's memory against simultaneous Satori workers before an
+employee/client rollout. This Node/Express implementation uses worker threads
+and is not a Cloudflare Workers / Sites deployment bundle. Hosting is retained
+on Render rather than replacing the site's architecture.
+
+For account removal, revoke sessions and disable/delete the account, then
+delete that workspace's rows from all three portal Satori tables as requested.
+Do not drop the shared database or delete other workspaces or legacy records.
+Deleting an account row alone does not delete its workspace records.
+
 ## Service growth implementation — September 2026
 
 All four services have equal homepage entry points. Existing pricing anchors,
@@ -739,7 +834,8 @@ does, is a bad trade. PNG is deflate plus per-scanline filters, and Node's
 ## Deployment
 
 Render Web Service, auto-deploy on push to `main`:
-- Build command: `npm install`
+- Build command: `npm ci --include=dev && npm run build`
+- Pre-deploy command: `npm run portal:db`
 - Start command: `node server.js`
 
 Live at [ahernai.com](https://ahernai.com) (apex `A` → `216.24.57.1`,

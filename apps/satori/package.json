@@ -1,0 +1,50 @@
+{
+  "name": "satori",
+  "version": "1.0.0",
+  "description": "Matrix/cyberpunk daily agenda PWA replacing ToolBox Google Sheet",
+  "main": "dist/server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server/index.ts",
+    "build:client": "vite build",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build": "npm run build:client && npm run build:server",
+    "postbuild": "node scripts/copy-migrations.js",
+    "start": "node dist/server/index.js",
+    "test": "node scripts/test.js",
+    "test:tz-chicago": "node scripts/test.js chicago",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/session": "^11.0.1",
+    "@fastify/static": "^8.1.1",
+    "@libsql/client": "^0.14.0",
+    "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3",
+    "fastify": "^5.2.1",
+    "luxon": "^3.7.2",
+    "node-ical": "^0.20.1",
+    "rrule": "^2.8.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/luxon": "^3.7.4",
+    "@types/node": "^22.13.4",
+    "@types/uuid": "^10.0.0",
+    "drizzle-kit": "^0.30.4",
+    "jsdom": "^30.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.1",
+    "vitest": "^3.0.6",
+    "xlsx": "^0.18.5"
+  }
+}

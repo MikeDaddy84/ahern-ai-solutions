@@ -527,6 +527,7 @@ p { text-wrap: pretty; max-width: 70ch; }
   .mobile-menu nav a { display: flex; align-items: center; min-height: 44px; padding: .8rem; font-size: 1rem; color: var(--color-text); border-radius: var(--radius-sm); }
   .mobile-menu nav a:hover, .mobile-menu nav a:focus-visible { background: var(--color-primary-highlight); color: var(--color-primary); }
 }
+.portal-entry-link { font-size:.875rem; white-space:nowrap; color:var(--color-primary); font-weight:600; }
 @media (max-width: 600px) {
   .header-actions > .btn { display: none; }
   .header-actions { gap: .45rem; }

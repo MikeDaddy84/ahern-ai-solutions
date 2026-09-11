@@ -47,7 +47,8 @@ export function buildApp(db: AppDatabase): FastifyInstance {
         }
       }
     },
-    trustProxy: 1
+    // Validate the proxy address; hop-count-only trust permits spoofed headers.
+    trustProxy: ['loopback', 'linklocal', 'uniquelocal']
   });
 
   // Register cookie and session
@@ -113,4 +114,3 @@ export function buildApp(db: AppDatabase): FastifyInstance {
 
   return app;
 }
-

@@ -510,6 +510,16 @@ a[href^="tel:"] { white-space: nowrap; }
 .post-body code { font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--color-surface-offset); padding: .15em .4em; border-radius: .3em; font-size: .9em; }
 .post-footer { max-width: 760px; margin: var(--space-10) auto 0; padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
 
+/* ---------- ABOUT PHOTOS ---------- */
+.about-intro { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 4vw, 3rem); }
+.about-photo { margin: 0; min-width: 0; }
+.about-photo img { display: block; width: 100%; height: auto; border-radius: var(--radius-lg); }
+.about-photo figcaption { margin-top: var(--space-3); color: var(--color-text-muted); font-size: .875rem; }
+.about-photo-travel { max-width: 440px; margin: var(--space-8) auto; }
+@media (max-width: 760px) {
+  .about-intro { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ---------- RESPONSIVE ---------- */
 /* Keep the desktop navigation and its mobile replacement at one breakpoint. */
 @media (max-width: 1120px) {

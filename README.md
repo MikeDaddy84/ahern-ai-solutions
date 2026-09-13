@@ -3,6 +3,26 @@
 Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, and websites and custom tools, based in Gordon, TX.
 
+## Website offers and automation positioning — September 12, 2026
+
+The homepage leads with “Websites & Automations” and “Get found. Get leads.
+Get time back.” Website-only projects are an entry service: Website Starter
+is $995 for one page, Business Website is $1,995 for up to five pages, and
+The Front Door starts at $2,995 for the Business Website plus one defined
+automation. Each website package includes two revision rounds within scope.
+Optional care is $99/month from launch for hosting, routine maintenance, and
+up to 20 minutes of minor edits, with no rollover. A year of care is no longer
+included in new project prices; existing agreements keep their terms.
+Custom apps retain their separate scope and pricing.
+
+The public offers are in `content/services/web.html`, with matching summaries
+and FAQs in `lib/services.js`, `lib/growth.js`, and `public/index.html`.
+Historical research and financial-model assumptions are not current quotes.
+
+GoDaddy forwarding for `ahernautomations.com` is configured as a permanent
+301 redirect to `https://ahernai.com/services/automation`, without masking.
+`ahernai.com` remains the canonical site on Render.
+
 ## Stack
 
 - **Server:** Express (Node ≥20), serves the static homepage plus a

@@ -3,6 +3,56 @@
 Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, and websites and custom tools, based in Gordon, TX.
 
+## Maintenance and backups
+
+Update this README on GitHub after each finished project turn, recording
+completed changes, decisions, verification, and outstanding setup. The standing
+instruction is also recorded in `AGENTS.md` for future work in this repository.
+
+**Backup status:** The following is a recommended recovery plan. No backup
+schedule, external backup destination, or restore test has been configured by
+this documentation update. The website offer release passed the build and all
+47 root tests, deployed successfully on Render, and was verified on the public
+homepage and website service page. The new domain's HTTP and HTTPS forwarding,
+with and without `www`, was verified as a 301 to the automation service page.
+
+### Recommended recovery plan
+
+- Keep dated repository snapshots outside the active working folder and outside
+  the GitHub account's failure boundary. Use an encrypted, versioned off-site
+  backup destination plus an encrypted external drive disconnected between
+  backups. Keep previous snapshots instead of overwriting the only copy.
+- Back up the repository daily while development is active and before major
+  releases. A proposed starting retention policy is 30 daily snapshots and
+  12 monthly snapshots; adjust it to available storage and recovery needs.
+- Use `git clone --mirror` against the GitHub repository in a new dated backup
+  directory to preserve Git history and refs. If Git LFS is introduced, also run
+  `git lfs fetch --all` inside that mirror. Archive the complete mirror and copy
+  it to the independent backup destinations. A source-code ZIP download does
+  not preserve the repository history.
+- A GitHub mirror does not include uncommitted or untracked local work. Back up
+  useful local artifacts separately, including the current untracked `output/`
+  research files and original source assets. OneDrive synchronization of this
+  working directory is useful but does not replace retained, independent
+  recovery copies.
+- Back up both live Turso databases separately: website contacts/analytics and
+  the Satori database used by the portal. Repository history contains the code
+  and schemas, not the live records. Agree a database export and restore process
+  before treating the entire website as protected.
+- Keep Render configuration and GoDaddy DNS/forwarding records in the recovery
+  documentation. Store secret values and recovery keys separately in a secure
+  password manager or encrypted backup, never in this public repository.
+- GitHub issues, pull-request discussions, release attachments, and repository
+  settings require separate coverage if they need to be recoverable. A GitHub
+  wiki, if used, has its own Git repository and needs its own backup.
+- Test a restore into a separate temporary location: check repository integrity
+  with `git fsck --full`, verify expected branches/tags and a known commit,
+  create a working checkout, then run the build and tests. Test database recovery
+  separately using isolated databases. Never point restore tests at production.
+
+References: [GitHub repository backup guidance](https://docs.github.com/en/repositories/archiving-a-github-repository/backing-up-a-repository)
+and [CISA backup guidance](https://www.cisa.gov/stopransomware/ransomware-guide).
+
 ## Website offers and automation positioning — September 12, 2026
 
 The homepage leads with “Websites & Automations” and “Get found. Get leads.

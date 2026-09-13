@@ -9,12 +9,68 @@ Update this README on GitHub after each finished project turn, recording
 completed changes, decisions, verification, and outstanding setup. The standing
 instruction is also recorded in `AGENTS.md` for future work in this repository.
 
-**Backup status:** The following is a recommended recovery plan. No backup
-schedule, external backup destination, or restore test has been configured by
-this documentation update. The website offer release passed the build and all
-47 root tests, deployed successfully on Render, and was verified on the public
-homepage and website service page. The new domain's HTTP and HTTPS forwarding,
-with and without `www`, was verified as a 301 to the automation service page.
+**Backup status:** Encrypted local backups are configured and restore-tested.
+The active working copy is now `D:\AhernAI\Website`; do not write to the old
+OneDrive checkout. Existing local research and source files were copied to D:
+without deleting the original copy.
+
+Restic 0.19.1 was downloaded from its official release and checked against the
+published SHA-256 checksum. The encrypted local repository is outside the
+working tree. Its recovery key and private configuration are outside Git and
+restricted to the Windows owner and SYSTEM. Keep a separate recovery-key copy
+in a password manager or another secure location away from this PC; that step
+is still pending.
+
+`scripts/backup-repo.js` refreshes a GitHub mirror including Git LFS payloads,
+checks Git integrity, and snapshots the mirror plus tracked and non-ignored
+untracked workspace files. Each run restores the snapshot, checks its commit,
+refs, and workspace-file hashes, and reads all stored data for integrity before
+applying retention. Retention keeps 30 daily and 12 monthly recovery points
+(the periods can overlap). A repository-ID check prevents running retention
+against the wrong destination. Only this script's tagged backup set is pruned.
+Up to three marked restore-check folders are retained locally; earlier initial
+test folders remain available for inspection.
+
+A daily Codex scheduled task runs at 9:00 p.m. America/Chicago. The computer,
+Codex app, D: drive, network access, and Windows-owner permissions must be
+available for it to run. It reports meaningful failures and checks for stale
+backups. It is not an always-on NAS job. The schedule is named “Back up Ahern AI
+website.”
+
+**Verified:** An encrypted snapshot restored the expected GitHub main commit
+and all refs. A second snapshot restored and checksum-verified the local
+project files. The restored checkout passed `npm ci`, the production build,
+and all 47 root tests. A deliberately incorrect repository ID was rejected
+before backup or retention. The restore install also reported existing Satori
+dependency advisories (six moderate, two high); no dependencies were changed
+as part of backup setup.
+
+**Still pending:** AhernAI-NAS rejects the current Windows share connection,
+and Edge is not yet connected to browser control for NAS administration.
+NAS replication, a separate off-site/offline copy, live Turso database backups,
+secret recovery, ignored source assets, and GitHub issue/PR/release metadata
+are not configured. A local D: backup alone does not protect against loss of
+this PC. Do not describe the complete recovery plan below as implemented yet.
+
+### Run or inspect a backup
+
+Run from the D: checkout as the Windows owner:
+
+```powershell
+node scripts/backup-repo.js run D:\AhernAI\BackupPrivate\config.json
+node scripts/backup-repo.js status D:\AhernAI\BackupPrivate\config.json
+node scripts/backup-repo.js verify D:\AhernAI\BackupPrivate\config.json
+```
+
+Private configuration selects the Restic executable, encrypted repository,
+expected repository ID, recovery-key file, working copy, and staging location.
+Never commit those private files. `verify` restores into a new isolated folder
+and does not change production. `last-success.json` in the private state folder
+records the snapshot ID, restored commit, and checkout location. A crashed run
+leaves a lock file: confirm its process has stopped before removing that lock.
+If recovering on another machine, install Git, Git LFS, Node, and Restic, unlock
+the encrypted repository with the separately stored recovery key, and restore
+a snapshot into a new directory before checking out and building the project.
 
 ### Recommended recovery plan
 

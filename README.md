@@ -14,14 +14,16 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest scheduled verification:** September 13, 2026 at 9:01 p.m. Central
-(2026-09-14 02:01 UTC). The daily run succeeded: repository identity, Git/LFS
-refresh, restored commit and refs, workspace checksums, full stored-data
-integrity, and retention all passed. The source commit was `f1a2dbb`.
-The previous successful backup was less than 36 hours old. Coverage remains
-local only; the external and database items listed below are still pending.
-The earlier application build/test results below are from the setup restore
-test, not a new application test run tonight.
+**Latest scheduled verification:** September 13, 2026. The initial daily run
+passed at 9:01 p.m. Central. After publishing its README update, the follow-up
+snapshot completed at 9:02 p.m. Central (2026-09-14 02:02 UTC), restoring
+commit `c20908a` successfully. Repository identity, Git/LFS refresh, restored
+commit and refs, workspace checksums, full stored-data integrity, and retention
+all passed. Status was reviewed on September 14 at 9:45 a.m. Central; the latest
+scheduled backup was about 13 hours old, within the 36-hour freshness limit.
+Coverage remains local only; the external and database items listed below
+are still pending. The application build/test results below are from the
+setup restore test, not a new application test run during this status review.
 
 Restic 0.19.1 was downloaded from its official release and checked against the
 published SHA-256 checksum. The encrypted local repository is outside the

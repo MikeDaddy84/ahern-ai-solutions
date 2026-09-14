@@ -42,7 +42,9 @@ duplication. All 37 Crew Room checks passed, including signature and claim rejec
 origin checks and refusal to substitute local authentication for remote Access.
 Changes were prepared in the isolated Linux checkout of GitHub main; the active
 Windows checkout at `D:\AhernAI\Website` should pull before its next source change.
-The concurrent Hosaka remote-link update was merged and preserved.
+The concurrent Hosaka remote-link update was merged and preserved. After Render
+deployed `7a525b4`, the signed-in production portal was verified to link directly
+to `https://crew.ahernai.com/`.
 
 **Mobile direction requested by Mike:** Crew Room, Hosaka and Satori should each
 eventually have an Android app using the same authoritative records and APIs as its

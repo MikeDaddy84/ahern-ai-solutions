@@ -3,6 +3,62 @@
 Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, and websites and custom tools, based in Gordon, TX.
 
+## Crew Room — September 14, 2026
+
+The owner portal now includes **Crew Room** beside Satori and Hosaka at
+`/portal/crew-room`. It uses Hosaka's dark walnut texture, slate panels, mint
+controls and Verdana typography, with a responsive phone layout. The texture and
+design reference come from `MikeDaddy84/Hosaka` commit
+`4660f7e2ad3842cdd3412bb8a21a1142f450a9ad`; Hosaka itself was not changed.
+
+The room runs inside the existing HTTPS website, so it works away from home.
+It requires an existing owner portal session; client, employee, member, anonymous
+and public-preview access are not enabled. There is no separate room password,
+localhost link, new public sharing mode or direct connection to the Hermes host.
+The return-to-portal link remains available on phones.
+
+Messages are stored in the new `portal_crew_messages` table in the configured
+portal/Satori Turso database, separately from existing agenda/account tables.
+The authenticated workspace controls visibility, and the authenticated user
+controls sender provenance. Existing portal CSRF and session checks cover writes.
+The application offers append/read only, with bounded pagination, explicit search,
+and idempotent posting. It exposes no edit/delete, mail, execution, enrollment or
+agent-release route. Database administrators can still change records; this is
+not a tamper-proof audit store. Include this table in the pending live database
+backup plan described below.
+
+An open foreground view checks for new messages every 15 seconds and on returning
+to the tab. Another device signed into the same workspace reads the same records.
+There is no offline write queue or native Android application yet. The local Hermes
+prototype remains separate; its synthetic messages were not imported into production.
+
+**Agent integration remains pending.** The roster labels do not mean agents are
+connected. Addressed posts are stored but do not trigger responses or model calls.
+No Gmail, Retell, Hosaka or Satori business-action bridge was activated. A future
+Hermes adapter needs a separately scoped machine credential, durable per-agent
+cursors, bounded context, replay protection and verified Tank gates; it must not
+reuse the owner's browser session or put broad provider credentials in the portal.
+
+**Validation:** production build and all 51 root tests passed, including four room
+tests for owner gating, CSRF/origin checks, sender spoofing rejection, duplicate and
+conflicting retries, cross-workspace separation, second-session persistence,
+pagination and absent mutation/execution routes. Browser checks verified portal
+navigation, posting, retrieval from a second view, and a 390-pixel phone layout.
+Only synthetic accounts/databases were used for these tests. Existing Satori
+dependency advisories remain unchanged (six moderate, two high). Changes were
+prepared in an isolated Linux checkout of current GitHub main; the active Windows
+working copy at `D:\AhernAI\Website` was not edited and should pull the published
+commit before its next source change.
+
+**Mobile direction requested by Mike:** Crew Room, Hosaka and Satori should each
+eventually have an Android app using the same authoritative records and APIs as its
+web counterpart. A phone-created Satori task should be the same task on the web;
+do not create independent phone-only databases. Shared sign-in, scoped API access,
+stable record IDs, version/conflict handling, offline retry policy and notifications
+need deliberate implementation. Cross-app handoffs should reference those stable
+records with provenance and authorization. Native apps, offline sync, unified SSO
+with Hosaka, and cross-app automations are future work, not delivered by this change.
+
 ## Maintenance and backups
 
 Update this README on GitHub after each finished project turn, recording
@@ -985,4 +1041,3 @@ Render Web Service, auto-deploy on push to `main`:
 Live at [ahernai.com](https://ahernai.com) (apex `A` → `216.24.57.1`,
 `www` `CNAME` → `ahern-ai-solutions-web.onrender.com`, DNS at GoDaddy, TLS
 issued by Render).
-

@@ -35,3 +35,14 @@ CREATE TABLE IF NOT EXISTS portal_satori_day_log (
   PRIMARY KEY(workspace_key,day_key)
 );
 CREATE INDEX IF NOT EXISTS idx_portal_history_created ON portal_satori_day_log(workspace_key,created_at);
+-- Crew Room uses a separate append-only application record, scoped by authenticated workspace.
+-- No existing Satori/portal records are migrated or rewritten.
+CREATE TABLE IF NOT EXISTS portal_crew_messages (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  workspace_key TEXT NOT NULL, created INTEGER NOT NULL,
+  sender_id TEXT NOT NULL, display_name TEXT NOT NULL,
+  recipient TEXT NOT NULL, thread TEXT NOT NULL, text TEXT NOT NULL,
+  request_key TEXT NOT NULL,
+  UNIQUE(workspace_key,sender_id,request_key)
+);
+CREATE INDEX IF NOT EXISTS idx_portal_crew_workspace ON portal_crew_messages(workspace_key,seq);

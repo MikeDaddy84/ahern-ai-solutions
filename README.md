@@ -1065,3 +1065,11 @@ separate; remote/phone access to agent chat still needs the planned secure
 transport. No localhost keys, bot credentials, private DM history or agent runtime
 files are part of this website repository. Validation: 54 portal tests passed,
 including composer keyboard behavior, owner access and local DM links.
+
+Crew Room remote-access follow-up: the Neb origin now has prepared, tested
+Cloudflare Access verification and dedicated tunnel service templates. The intended
+remote hostname is `crew.ahernai.com`, using the same owner-only access arrangement
+as Hosaka. **It is not activated yet:** Cloudflare administrator sign-in/resource
+setup remains pending. Existing portal links stay on the working local room until
+signed-in remote chat is verified. The 37 local Crew Room checks pass; this follow-up
+does not change the hosted website runtime or its authentication.

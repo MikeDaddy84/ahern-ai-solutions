@@ -5,6 +5,12 @@ private local AI systems, and websites and custom tools, based in Gordon, TX.
 
 ## Crew Room — September 14, 2026
 
+**Current roster:** Trinity (`trinity`) replaces Molly as security specialist, per
+Mike on September 14. New posts can address Trinity; Molly is removed from the
+recipient list. Existing register entries retain their original recipients. This
+changes the roster only; agent connections and permissions remain unchanged.
+Validation: the existing Crew Room integration suite passes with the new roster.
+
 The owner portal now includes **Crew Room** beside Satori and Hosaka at
 `/portal/crew-room`. It uses Hosaka's dark walnut texture, slate panels, mint
 controls and Verdana typography, with a responsive phone layout. The texture and

@@ -75,7 +75,9 @@ does not bypass Cloudflare authentication. The browser continues to open
 Hosaka in a new tab. The HosakaBox VM and its internet connection must be online.
 
 Validation: production build, all eight portal integration tests, and rendered
-owner/preview link checks passed. The Crew Room behavior checks passed, but its
+owner/preview link checks passed. After Render deployed commit `af6c652`, the
+signed-in production portal was verified to link to `https://hosaka.ahernai.com/`.
+The Crew Room behavior checks passed, but its
 Windows temporary-database cleanup reported an EPERM error.
 
 ## Maintenance and backups

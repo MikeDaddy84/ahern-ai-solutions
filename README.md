@@ -65,6 +65,19 @@ need deliberate implementation. Cross-app handoffs should reference those stable
 records with provenance and authorization. Native apps, offline sync, unified SSO
 with Hosaka, and cross-app automations are future work, not delivered by this change.
 
+## Hosaka remote portal link — September 14, 2026
+
+The portal sidebar opens Hosaka at `https://hosaka.ahernai.com/` instead of
+its LAN IP address. Mike confirmed that the public address works. Cloudflare
+Access permits the configured owner email and requires MFA, with 12-hour
+Access and MFA sessions; Hosaka retains its separate login. Portal login
+does not bypass Cloudflare authentication. The browser continues to open
+Hosaka in a new tab. The HosakaBox VM and its internet connection must be online.
+
+Validation: production build, all eight portal integration tests, and rendered
+owner/preview link checks passed. The Crew Room behavior checks passed, but its
+Windows temporary-database cleanup reported an EPERM error.
+
 ## Maintenance and backups
 
 Update this README on GitHub after each finished project turn, recording

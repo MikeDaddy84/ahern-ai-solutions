@@ -45,6 +45,11 @@ test('only owners see the link and can reach the room; anonymous access requires
   const room=await request('/portal/crew-room',{cookie:owner});assert.equal(room.status,200);
   assert.match(room.headers.get('cache-control'),/no-store/);
   const html=await room.text();assert.match(html,/crew-room-csrf/);assert.doesNotMatch(html,/PORTAL_SESSION|Sample:/);
+  const roomDoc=new JSDOM(html).window.document;
+  assert.equal(roomDoc.querySelectorAll('a.participant-dm').length,2);
+  for(const link of roomDoc.querySelectorAll('a.participant-dm')){assert.match(link.href,/^http:\/\/127\.0\.0\.1:9132\/#dm=(morph3us|jaylene)$/);assert.equal(link.target,'_blank');}
+  assert.ok(roomDoc.querySelector('a[href="http://127.0.0.1:9132/"]'));
+  assert.ok(roomDoc.querySelector('script[src="/crew-room/composer-keys.js"]'));
 });
 test('writes enforce session CSRF, sender provenance and idempotency',async()=>{
   const body={recipient:'jaylene',thread:'triage',text:'A real request with <script> text',request_key:'test-one'};

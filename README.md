@@ -1047,3 +1047,21 @@ Render Web Service, auto-deploy on push to `main`:
 Live at [ahernai.com](https://ahernai.com) (apex `A` → `216.24.57.1`,
 `www` `CNAME` → `ahern-ai-solutions-web.onrender.com`, DNS at GoDaddy, TLS
 issued by Render).
+
+### Crew Room local chat and Discord DMs (September 14, 2026)
+
+The hosted Crew Room remains a saved owner register. Its live-room link now makes
+that boundary explicit: agent replies currently run on Neb at `127.0.0.1:9132`.
+Morph3us and Jaylene participant links open the matching private conversation
+inside that local Crew Room. Those local conversations synchronize text with the
+owner's existing Discord DMs and continue native agent conversation history.
+Owner messages appear in Discord as labeled Crew Room relays. Tank provides live
+supervisor status locally; undeployed agents are not shown as connected.
+
+Both composers use Enter to post and Shift+Enter for a newline, preserving IME
+composition. Local DM synchronization was checked against both real bots and their
+native conversation storage. The hosted register and local register remain
+separate; remote/phone access to agent chat still needs the planned secure
+transport. No localhost keys, bot credentials, private DM history or agent runtime
+files are part of this website repository. Validation: 54 portal tests passed,
+including composer keyboard behavior, owner access and local DM links.

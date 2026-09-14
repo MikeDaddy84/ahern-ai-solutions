@@ -63,8 +63,10 @@ async function start(){
   try {
     const me=await api('/me');
     byId('owner-name').textContent=me.name;byId('owner-initial').textContent=me.name.slice(0,1).toUpperCase();
-    for(const actor of me.roster.filter(x=>x!=='room')){const option=document.createElement('option');option.value=actor;option.textContent=actor+' · connection pending';byId('recipient').append(option);}
+    for(const actor of me.roster.filter(x=>x!=='room')){const option=document.createElement('option');option.value=actor;option.textContent=actor+' · use live room';option.disabled=true;byId('recipient').append(option);}
     await load('reset');setInterval(refresh,15000);window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);
   }catch(e){byId('status').textContent=e.message;}
 }
 start();
+
+bindComposerKeys(byId('composer'),byId('message'));

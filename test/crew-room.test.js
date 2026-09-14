@@ -39,16 +39,16 @@ test('only owners see the link and can reach the room; anonymous access requires
   const doc=new JSDOM(ownHTML).window.document;
   const labels=[...doc.querySelectorAll('nav[aria-label="Workspace"] a')].map(a=>a.textContent);
   assert.ok(labels.some(x=>x.includes('Satori')) && labels.some(x=>x.includes('Hosaka')) && labels.some(x=>x.includes('Crew Room')));
-  assert.ok(doc.querySelector('a[href="/portal/crew-room"]'));
-  assert.doesNotMatch(await (await request('/portal',{cookie:client})).text(),/href="\/portal\/crew-room"/);
-  assert.doesNotMatch(await (await request('/portal/preview')).text(),/href="\/portal\/crew-room"/);
+  assert.ok(doc.querySelector('a[href="https://crew.ahernai.com/"]'));
+  assert.doesNotMatch(await (await request('/portal',{cookie:client})).text(),/href="https:\/\/crew\.ahernai\.com\/"/);
+  assert.doesNotMatch(await (await request('/portal/preview')).text(),/href="https:\/\/crew\.ahernai\.com\/"/);
   const room=await request('/portal/crew-room',{cookie:owner});assert.equal(room.status,200);
   assert.match(room.headers.get('cache-control'),/no-store/);
   const html=await room.text();assert.match(html,/crew-room-csrf/);assert.doesNotMatch(html,/PORTAL_SESSION|Sample:/);
   const roomDoc=new JSDOM(html).window.document;
   assert.equal(roomDoc.querySelectorAll('a.participant-dm').length,2);
-  for(const link of roomDoc.querySelectorAll('a.participant-dm')){assert.match(link.href,/^http:\/\/127\.0\.0\.1:9132\/#dm=(morph3us|jaylene)$/);assert.equal(link.target,'_blank');}
-  assert.ok(roomDoc.querySelector('a[href="http://127.0.0.1:9132/"]'));
+  for(const link of roomDoc.querySelectorAll('a.participant-dm')){assert.match(link.href,/^https:\/\/crew\.ahernai\.com\/#dm=(morph3us|jaylene)$/);assert.equal(link.target,'_blank');}
+  assert.ok(roomDoc.querySelector('a[href="https://crew.ahernai.com/"]'));
   assert.ok(roomDoc.querySelector('script[src="/crew-room/composer-keys.js"]'));
 });
 test('writes enforce session CSRF, sender provenance and idempotency',async()=>{

@@ -11,50 +11,38 @@ recipient list. Existing register entries retain their original recipients. This
 changes the roster only; agent connections and permissions remain unchanged.
 Validation: the existing Crew Room integration suite passes with the new roster.
 
-The owner portal now includes **Crew Room** beside Satori and Hosaka at
-`/portal/crew-room`. It uses Hosaka's dark walnut texture, slate panels, mint
-controls and Verdana typography, with a responsive phone layout. The texture and
-design reference come from `MikeDaddy84/Hosaka` commit
-`4660f7e2ad3842cdd3412bb8a21a1142f450a9ad`; Hosaka itself was not changed.
+The owner portal's **Crew Room** link opens [the live room](https://crew.ahernai.com/)
+in a new tab, beside Satori and Hosaka. It uses Hosaka's dark walnut texture, slate
+panels, mint controls and Verdana typography, with a responsive phone layout.
+Cloudflare Access permits only the approved owner identity and reuses Hosaka's
+existing MFA policy, with 12-hour sessions. Portal login does not bypass that gate.
+Client, employee, member and public-preview navigation does not expose the link.
 
-The room runs inside the existing HTTPS website, so it works away from home.
-It requires an existing owner portal session; client, employee, member, anonymous
-and public-preview access are not enabled. There is no separate room password,
-localhost link, new public sharing mode or direct connection to the Hermes host.
-The return-to-portal link remains available on phones.
+The dedicated Cloudflare connector runs on Neb and reaches its loopback Crew Room
+service. The connector and origin both validate the Crew Room Access assertion;
+the origin verifies its signature, issuer, audience, lifetime and exact owner.
+Neb and its internet connection must remain online. The remote and local room use
+one register and the existing agent/Discord connections. Morph3us and Jaylene DMs
+stay inside the room and synchronize with the owner's existing Discord DMs. Tank
+provides deterministic supervisor status; undeployed agents are not shown as live.
+Enter posts a message; Shift+Enter inserts a newline.
 
-Messages are stored in the new `portal_crew_messages` table in the configured
-portal/Satori Turso database, separately from existing agenda/account tables.
-The authenticated workspace controls visibility, and the authenticated user
-controls sender provenance. Existing portal CSRF and session checks cover writes.
-The application offers append/read only, with bounded pagination, explicit search,
-and idempotent posting. It exposes no edit/delete, mail, execution, enrollment or
-agent-release route. Database administrators can still change records; this is
-not a tamper-proof audit store. Include this table in the pending live database
-backup plan described below.
+The earlier `/portal/crew-room` page preserves its separate saved owner register in
+`portal_crew_messages` in the existing Turso database. Its banner and participant
+links now open the live remote room. Earlier saved notes are not merged into the
+live agent register. Existing portal authentication, CSRF checks, workspace isolation,
+append/read behavior and backup obligations still apply to that saved register.
+No room keys, bot tokens, private DM history or agent runtime files are in this repo.
 
-An open foreground view checks for new messages every 15 seconds and on returning
-to the tab. Another device signed into the same workspace reads the same records.
-There is no offline write queue or native Android application yet. The local Hermes
-prototype remains separate; its synthetic messages were not imported into production.
-
-**Agent integration remains pending.** The roster labels do not mean agents are
-connected. Addressed posts are stored but do not trigger responses or model calls.
-No Gmail, Retell, Hosaka or Satori business-action bridge was activated. A future
-Hermes adapter needs a separately scoped machine credential, durable per-agent
-cursors, bounded context, replay protection and verified Tank gates; it must not
-reuse the owner's browser session or put broad provider credentials in the portal.
-
-**Validation:** production build and all 51 root tests passed, including four room
-tests for owner gating, CSRF/origin checks, sender spoofing rejection, duplicate and
-conflicting retries, cross-workspace separation, second-session persistence,
-pagination and absent mutation/execution routes. Browser checks verified portal
-navigation, posting, retrieval from a second view, and a 390-pixel phone layout.
-Only synthetic accounts/databases were used for these tests. Existing Satori
-dependency advisories remain unchanged (six moderate, two high). Changes were
-prepared in an isolated Linux checkout of current GitHub main; the active Windows
-working copy at `D:\AhernAI\Website` was not edited and should pull the published
-commit before its next source change.
+**Validation:** all 54 website tests and the production build passed. The live
+remote browser authenticated successfully, displayed `PRIVATE · REMOTE`, and sent
+an Enter-submitted Jaylene DM. Its reply appeared in Crew Room; both messages were
+verified in the existing Discord DM and native conversation storage without relay
+duplication. All 37 Crew Room checks passed, including signature and claim rejection,
+origin checks and refusal to substitute local authentication for remote Access.
+Changes were prepared in the isolated Linux checkout of GitHub main; the active
+Windows checkout at `D:\AhernAI\Website` should pull before its next source change.
+The concurrent Hosaka remote-link update was merged and preserved.
 
 **Mobile direction requested by Mike:** Crew Room, Hosaka and Satori should each
 eventually have an Android app using the same authoritative records and APIs as its
@@ -1063,28 +1051,13 @@ Live at [ahernai.com](https://ahernai.com) (apex `A` → `216.24.57.1`,
 `www` `CNAME` → `ahern-ai-solutions-web.onrender.com`, DNS at GoDaddy, TLS
 issued by Render).
 
-### Crew Room local chat and Discord DMs (September 14, 2026)
+### Crew Room remote deployment (September 14, 2026)
 
-The hosted Crew Room remains a saved owner register. Its live-room link now makes
-that boundary explicit: agent replies currently run on Neb at `127.0.0.1:9132`.
-Morph3us and Jaylene participant links open the matching private conversation
-inside that local Crew Room. Those local conversations synchronize text with the
-owner's existing Discord DMs and continue native agent conversation history.
-Owner messages appear in Discord as labeled Crew Room relays. Tank provides live
-supervisor status locally; undeployed agents are not shown as connected.
-
-Both composers use Enter to post and Shift+Enter for a newline, preserving IME
-composition. Local DM synchronization was checked against both real bots and their
-native conversation storage. The hosted register and local register remain
-separate; remote/phone access to agent chat still needs the planned secure
-transport. No localhost keys, bot credentials, private DM history or agent runtime
-files are part of this website repository. Validation: 54 portal tests passed,
-including composer keyboard behavior, owner access and local DM links.
-
-Crew Room remote-access follow-up: the Neb origin now has prepared, tested
-Cloudflare Access verification and dedicated tunnel service templates. The intended
-remote hostname is `crew.ahernai.com`, using the same owner-only access arrangement
-as Hosaka. **It is not activated yet:** Cloudflare sign-in and Free-plan activation are complete; the prepared owner-only
-application and dedicated connector await final approval and creation. Existing portal links stay on the working local room until
-signed-in remote chat is verified. The 37 local Crew Room checks pass; this follow-up
-does not change the hosted website runtime or its authentication.
+Owner-only remote access is enabled at `https://crew.ahernai.com/`. Mike completed
+Cloudflare sign-in and Zero Trust Free activation, explicitly approved owner-only
+access, then completed the Access login. The dedicated connector runs as
+`sprawl-crew-tunnel.service` on Neb; its token is private and absent from this repo.
+The origin remains loopback-only at `127.0.0.1:9132`. No router port forwarding or
+changes to Hosaka's connector, mail routing, or established agent services were made.
+Operational details and recovery steps live in the private Hermes workspace's
+`crew-room/REMOTE-ACCESS.md`. Native Android apps remain future work.

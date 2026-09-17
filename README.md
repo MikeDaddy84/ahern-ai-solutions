@@ -81,17 +81,20 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest scheduled verification:** September 16, 2026 at 9:01 p.m. Central
-(2026-09-17 02:01 UTC). The daily run succeeded, restoring GitHub main commit
-`30ab80b`. Repository identity, Git/LFS refresh, restored commit and refs,
+**Latest verification:** September 17, 2026 at 10:30 a.m. Central
+(15:30 UTC). An on-demand backup succeeded, restoring GitHub main commit
+`15ed19d`. Repository identity, Git/LFS refresh, restored commit and refs,
 workspace-file checksums, full stored-data integrity, and the approved 30 daily
-/ 12 monthly retention all passed.
+/ 12 monthly retention all passed. Stored snapshots were confirmed for
+September 12, 13, 14, and 16 before this new September 17 backup.
 
-**Freshness recovery:** Before this run, the last recorded success was September
-14 at 9:04 p.m. Central, nearly 48 hours earlier and beyond the 36-hour limit.
-Tonight's verified snapshot restores current coverage. The cause of the gap
-has not been established; no successful September 15 run is recorded in the
-last-success record inspected before this run.
+**September 15 missed run diagnosed:** The scheduled Codex turn failed at
+9:02 p.m. Central because the account had reached its usage limit, before the
+backup script executed. No September 15 snapshot is present. The September
+16 scheduled backup and September 17 manual check succeeded. The daily 9 p.m.
+schedule remains active, but requires available Codex usage as well as the
+computer and app running. Moving execution to an independent scheduler is a
+recommendation, not an implemented change.
 
 The GitHub mirror and local workspace are captured separately, so local files
 may reflect an older checkout. This documentation update was prepared from the

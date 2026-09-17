@@ -81,17 +81,24 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest scheduled verification:** September 14, 2026 at 9:02 p.m. Central
-(2026-09-15 02:02 UTC). The daily run succeeded, restoring GitHub main commit
-`58b099a`. Repository identity, Git/LFS refresh, restored commit and refs,
+**Latest scheduled verification:** September 16, 2026 at 9:01 p.m. Central
+(2026-09-17 02:01 UTC). The daily run succeeded, restoring GitHub main commit
+`30ab80b`. Repository identity, Git/LFS refresh, restored commit and refs,
 workspace-file checksums, full stored-data integrity, and the approved 30 daily
-/ 12 monthly retention all passed. The previous successful backup was about
-11 hours old, within the 36-hour freshness limit. The GitHub mirror and local
-workspace are captured separately, so local files may reflect an older checkout.
-This documentation update was prepared from the restored current GitHub main
-without changing the active working copy. Application build/tests were not
-rerun during this backup check. Coverage remains local only; NAS, off-site,
-offline, and live database backups remain pending as detailed below.
+/ 12 monthly retention all passed.
+
+**Freshness recovery:** Before this run, the last recorded success was September
+14 at 9:04 p.m. Central, nearly 48 hours earlier and beyond the 36-hour limit.
+Tonight's verified snapshot restores current coverage. The cause of the gap
+has not been established; no successful September 15 run is recorded in the
+last-success record inspected before this run.
+
+The GitHub mirror and local workspace are captured separately, so local files
+may reflect an older checkout. This documentation update was prepared from the
+restored current GitHub main without changing the active working copy.
+Application build/tests were not rerun during this backup check. Coverage
+remains local only; NAS, off-site, offline, and live database backups remain
+pending as detailed below.
 
 Restic 0.19.1 was downloaded from its official release and checked against the
 published SHA-256 checksum. The encrypted local repository is outside the

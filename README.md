@@ -81,12 +81,12 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest verification:** September 17, 2026 at 10:30 a.m. Central
-(15:30 UTC). An on-demand backup succeeded, restoring GitHub main commit
-`15ed19d`. Repository identity, Git/LFS refresh, restored commit and refs,
-workspace-file checksums, full stored-data integrity, and the approved 30 daily
-/ 12 monthly retention all passed. Stored snapshots were confirmed for
-September 12, 13, 14, and 16 before this new September 17 backup.
+**Latest verification:** September 17, 2026 at 9:01 p.m. Central
+(2026-09-18 02:01 UTC). The scheduled backup succeeded, restoring GitHub main
+commit `42a2cd3`. Repository identity, Git/LFS refresh, restored commit and
+refs, workspace-file checksums, full stored-data integrity, and the approved
+30 daily / 12 monthly retention all passed. The preceding verified backup
+was approximately 10.5 hours old, within the 36-hour freshness limit.
 
 **September 15 missed run diagnosed:** The scheduled Codex turn failed at
 9:02 p.m. Central because the account had reached its usage limit, before the

@@ -81,20 +81,20 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest verification:** September 17, 2026 at 9:01 p.m. Central
-(2026-09-18 02:01 UTC). The scheduled backup succeeded, restoring GitHub main
-commit `42a2cd3`. Repository identity, Git/LFS refresh, restored commit and
+**Latest verification:** September 19, 2026 at 9:01 p.m. Central
+(2026-09-20 02:01 UTC). The scheduled backup succeeded, restoring GitHub main
+commit `6472871`. Repository identity, Git/LFS refresh, restored commit and
 refs, workspace-file checksums, full stored-data integrity, and the approved
-30 daily / 12 monthly retention all passed. The preceding verified backup
-was approximately 10.5 hours old, within the 36-hour freshness limit.
+30 daily / 12 monthly retention all passed.
 
-**September 15 missed run diagnosed:** The scheduled Codex turn failed at
-9:02 p.m. Central because the account had reached its usage limit, before the
-backup script executed. No September 15 snapshot is present. The September
-16 scheduled backup and September 17 manual check succeeded. The daily 9 p.m.
-schedule remains active, but requires available Codex usage as well as the
-computer and app running. Moving execution to an independent scheduler is a
-recommendation, not an implemented change.
+**Freshness recovery:** The preceding recorded success was September 17 at
+9:02 p.m. Central, nearly 48 hours earlier and beyond the 36-hour freshness
+limit. The September 18 scheduled Codex turn failed because the account had
+reached its usage limit. Tonight's verified snapshot restores current coverage.
+The September 15 run previously failed for the same reason, before the backup
+script executed. The daily 9 p.m. schedule requires available Codex usage as
+well as the computer and app running. Moving execution to an independent
+scheduler remains a recommendation, not an implemented change.
 
 The GitHub mirror and local workspace are captured separately, so local files
 may reflect an older checkout. This documentation update was prepared from the

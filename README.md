@@ -11,7 +11,9 @@ repository, and the local `main` branch tracks `origin/main`. GitHub access was
 verified for the `MikeDaddy84` account with administrator and push permission.
 Render continues to auto-deploy the website from pushes to `main`; no hosting,
 DNS, application, or secret configuration changed during this connection check.
-The local untracked `output/` research folder was preserved and not committed.
+Git's user-level safe-directory list trusts this exact checkout so normal commands
+work despite its inherited Windows owner SID. The local untracked `output/`
+research folder was preserved and not committed.
 
 Validation: fetched and pruned `origin`, confirmed its default branch and remote
 URL, fast-forwarded the active checkout to the current GitHub `main`, and verified

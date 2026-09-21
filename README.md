@@ -3,6 +3,21 @@
 Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, and websites and custom tools, based in Gordon, TX.
 
+## GitHub connection — September 21, 2026
+
+The active checkout is `D:\AhernAI\Website`. Its `origin` remote is the public
+[`MikeDaddy84/ahern-ai-solutions`](https://github.com/MikeDaddy84/ahern-ai-solutions)
+repository, and the local `main` branch tracks `origin/main`. GitHub access was
+verified for the `MikeDaddy84` account with administrator and push permission.
+Render continues to auto-deploy the website from pushes to `main`; no hosting,
+DNS, application, or secret configuration changed during this connection check.
+The local untracked `output/` research folder was preserved and not committed.
+
+Validation: fetched and pruned `origin`, confirmed its default branch and remote
+URL, fast-forwarded the active checkout to the current GitHub `main`, and verified
+that local `main` and `origin/main` were synchronized before this documentation
+commit.
+
 ## Crew Room — September 14, 2026
 
 **Current roster:** Trinity (`trinity`) replaces Molly as security specialist, per

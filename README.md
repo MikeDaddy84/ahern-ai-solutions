@@ -42,6 +42,12 @@ GitHub main / Render automatic deployment workflow. Unrelated local output files
 are preserved and excluded from the commit. No database migration, new secrets,
 or hosting configuration is required.
 
+**Production verification:** Render deployed source commit `2d7864b`. The public
+homepage, new service page, and sitemap returned HTTP 200 with the fifth service
+present. The live page contains the assessment-before-quote policy, and a phone
+browser verified that its CTA selects Networks & cabling in the contact form.
+No production form was submitted.
+
 ## GitHub connection — September 21, 2026
 
 The active checkout is `D:\AhernAI\Website`. Its `origin` remote is the public

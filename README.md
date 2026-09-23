@@ -3,6 +3,31 @@
 Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, and websites and custom tools, based in Gordon, TX.
 
+## Networks and cabling — proposed service direction, September 23, 2026
+
+The current homepage and `lib/services.js` present four offers: AI automation,
+custom PCs, private local AI, and websites/custom tools. Recommendation: add a
+fifth, **Networks & Cabling**, so customers can directly find switch installation
+and configuration, Ethernet testing and troubleshooting, copper termination,
+and fiber termination. An alternative is to broaden Custom PCs into Computers
+& Networks, with separate PC-build and business-network paths. The fifth offer
+is the recommended direction; no service-page or navigation changes have been
+implemented or approved yet.
+
+Suggested positioning: reliable connections for small businesses, with work
+scoped and quoted per project after assessing the existing setup. Describe the
+specific testing delivered; do not promise formal cable certification unless
+that service is actually available. Pricing, service area, support terms, and
+final website copy remain to be defined.
+
+Validation: reviewed GitHub main's homepage and service definitions. GitHub
+confirmed administrator and push access. Local shell access failed during this
+review, so this documentation-only update was published through the GitHub
+connector without modifying the local checkout. Synchronize the D: checkout
+before the next source change, preserving uncommitted work. The live site could
+not be retrieved by the web reader; no runtime tests or deployment verification
+were performed for this recommendation.
+
 ## GitHub connection — September 21, 2026
 
 The active checkout is `D:\AhernAI\Website`. Its `origin` remote is the public

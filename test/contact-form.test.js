@@ -33,3 +33,29 @@ test('automation demo switches scenarios without sending a network request', asy
   assert.equal(dom.window.document.querySelectorAll('.is-complete').length, 3);
   assert.match(dom.window.document.querySelector('#workflow-status').textContent, /Example complete/); dom.window.close();
 });
+
+
+test('network assessment links prefill an accepted inquiry with site-specific context', async () => {
+  const dom = new JSDOM(fs.readFileSync('public/index.html', 'utf8'), { url: 'https://example.test/?interest=Networks%20%26%20cabling#audit', runScripts: 'outside-only' });
+  const w = dom.window; w.matchMedia = () => ({ matches: true });
+  const requests = [];
+  w.fetch = async (url, options) => {
+    if (url === '/api/contact') requests.push(JSON.parse(options.body));
+    return { ok: true, json: async () => ({ ok: true, persisted: true }) };
+  };
+  w.eval(fs.readFileSync('public/script.js', 'utf8'));
+  const form = w.document.querySelector('#audit-form');
+  assert.equal(form.elements.namedItem('interest').value, 'Networks & cabling');
+  assert.match(w.document.querySelector('#project-details-label').textContent, /Site location/);
+  form.elements.namedItem('name').value = 'Example Visitor';
+  form.elements.namedItem('email').value = 'example@example.test';
+  form.elements.namedItem('projectDetails').value = 'Gordon office; switch and Ethernet assessment';
+  form.dispatchEvent(new w.Event('submit', { cancelable: true }));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(requests.length, 1);
+  const { lead } = require('../lib/contact').validate(requests[0]);
+  assert.equal(lead.interest, 'Networks & cabling');
+  assert.match(lead.message, /switch and Ethernet assessment/);
+  assert.equal(require('../lib/db').validEvent({ event: 'quote_requested', service: 'networks-cabling' }), true);
+  dom.window.close();
+});

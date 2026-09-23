@@ -43,3 +43,6 @@
 @media(max-width:850px) { .plan-tool,.document-example { grid-template-columns:1fr; } .document-example>div+div { border-left:0;border-top:1px solid var(--color-border); } .intake-steps { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .plan-fields,.offer-grid,.service-pillars.home-services,.lead-edit { grid-template-columns:1fr; } .home-services .pillar-card:nth-child(even) { border-right:1px solid var(--color-border); } .plan-fields,.plan-output,.document-example>div,.intake-example { padding:1.25rem; } .intake-steps { grid-template-columns:1fr; } }
 @media print { .header,.footer,.bg-aurora,.scanlines,#matrix-rain,[data-print-guides],.resource-guide a { display:none!important; } body { color:#111;background:#fff; } .resource-guide { break-inside:avoid;padding-block:1rem; } .service-hero { padding:1rem 0; } }
+
+/* The fifth service fills the last row on desktop and stacks on phones. */
+.home-services .network-pillar { grid-column: 1 / -1; border-right: 0; }

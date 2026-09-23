@@ -1,32 +1,46 @@
 # Ahern AI — Website
 
 Node/Express site for Ahern AI: AI automation, custom PCs,
-private local AI systems, and websites and custom tools, based in Gordon, TX.
+private local AI systems, websites and custom tools, and networks and cabling,
+based in Gordon, TX.
 
-## Networks and cabling — proposed service direction, September 23, 2026
+## Networks & Cabling — September 23, 2026
 
-The current homepage and `lib/services.js` present four offers: AI automation,
-custom PCs, private local AI, and websites/custom tools. Recommendation: add a
-fifth, **Networks & Cabling**, so customers can directly find switch installation
-and configuration, Ethernet testing and troubleshooting, copper termination,
-and fiber termination. An alternative is to broaden Custom PCs into Computers
-& Networks, with separate PC-build and business-network paths. The fifth offer
-is the recommended direction; no service-page or navigation changes have been
-implemented or approved yet.
+Networks & Cabling is the fifth service, alongside automation, custom PCs,
+private AI, and websites/custom tools. The dedicated page is
+`/services/networks-cabling`. It covers switch installation and configuration,
+Ethernet testing and troubleshooting, copper and fiber termination, labeling,
+and documentation.
 
-Suggested positioning: reliable connections for small businesses, with work
-scoped and quoted per project after assessing the existing setup. Describe the
-specific testing delivered; do not promise formal cable certification unless
-that service is actually available. Pricing, service area, support terms, and
-final website copy remain to be defined.
+**Quote policy:** inspect the existing setup on site first, then provide a written
+quote for the agreed equipment, materials, labor, testing, and downtime. The
+customer approves the quote before installation or repairs. Any assessment or
+travel charge is agreed before the visit. No fixed package price or online
+networking estimate is published; follow-up support is scoped separately.
 
-Validation: reviewed GitHub main's homepage and service definitions. GitHub
-confirmed administrator and push access. Local shell access failed during this
-review, so this documentation-only update was published through the GitHub
-connector without modifying the local checkout. Synchronize the D: checkout
-before the next source change, preserving uncommitted work. The live site could
-not be retrieved by the web reader; no runtime tests or deployment verification
-were performed for this recommendation.
+The fifth offer appears in the homepage service chooser and pillar grid,
+desktop/mobile navigation, footer, planning guides, sitemap, and homepage
+structured data. Desktop navigation keeps six links: Networks replaces Blog;
+Blog remains in the mobile menu and footer. Network assessment links select
+Networks & cabling in the contact form, with prompts for site location,
+equipment, and connection needs. Contact validation and service analytics
+accept the new offer. The fifth homepage card spans the final desktop row and
+stacks on mobile. Existing service prices and portal behavior are unchanged.
+
+**Validation:** production build passed. The root suite passed 55 checks; the
+Crew Room cleanup hook failed with the previously documented Windows EPERM
+file-lock error after its behavior checks passed. Journey checks cover all five
+service routes, page metadata, sitemap inclusion, links, assessment-first copy,
+and absence of fixed pricing on the networking page. A regression check covers
+network inquiry prefill, submission payload, backend validation, and analytics
+acceptance. Headless Edge checks at 1440, 900, and 390 pixels found no horizontal
+overflow on the homepage or new service page and verified the assessment CTA
+selects the correct service. No test inquiry was sent to production.
+
+The active D: checkout was synchronized before editing. Changes use the existing
+GitHub main / Render automatic deployment workflow. Unrelated local output files
+are preserved and excluded from the commit. No database migration, new secrets,
+or hosting configuration is required.
 
 ## GitHub connection — September 21, 2026
 
@@ -960,7 +974,7 @@ also carry `white-space: nowrap`, because one item wrapping to two lines beside
 single-line neighbours makes the whole bar look broken.
 
 So the header carries Automation / Custom PCs / Private AI / Websites /
-PC Builder / Blog, and **the footer nav carries the full set**, including
+PC Builder / Networks, and **the footer nav carries the full set**, including
 automation pricing, How it works, FAQ, About, and contact. Adding to the header means taking
 something out of it.
 

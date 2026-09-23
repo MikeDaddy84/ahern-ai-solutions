@@ -9,11 +9,11 @@ let server, origin;
 test.before(async () => { server = app.listen(0, '127.0.0.1'); await new Promise(resolve => server.once('listening', resolve)); origin = 'http://127.0.0.1:' + server.address().port; });
 test.after(() => server.close());
 test('pages, self-hosted 3D libraries, and service sitemap are available', async () => {
-  for (const path of ['/pc-builder', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/vendor/three/three.module.js', '/vendor/three-addons/environments/RoomEnvironment.js', '/builder-scene.mjs']) assert.equal((await fetch(origin + path)).status, 200, path);
+  for (const path of ['/pc-builder', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/services/networks-cabling', '/vendor/three/three.module.js', '/vendor/three-addons/environments/RoomEnvironment.js', '/builder-scene.mjs']) assert.equal((await fetch(origin + path)).status, 200, path);
   assert.match(await (await fetch(origin + '/sitemap.xml')).text(), /services\/local-ai/);
 });
 test('audience journeys retain content, valid destinations, metadata, and inquiry handoffs', async () => {
-  const paths = ['/', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/pc-builder', '/resources'];
+  const paths = ['/', '/services/automation', '/services/custom-pcs', '/services/local-ai', '/services/websites', '/services/networks-cabling', '/pc-builder', '/resources'];
   const docs = new Map();
   for (const path of paths) {
     const response = await fetch(origin + path);
@@ -21,14 +21,18 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
     docs.set(path, new JSDOM(await response.text()).window.document);
   }
   const home = docs.get('/');
-  assert.equal(home.querySelectorAll('.audience-paths a').length, 4);
-  assert.equal(home.querySelectorAll('.home-services > .pillar-card').length, 4);
+  assert.equal(home.querySelectorAll('.audience-paths a').length, 5);
+  assert.equal(home.querySelectorAll('.home-services > .pillar-card').length, 5);
   assert.ok(home.querySelector('#services'));
   assert.ok(home.querySelector('.founder-section'));
   assert.equal(home.querySelectorAll('.grid-pricing, .web-tiers, #hero-demo, [data-workflow-demo]').length, 0);
   assert.ok(docs.get('/services/automation').querySelector('#pricing .grid-pricing'));
   assert.ok(docs.get('/services/automation').querySelector('[data-workflow-demo]'));
   assert.ok(docs.get('/services/websites').querySelector('#web .web-tiers'));
+  const network = docs.get('/services/networks-cabling').querySelector('main').textContent;
+  assert.match(network, /quoted after an on-site assessment/);
+  assert.match(network, /approve the quote before installation/i);
+  assert.doesNotMatch(network, /\$[0-9]|Website Starter|The Front Door/);
   const pc = docs.get('/services/custom-pcs');
   assert.equal(pc.querySelector('#hero-demo').dataset.defaultTrack, 'gaming');
   const scripts = [...pc.querySelectorAll('script[src]')].map(el => el.getAttribute('src'));
@@ -56,7 +60,7 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
       assert.ok(doc.querySelector('a[href*="interest="]'), 'service consultation: ' + path);
     }
   }
-  assert.equal(titles.size, 4);
+  assert.equal(titles.size, 5);
 });
 test('database outage returns a recoverable error, never a false success', async () => {
   const response = await fetch(origin + '/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Example', email: 'example@example.test', interest: 'AI automation' }) });

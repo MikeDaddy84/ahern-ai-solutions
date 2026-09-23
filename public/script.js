@@ -86,13 +86,14 @@
   var result = document.getElementById('form-result');
   var success = document.getElementById('audit-success');
 
-  var serviceNames = { 'AI automation': 'automation', 'Custom gaming PC': 'custom-pcs', 'Professional workstation': 'custom-pcs', 'Everyday or office PC': 'custom-pcs', 'Business local AI system': 'local-ai', 'Website or custom app': 'websites' };
+  var serviceNames = { 'AI automation': 'automation', 'Custom gaming PC': 'custom-pcs', 'Professional workstation': 'custom-pcs', 'Everyday or office PC': 'custom-pcs', 'Business local AI system': 'local-ai', 'Website or custom app': 'websites', 'Networks & cabling': 'networks-cabling' };
   var pendingPlan = null;
   if (form) {
     var interestField = form.elements.namedItem('interest');
     var detailsLabel = document.getElementById('project-details-label');
     var detailsInput = document.getElementById('project-details');
     var prompts = {
+      'networks-cabling': ['Site location, existing equipment, and connection needs', 'e.g. Gordon office; add a switch and troubleshoot Ethernet outlets'],
       'automation': ['Tools and task volume', 'e.g. Outlook, a spreadsheet, and 50 inquiries a week'],
       'custom-pcs': ['Games or apps, setup needs, and delivery area', 'e.g. video editing, data migration, pickup in North Texas'],
       'local-ai': ['Document types, users, and cloud restrictions', 'e.g. searchable PDFs, three users, local processing'],
@@ -207,7 +208,7 @@
   // query strings, visitor IDs, or contact details are included in analytics.
   var recordedEvents = new Set();
   window.ahernTrack = function (event, service) {
-    if (!['service_selected','assessment_completed','demo_completed','quote_requested','inquiry_received'].includes(event) || !['automation','custom-pcs','local-ai','websites'].includes(service)) return;
+    if (!['service_selected','assessment_completed','demo_completed','quote_requested','inquiry_received'].includes(event) || !['automation','custom-pcs','local-ai','websites','networks-cabling'].includes(service)) return;
     var key = event + ':' + service;
     if (recordedEvents.has(key)) return;
     recordedEvents.add(key);
@@ -219,7 +220,7 @@
     if (!link) return;
     var url = new URL(link.href, location.href);
     if (url.origin !== location.origin) return;
-    var match = url.pathname.match(/^\/services\/(automation|custom-pcs|local-ai|websites)$/);
+    var match = url.pathname.match(/^\/services\/(automation|custom-pcs|local-ai|websites|networks-cabling)$/);
     if (match) window.ahernTrack('service_selected', match[1]);
     if (url.searchParams.has('interest')) window.ahernTrack('quote_requested', serviceNames[url.searchParams.get('interest')]);
   });

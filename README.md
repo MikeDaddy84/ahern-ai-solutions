@@ -143,6 +143,18 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
+**Latest attempt blocked:** September 23, 2026 at 11:02 p.m. Central
+(2026-09-24 04:02 UTC). The current Windows account cannot read the private
+backup configuration or last-success record. The backup exited before creating
+a snapshot; no restore, integrity, or retention checks ran. Private-folder
+permissions were not changed. Run under the original authorized Windows owner,
+or have an administrator explicitly migrate access to the intended account.
+The last success verified in this task was September 19 at 9:02 p.m. Central,
+about 98 hours earlier, exceeding the 36-hour limit. Newer backup status cannot
+be confirmed until private-folder access is restored. GitHub documentation
+publication does not constitute a successful backup. Protection remains local
+only; NAS, off-site, offline, database, and secret recovery remain pending.
+
 **Latest verification:** September 19, 2026 at 9:01 p.m. Central
 (2026-09-20 02:01 UTC). The scheduled backup succeeded, restoring GitHub main
 commit `6472871`. Repository identity, Git/LFS refresh, restored commit and

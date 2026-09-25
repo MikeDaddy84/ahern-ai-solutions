@@ -4,6 +4,26 @@ Node/Express site for Ahern AI: AI automation, custom PCs,
 private local AI systems, websites and custom tools, and networks and cabling,
 based in Gordon, TX.
 
+## LinkedIn banner — September 24, 2026
+
+A LinkedIn personal-profile banner is available at
+[`public/images/ahern-ai-linkedin-banner-v1.png`](public/images/ahern-ai-linkedin-banner-v1.png).
+It was recreated from the supplied screenshot with the built-in image-generation
+tool, retaining the metallic A/circuit motif, blue smoke, orange fire, and
+AHERN AI name. The layout leaves atmospheric space on the left and places the
+complete logo and name slightly right of center.
+
+The PNG export is 1584 × 396 pixels (4:1), about 1.43 MB, matching
+[LinkedIn's recommended cover dimensions](https://www.linkedin.com/help/lms/answer/a568217)
+and staying below its 8 MB limit. The generated composition was visually checked;
+the export crops background above and below before resizing. Uploading and
+checking the actual profile display in LinkedIn remain manual setup steps.
+
+Generation brief: recreate the screenshot's artwork as a clean wide banner,
+preserve the metallic A and three circuit traces, blue/orange atmosphere and
+exact text "AHERN AI", keep all branding away from edges, and omit browser UI.
+No website page references this asset yet.
+
 ## Networks & Cabling — September 23, 2026
 
 Networks & Cabling is the fifth service, alongside automation, custom PCs,

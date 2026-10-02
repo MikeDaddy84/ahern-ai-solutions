@@ -4,11 +4,12 @@ Node/Express site for Ahern AI: managed AI phone agents, AI automation, custom
 PCs, private local AI systems, websites and custom tools, and networks and
 cabling, based in Gordon, TX.
 
-## AI phone agents — prepared for review, October 2, 2026
+## AI phone agents — live, October 2, 2026
 
-The review branch `codex/ai-phone-agents-review` makes managed AI phone agents
-the main offer. It is **not deployed**. Render still deploys from `main`; do not
-merge this branch until Mike reviews and approves the finished website.
+Mike approved the reviewed update for production on October 2, 2026. Managed
+AI phone agents are now the main offer at [ahernai.com](https://ahernai.com).
+The approved website commit `b3511f8` was fast-forwarded to GitHub `main` and
+published through the existing Render automatic deployment workflow.
 
 The homepage leads with a call to Jaylene at **(254) 693-4919**
 (`tel:+12546934919`), identifies her as an AI receptionist, and invites callers
@@ -52,6 +53,17 @@ focus visibility, theme persistence, package-to-inquiry navigation, 31 internal
 destinations, and new secondary-copy/button contrast were checked. Mocked form
 tests cover failed persistence, offline retry, and durable success. Screenshots
 and local QA results are in the uncommitted `output/phone-agent-review/` folder.
+
+**Production verification:** the homepage, dedicated service page, new styles,
+browser script, and sitemap returned HTTP 200. Published homepage/CSS/script
+content matched the approved commit. Headless Edge verified both pages at
+1440px and 390px in light and dark themes, all three monthly prices, telephone
+links, navigation, and absence of horizontal overflow or page JavaScript errors.
+The mobile package link selected AI phone agents in the existing contact form.
+No production inquiry was submitted. Release screenshots and results remain
+local in `output/phone-agent-release/`. The build/test results above apply to
+the unchanged approved application source. Only release documentation was
+updated after publication; hosting, DNS, and secret configuration are unchanged.
 
 **Still unverified:** no actual phone conversation or Jaylene-to-Hideo transfer
 was tested. No production inquiry was submitted. The local preview intentionally

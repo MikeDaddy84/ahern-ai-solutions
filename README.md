@@ -1,8 +1,63 @@
 # Ahern AI — Website
 
-Node/Express site for Ahern AI: AI automation, custom PCs,
-private local AI systems, websites and custom tools, and networks and cabling,
-based in Gordon, TX.
+Node/Express site for Ahern AI: managed AI phone agents, AI automation, custom
+PCs, private local AI systems, websites and custom tools, and networks and
+cabling, based in Gordon, TX.
+
+## AI phone agents — prepared for review, October 2, 2026
+
+The review branch `codex/ai-phone-agents-review` makes managed AI phone agents
+the main offer. It is **not deployed**. Render still deploys from `main`; do not
+merge this branch until Mike reviews and approves the finished website.
+
+The homepage leads with a call to Jaylene at **(254) 693-4919**
+(`tel:+12546934919`), identifies her as an AI receptionist, and invites callers
+to ask for Hideo, the AI manager. It then presents the three packages, the
+configuration/testing/management process, broader services, founder background,
+and a repeated call and contact invitation. Both agents are identified as AI;
+the demonstration is explicitly separate from per-agent subscriptions.
+
+The dedicated page is `/services/ai-phone-agents`, with package comparison at
+`#packages` and individual `#answering`, `#receptionist`, and `#manager` anchors.
+Phone inquiries use **phones@ahernai.com**; general inquiries retain
+**hello@ahernai.com**. Navigation, footers, homepage metadata/structured data,
+sitemap, contact interest validation/prefill, and anonymous service events include
+the new offer. Existing services, sign-in, and PC Builder remain accessible.
+
+| Package | Monthly / agent | Setup / agent | Included minutes | Additional minute |
+| --- | ---: | ---: | ---: | ---: |
+| Answering | $349 | $750 | 300 | $0.75 |
+| Receptionist | $549 | $1,250 | 500 | $0.75 |
+| Manager | $749 | $1,750 | 700 | $0.95 |
+
+Prices follow Mike's supplied October 2 brief. No newer conflicting phone-agent
+pricing was found in the project. Full inclusions and terms are in
+`content/services/phone-agents.html`; the homepage comparison repeats the key
+figures and boundaries, with regression checks to catch drift. Prices are USD
+per agent before applicable taxes, with setup and usage charges. Receptionist
+includes one standard calendar OR CRM integration; Manager includes two standard
+integrations total. Financial decisions and policy exceptions stay with the
+business owner/team. Every additional agent has its own fees and minute allowance.
+
+**Validation:** the production build passed (both commands behind `npm run build`
+were run directly with Node). All 16 targeted route, contact, and planning checks
+passed. The full root suite passed 83 checks, including 25 existing local backup
+checks; the sole failure was the previously documented Windows EPERM temporary
+database cleanup hook in Crew Room, after its behavior checks passed.
+
+Headless Edge checked both new page layouts at 320, 390, 768, 820, 900, 1024, 1100,
+and 1440 pixels in light and dark themes: no horizontal overflow, duplicate IDs,
+broken local anchors, or page JavaScript errors. Keyboard skip/menu/FAQ behavior,
+focus visibility, theme persistence, package-to-inquiry navigation, 31 internal
+destinations, and new secondary-copy/button contrast were checked. Mocked form
+tests cover failed persistence, offline retry, and durable success. Screenshots
+and local QA results are in the uncommitted `output/phone-agent-review/` folder.
+
+**Still unverified:** no actual phone conversation or Jaylene-to-Hideo transfer
+was tested. No production inquiry was submitted. The local preview intentionally
+has no production database or email credentials. No hosting changes, migrations,
+new dependencies, or secrets are required. Unrelated local backup/recovery edits,
+their README section, tests, and output files are excluded from this release.
 
 ## LinkedIn banner — September 24, 2026
 
@@ -564,10 +619,13 @@ configure the production service. No mailbox password is needed for Resend.
 
 ## Audience paths — September 2026
 
-The homepage is the starting point for three audiences: business automation
-buyers, gamers and creators, and private-AI customers. Its hero links directly
-to each service; detailed pricing and demos live on their relevant pages.
+The homepage now leads with managed AI phone agents. The broader-service grid
+retains entry points for automation buyers, gamers and creators, private-AI
+customers, website projects, and networks/cabling. Detailed pricing and demos
+live on their relevant pages.
 
+- `/services/ai-phone-agents`: the Jaylene/Hideo call invitation, Answering,
+  Receptionist, and Manager packages, full terms, managed setup, and FAQs.
 - `/services/automation`: workflow examples, the interactive sample walkthrough,
   all automation packages, and business-specific FAQs.
 - `/services/custom-pcs`: gaming, creative and everyday builds, the live estimate
@@ -576,6 +634,8 @@ to each service; detailed pricing and demos live on their relevant pages.
   costs, and a consultation or AI hardware exploration.
 - `/services/websites`: website and custom-tool scopes, full existing pricing,
   care plans, and a focused consultation link.
+- `/services/networks-cabling`: site assessment, switch and cable work, and a
+  written quote before installation or repairs.
 
 The homepage retains the founder introduction, process, general questions, and
 contact form. Service consultation links preselect the matching contact interest.
@@ -583,17 +643,17 @@ Old homepage hashes for pricing, hardware, websites, and the automation demo
 forward to their new destinations while retaining query parameters. Pricing,
 hardware, and website anchors also retain a homepage service link without JS.
 
-Full pricing is unchanged. The relocated markup lives in
+Existing service pricing is unchanged. The relocated markup lives in
 `content/services/*.html`, loaded by `lib/services.js`. The sitemap includes all
-four service pages, each with its own title, description, and canonical URL.
+six service pages, each with its own title, description, and canonical URL.
 The existing Express/Render hosting is retained.
 
 ## Brand
 
 ### Homepage credibility
 
-The `#meet-mike` introduction sits directly after the hero and draws from the
-About page: twelve years in technical work, VoIP engineering at NextLink, and
+The `#meet-mike` introduction follows the phone-agent offer, managed process,
+and broader services. It draws from the About page: twelve years in technical work, VoIP engineering at NextLink, and
 Mike's progression to KCS VP/CTO in 2022. Keep these details aligned with
 `lib/pages.js`; they describe Mike's career, not Ahern AI client results.
 
@@ -1005,16 +1065,12 @@ in the markup.
 
 ### The header nav holds six items
 
-Six is the cap, verified against the layout: the header is logo + nav +
-theme toggle + CTA inside a 1120px container, and a seventh item pushes the
-whole page into a horizontal scroll before the nav drops out at 820px. Labels
-also carry `white-space: nowrap`, because one item wrapping to two lines beside
-single-line neighbours makes the whole bar look broken.
-
-So the header carries Automation / Custom PCs / Private AI / Websites /
-PC Builder / Networks, and **the footer nav carries the full set**, including
-automation pricing, How it works, FAQ, About, and contact. Adding to the header means taking
-something out of it.
+The desktop header carries AI Phone Agents / Automations / Custom PCs /
+Private AI / Websites / Networks alongside sign-in, the theme toggle, and Call
+Jaylene. Labels do not wrap. The mobile menu takes over at 1100px so the longer
+phone-agent label fits without horizontal scrolling. PC Builder remains in the
+mobile menu, footer, and custom PC service page. The footer carries the full set
+of services and package links. Narrow-phone header spacing is checked at 320px.
 
 ## Blog / reference builds
 

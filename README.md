@@ -38,6 +38,8 @@ the open menu. No menu text escaped its link box and no page scrolled
 horizontally. Keyboard menu opening/Escape, restored content, package
 navigation, legacy bookmarks, and inquiry prefill passed. After Render
 deployed, the same checks passed live at 390px and 1440px in both themes.
+An uncached production GET also returned HTTP 200 and confirmed the phone-agent
+introduction, restored homepage, and shortened mobile Call link in the served HTML.
 No production inquiry was submitted. Screenshots and results remain local
 in `output/mobile-home-review/` and `output/mobile-home-release/`.
 

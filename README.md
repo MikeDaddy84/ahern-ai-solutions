@@ -13,10 +13,33 @@ published through the existing Render automatic deployment workflow.
 
 The homepage leads with a call to Jaylene at **(254) 693-4919**
 (`tel:+12546934919`), identifies her as an AI receptionist, and invites callers
-to ask for Hideo, the AI manager. It then presents the three packages, the
-configuration/testing/management process, broader services, founder background,
-and a repeated call and contact invitation. Both agents are identified as AI;
-the demonstration is explicitly separate from per-agent subscriptions.
+to ask for Hideo, the AI manager. Both agents are identified as AI, and the
+demonstration is explicitly separate from per-agent subscriptions.
+
+**Homepage and mobile-menu refinement (October 2):** at Mike's request,
+commit `7a9e2c5` restores the original homepage below that phone-agent
+introduction: “Get found. Get leads. Get time back.” and the five-service
+chooser, founder background, service cards, work examples, general process,
+FAQ, and consultation form. The restored headline is an H2, leaving one H1.
+The full phone-agent comparison and managed process remain on the dedicated
+service page; the top invitation links there. Existing `/#phone-packages`
+bookmarks forward to `/services/ai-phone-agents#packages`.
+
+The mobile-menu phone entry now reads **Call**, with an accessible label
+identifying Jaylene and the number. Menu items can wrap within their grid
+columns, overriding the general no-wrap telephone rule that caused overlap.
+The fix applies to the homepage, shared service/blog pages, and PC Builder.
+
+**Refinement validation:** production build and all 16 targeted route,
+contact, and planning checks passed. Headless Edge checked the homepage,
+phone-agent page, and PC Builder at 320, 360, 390, 412, 540, 820, 1100, and
+1440 pixels in both themes (48 page/viewport/theme combinations), including
+the open menu. No menu text escaped its link box and no page scrolled
+horizontally. Keyboard menu opening/Escape, restored content, package
+navigation, legacy bookmarks, and inquiry prefill passed. After Render
+deployed, the same checks passed live at 390px and 1440px in both themes.
+No production inquiry was submitted. Screenshots and results remain local
+in `output/mobile-home-review/` and `output/mobile-home-release/`.
 
 The dedicated page is `/services/ai-phone-agents`, with package comparison at
 `#packages` and individual `#answering`, `#receptionist`, and `#manager` anchors.
@@ -33,14 +56,14 @@ the new offer. Existing services, sign-in, and PC Builder remain accessible.
 
 Prices follow Mike's supplied October 2 brief. No newer conflicting phone-agent
 pricing was found in the project. Full inclusions and terms are in
-`content/services/phone-agents.html`; the homepage comparison repeats the key
-figures and boundaries, with regression checks to catch drift. Prices are USD
+`content/services/phone-agents.html`, with regression checks for prices and
+package boundaries. The homepage links to that comparison. Prices are USD
 per agent before applicable taxes, with setup and usage charges. Receptionist
 includes one standard calendar OR CRM integration; Manager includes two standard
 integrations total. Financial decisions and policy exceptions stay with the
 business owner/team. Every additional agent has its own fees and minute allowance.
 
-**Validation:** the production build passed (both commands behind `npm run build`
+**Initial release validation:** the production build passed (both commands behind `npm run build`
 were run directly with Node). All 16 targeted route, contact, and planning checks
 passed. The full root suite passed 83 checks, including 25 existing local backup
 checks; the sole failure was the previously documented Windows EPERM temporary
@@ -54,7 +77,7 @@ destinations, and new secondary-copy/button contrast were checked. Mocked form
 tests cover failed persistence, offline retry, and durable success. Screenshots
 and local QA results are in the uncommitted `output/phone-agent-review/` folder.
 
-**Production verification:** the homepage, dedicated service page, new styles,
+**Initial production verification:** the homepage, dedicated service page, new styles,
 browser script, and sitemap returned HTTP 200. Published homepage/CSS/script
 content matched the approved commit. Headless Edge verified both pages at
 1440px and 390px in light and dark themes, all three monthly prices, telephone
@@ -62,8 +85,8 @@ links, navigation, and absence of horizontal overflow or page JavaScript errors.
 The mobile package link selected AI phone agents in the existing contact form.
 No production inquiry was submitted. Release screenshots and results remain
 local in `output/phone-agent-release/`. The build/test results above apply to
-the unchanged approved application source. Only release documentation was
-updated after publication; hosting, DNS, and secret configuration are unchanged.
+the initial approved application source. The refinement above has its own
+validation record. Hosting, DNS, and secret configuration remain unchanged.
 
 **Still unverified:** no actual phone conversation or Jaylene-to-Hideo transfer
 was tested. No production inquiry was submitted. The local preview intentionally
@@ -361,8 +384,9 @@ and [CISA backup guidance](https://www.cisa.gov/stopransomware/ransomware-guide)
 
 ## Website offers and automation positioning — September 12, 2026
 
-The homepage leads with “Websites & Automations” and “Get found. Get leads.
-Get time back.” Website-only projects are an entry service: Website Starter
+Below the AI receptionist introduction, the homepage retains “Websites &
+Automations” and “Get found. Get leads. Get time back.” Website-only projects
+are an entry service: Website Starter
 is $995 for one page, Business Website is $1,995 for up to five pages, and
 The Front Door starts at $2,995 for the Business Website plus one defined
 automation. Each website package includes two revision rounds within scope.
@@ -631,8 +655,8 @@ configure the production service. No mailbox password is needed for Resend.
 
 ## Audience paths — September 2026
 
-The homepage now leads with managed AI phone agents. The broader-service grid
-retains entry points for automation buyers, gamers and creators, private-AI
+The homepage leads with managed AI phone agents, followed by the original
+five-service chooser and broader-service grid. These retain entry points for automation buyers, gamers and creators, private-AI
 customers, website projects, and networks/cabling. Detailed pricing and demos
 live on their relevant pages.
 
@@ -651,7 +675,7 @@ live on their relevant pages.
 
 The homepage retains the founder introduction, process, general questions, and
 contact form. Service consultation links preselect the matching contact interest.
-Old homepage hashes for pricing, hardware, websites, and the automation demo
+Old homepage hashes for phone packages, pricing, hardware, websites, and the automation demo
 forward to their new destinations while retaining query parameters. Pricing,
 hardware, and website anchors also retain a homepage service link without JS.
 
@@ -664,8 +688,9 @@ The existing Express/Render hosting is retained.
 
 ### Homepage credibility
 
-The `#meet-mike` introduction follows the phone-agent offer, managed process,
-and broader services. It draws from the About page: twelve years in technical work, VoIP engineering at NextLink, and
+The `#meet-mike` introduction follows the phone-agent introduction and restored
+service chooser. It draws from the About page: twelve years in technical work,
+VoIP engineering at NextLink, and
 Mike's progression to KCS VP/CTO in 2022. Keep these details aligned with
 `lib/pages.js`; they describe Mike's career, not Ahern AI client results.
 
@@ -1083,6 +1108,8 @@ Jaylene. Labels do not wrap. The mobile menu takes over at 1100px so the longer
 phone-agent label fits without horizontal scrolling. PC Builder remains in the
 mobile menu, footer, and custom PC service page. The footer carries the full set
 of services and package links. Narrow-phone header spacing is checked at 320px.
+The mobile telephone link reads Call; mobile labels wrap inside their columns
+so a long label cannot overlap the next link.
 
 ## Blog / reference builds
 

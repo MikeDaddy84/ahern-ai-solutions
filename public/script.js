@@ -3,6 +3,7 @@
 (function () {
   // Keep old homepage bookmarks useful after moving the detailed sections.
   var movedSections = {
+    '#phone-packages': '/services/ai-phone-agents#packages',
     '#pricing': '/services/automation#pricing',
     '#hardware': '/services/custom-pcs#hardware',
     '#web': '/services/websites#web',

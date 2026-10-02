@@ -21,6 +21,12 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
     docs.set(path, new JSDOM(await response.text()).window.document);
   }
   const home = docs.get('/');
+  const homeSections = [...home.querySelectorAll('main > section')];
+  assert.ok(homeSections[0].classList.contains('phone-home-hero'), 'AI receptionist offer stays first');
+  assert.ok(homeSections[0].querySelector('a[href="/services/ai-phone-agents#packages"]'), 'offer links to full package details');
+  assert.ok(homeSections[1].querySelector('.audience-paths'), 'original homepage follows the phone offer');
+  assert.equal(home.querySelectorAll('.audience-paths a').length, 5);
+  assert.deepEqual(homeSections.slice(2).map(section => section.id), ['meet-mike', 'services', 'work-samples', 'process', 'faq', 'audit']);
   assert.equal(home.querySelectorAll('.home-services > .pillar-card').length, 5);
   for (const service of ['automation', 'custom-pcs', 'local-ai', 'websites', 'networks-cabling']) assert.ok(home.querySelector('#services a[href="/services/' + service + '"]'), 'broader service remains accessible: ' + service);
   assert.ok(home.querySelector('#services'));
@@ -45,6 +51,9 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
     assert.equal(doc.querySelectorAll('.nav > a').length, 6, 'desktop navigation: ' + path);
     assert.equal(doc.querySelector('.header-actions .header-call').getAttribute('href'), 'tel:+12546934919', 'working call invitation: ' + path);
     assert.ok(doc.querySelector('.mobile-menu a[href="/services/ai-phone-agents"]'), 'mobile phone navigation: ' + path);
+    const mobileCall = doc.querySelector('.mobile-menu a[href="tel:+12546934919"]');
+    assert.equal(mobileCall.textContent.trim(), 'Call', 'compact mobile call link: ' + path);
+    assert.equal(mobileCall.getAttribute('aria-label'), 'Call Jaylene at (254) 693-4919', 'accessible call destination: ' + path);
     assert.ok(doc.querySelector('.footer-nav a[href="/services/ai-phone-agents#packages"]'), 'footer package navigation: ' + path);
     assert.ok(doc.querySelector('.mobile-menu a[href="/pc-builder"]'), 'mobile PC Builder navigation: ' + path);
     assert.ok(doc.querySelector('.footer-nav a[href="/pc-builder"]'), 'footer PC Builder navigation: ' + path);
@@ -70,48 +79,41 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
   assert.equal(titles.size, 6);
 });
 
-test('phone packages preserve per-agent pricing, integration limits, and human decisions on both pages', async () => {
+test('dedicated phone page preserves per-agent pricing, integration limits, and human decisions', async () => {
   const expected = [
     { name: 'Answering', monthly: '$349', setup: '$750', minutes: '300', additional: '$0.75' },
     { name: 'Receptionist', monthly: '$549', setup: '$1,250', minutes: '500', additional: '$0.75' },
     { name: 'Manager', monthly: '$749', setup: '$1,750', minutes: '700', additional: '$0.95' }
   ];
   const text = element => element.textContent.replace(/\s+/g, ' ').trim();
-  for (const path of ['/', '/services/ai-phone-agents']) {
-    const dom = new JSDOM(await (await fetch(origin + path)).text());
-    const doc = dom.window.document, isHome = path === '/';
-    const cards = [...doc.querySelectorAll(isHome ? '.phone-package-card' : '.ph-package')];
-    assert.equal(cards.length, 3, path);
-    for (const [index, price] of expected.entries()) {
-      const card = cards[index];
-      assert.equal(text(card.querySelector('h3')), price.name);
-      assert.equal(text(card.querySelector(isHome ? '.phone-package-price strong' : '.ph-price strong')), price.monthly);
-      assert.equal(text(card.querySelector(isHome ? '.phone-package-price span' : '.ph-price span')), '/month per agent');
-      if (isHome) {
-        assert.equal(text(card.querySelector('.phone-package-setup')), price.setup + ' setup · ' + price.minutes + ' included minutes');
-        assert.equal(text(card.querySelector('.phone-overage')), price.additional + ' per additional minute');
-      } else {
-        assert.equal(text(card.querySelector('.ph-setup')), price.setup + ' setup');
-        assert.deepEqual([...card.querySelectorAll('.ph-allowance dd')].map(text), [price.minutes, price.additional + '/min']);
-      }
-    }
-    assert.match(text(cards[1]), /One standard calendar OR CRM integration/);
-    assert.match(text(cards[2]), /[Tt]wo standard integrations total/);
-    const main = text(doc.querySelector('main'));
-    assert.match(main, /Financial decisions and policy exceptions (?:stay|remain) with (?:your |the )?business owner(?:\/team| or team)/);
-    assert.match(main, /Each additional agent has its own setup fee, subscription, and minute allowance/);
-    assert.match(main, /Included minutes cover AI-handled call time/);
-    assert.match(main, /Custom integrations, texting, and additional transfer charges are quoted separately/);
-    assert.match(main, /[Oo]ne business location and one language/);
-    assert.match(main, /[Uu]p to 30 minutes of routine configuration updates each month/);
-    assert.match(main, /USD per agent, before applicable taxes/);
-    assert.match(main, /compatible call forwarding/);
-    assert.match(main, /Jaylene.*AI receptionist/);
-    assert.match(main, /Hideo.*AI manager/);
-    assert.match(main, isHome ? /not a two-agent bundle/ : /does not automatically include two agents/);
-    for (const link of doc.querySelectorAll('a[href^="tel:"]')) assert.equal(link.getAttribute('href'), 'tel:+12546934919');
-    dom.window.close();
+  const dom = new JSDOM(await (await fetch(origin + '/services/ai-phone-agents')).text());
+  const doc = dom.window.document;
+  const cards = [...doc.querySelectorAll('.ph-package')];
+  assert.equal(cards.length, 3);
+  for (const [index, price] of expected.entries()) {
+    const card = cards[index];
+    assert.equal(text(card.querySelector('h3')), price.name);
+    assert.equal(text(card.querySelector('.ph-price strong')), price.monthly);
+    assert.equal(text(card.querySelector('.ph-price span')), '/month per agent');
+    assert.equal(text(card.querySelector('.ph-setup')), price.setup + ' setup');
+    assert.deepEqual([...card.querySelectorAll('.ph-allowance dd')].map(text), [price.minutes, price.additional + '/min']);
   }
+  assert.match(text(cards[1]), /One standard calendar OR CRM integration/);
+  assert.match(text(cards[2]), /[Tt]wo standard integrations total/);
+  const main = text(doc.querySelector('main'));
+  assert.match(main, /Financial decisions and policy exceptions (?:stay|remain) with (?:your |the )?business owner(?:\/team| or team)/);
+  assert.match(main, /Each additional agent has its own setup fee, subscription, and minute allowance/);
+  assert.match(main, /Included minutes cover AI-handled call time/);
+  assert.match(main, /Custom integrations, texting, and additional transfer charges are quoted separately/);
+  assert.match(main, /[Oo]ne business location and one language/);
+  assert.match(main, /[Uu]p to 30 minutes of routine configuration updates each month/);
+  assert.match(main, /USD per agent, before applicable taxes/);
+  assert.match(main, /compatible call forwarding/);
+  assert.match(main, /Jaylene.*AI receptionist/);
+  assert.match(main, /Hideo.*AI manager/);
+  assert.match(main, /does not automatically include two agents/);
+  for (const link of doc.querySelectorAll('a[href^="tel:"]')) assert.equal(link.getAttribute('href'), 'tel:+12546934919');
+  dom.window.close();
 });
 test('database outage returns a recoverable error, never a false success', async () => {
   const response = await fetch(origin + '/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Example', email: 'example@example.test', interest: 'AI phone agents' }) });

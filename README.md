@@ -1,5 +1,40 @@
 # Ahern AI — Website
 
+## Reusable phone-agent industry knowledge — October 3, 2026
+
+The [portable knowledge library](knowledge/phone-agents/README.md) now contains
+separate canonical JSON records and Retell text exports for restaurants,
+plumbing, residential electrical, HVAC, smart-home technology, auto repair,
+salons/spas, and cleaning services. Each includes business matching terms,
+discovery questions, Level 1 Answering → Level 2 Receptionist → Level 3 Manager
+examples and probes, plan-fit signals, scope boundaries, setup requirements,
+and an illustrative conversation. These are authored configuration examples,
+not customer results or guaranteed application integrations.
+
+Eight separate KBs were created in the AhernAI Retell workspace and attached
+to Jaylene and Hideo alongside the shared Services & Pricing KB. Jaylene V28
+and Hideo V2 are published; Jaylene's internal handoff targets Hideo V2.
+The deployment mapping is in
+[`deployment/retell.json`](knowledge/phone-agents/deployment/retell.json).
+KCS agents and Alfred were not part of this update.
+
+Phone prices are centralized in the shared JSON/text snapshot. The generated
+[`phone-pricing-anchor.txt`](knowledge/phone-agents/retell/phone-pricing-anchor.txt)
+is also included in both agent prompts. Testing exposed a wrong Manager price
+when industry retrieval omitted pricing; the exact price anchor corrected that
+failure in fresh tests. Update the shared KB and both prompt anchors together
+when the published website prices change.
+
+**Validation:** all eight records passed structural checks and independent
+content review. All 11 generated exports passed deterministic consistency
+checks. Retell text tests covered restaurant discovery, electrical/smart-home
+clarification, smart-home plan comparison, calendar-versus-CRM limits, exact
+prices/setup/minutes/overages, human refund decisions, and reservation-system
+compatibility boundaries. Live voice calls, actual transfers, every possible
+industry conversation, and future-platform runtime behavior remain untested.
+No website application code, hosting configuration or production data changed.
+
+
 Node/Express site for Ahern AI: managed AI phone agents, AI automation, custom
 PCs, private local AI systems, websites and custom tools, and networks and
 cabling, based in Gordon, TX.

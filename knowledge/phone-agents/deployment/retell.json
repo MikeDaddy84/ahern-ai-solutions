@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "verified_at": "2026-10-03",
+  "platform": "Retell AI",
+  "workspace": "AhernAI",
+  "status": "published",
+  "shared_knowledge_base": {
+    "name": "AhernAI Services & Pricing",
+    "knowledge_base_id": "knowledge_base_7e5f9bbed937580a"
+  },
+  "verticals": [
+    {
+      "id": "auto-repair",
+      "name": "AhernAI - Auto Repair",
+      "knowledge_base_id": "knowledge_base_fe0983b461a8eb61",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_fe0983b461a8eb61"
+    },
+    {
+      "id": "cleaning-services",
+      "name": "AhernAI - Cleaning Services",
+      "knowledge_base_id": "knowledge_base_b044eaf2071381e7",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_b044eaf2071381e7"
+    },
+    {
+      "id": "hvac",
+      "name": "AhernAI - HVAC",
+      "knowledge_base_id": "knowledge_base_8adbb3d862a4d9c2",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_8adbb3d862a4d9c2"
+    },
+    {
+      "id": "plumbing",
+      "name": "AhernAI - Plumbing",
+      "knowledge_base_id": "knowledge_base_f28abb6857312bb4",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_f28abb6857312bb4"
+    },
+    {
+      "id": "residential-electrical",
+      "name": "AhernAI - Residential Electrical",
+      "knowledge_base_id": "knowledge_base_7aab3b0d52e799f8",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_7aab3b0d52e799f8"
+    },
+    {
+      "id": "restaurants",
+      "name": "AhernAI - Restaurants",
+      "knowledge_base_id": "knowledge_base_51bc61fb4991d9dc",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_51bc61fb4991d9dc"
+    },
+    {
+      "id": "salons-spas",
+      "name": "AhernAI - Salons and Spas",
+      "knowledge_base_id": "knowledge_base_403a93bc0035a6fc",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_403a93bc0035a6fc"
+    },
+    {
+      "id": "smart-home-technology",
+      "name": "AhernAI - Smart Home Technology",
+      "knowledge_base_id": "knowledge_base_7fd066cceae65cdb",
+      "url": "https://dashboard.retellai.com/org_6rh3AuITRLTxUPJv/knowledgeBase?knowledge_base_id=knowledge_base_7fd066cceae65cdb"
+    }
+  ],
+  "agents": [
+    {
+      "name": "Jaylene Slide",
+      "published_version": 28,
+      "vertical_ids": [
+        "auto-repair",
+        "cleaning-services",
+        "hvac",
+        "plumbing",
+        "residential-electrical",
+        "restaurants",
+        "salons-spas",
+        "smart-home-technology"
+      ],
+      "pricing_anchor": "retell/phone-pricing-anchor.txt",
+      "handoff": {
+        "agent": "Hideo",
+        "published_version": 2
+      }
+    },
+    {
+      "name": "Hideo",
+      "published_version": 2,
+      "vertical_ids": [
+        "auto-repair",
+        "cleaning-services",
+        "hvac",
+        "plumbing",
+        "residential-electrical",
+        "restaurants",
+        "salons-spas",
+        "smart-home-technology"
+      ],
+      "pricing_anchor": "retell/phone-pricing-anchor.txt"
+    }
+  ],
+  "validation": {
+    "content": "Eight canonical records structurally validated and independently reviewed; deterministic exports checked.",
+    "text_tests": [
+      "Restaurant business matching and sequential three-level discovery",
+      "Ambiguous home electrical wording clarified into electrician versus smart-home",
+      "Smart-home three-level comparison and calendar OR CRM limit",
+      "All three published prices, setup fees, minute allowances and overages",
+      "Human refund decisions and reservation-system compatibility boundaries"
+    ],
+    "corrected_failures": [
+      "A Manager price was hallucinated when industry retrieval omitted pricing; generated exact pricing anchors were added to both agent prompts and both passed fresh price tests.",
+      "An ambiguous Hideo summary implied CRM booking; explicit calendar-booking OR CRM-lead-capture wording was added and verified."
+    ],
+    "not_tested": [
+      "Live voice calls or real transfers",
+      "Every possible industry conversation or integration",
+      "Future custom-platform import/runtime behavior"
+    ]
+  }
+}

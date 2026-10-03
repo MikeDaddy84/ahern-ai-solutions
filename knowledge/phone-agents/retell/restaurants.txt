@@ -1,0 +1,77 @@
+AHERNAI VERTICAL: RESTAURANTS
+Stable ID: restaurants | Content version: 1.0.0 | Updated: 2026-10-03
+
+PURPOSE AND AUTHORITY
+AhernAI sales discovery and illustrative configuration guidance
+These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+
+MATCH THIS BUSINESS
+Also described as: restaurant; cafe; diner; bistro; eatery
+Help restaurant owners explore handling calls during service and after hours. First identify their dining format, common inquiries, and current response process. These are conditional configuration proposals, not a deployed restaurant agent or customer results. Explain all three levels across separate turns, ask one question at each, and recommend the lowest level meeting the stated need. Answer direct questions first.
+Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
+
+DISCOVERY QUESTIONS — ASK ONE AT A TIME
+- What kind of restaurant do you run, and which calls interrupt service most often?
+- What happens when a caller cannot reach your team?
+- Are callers mostly asking routine questions, requesting reservations, or planning larger events?
+- Who should receive messages, and when does someone need to speak to staff immediately?
+- Which reservation, calendar, or customer system do you use today?
+
+EXPLAIN THE THREE LEVELS IN ORDER
+Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+
+LEVEL 1 — ANSWERING SERVICE
+Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
+- Answer approved questions about hours, location, parking, and published dining arrangements.
+- Capture an event inquiry's contact details, requested date, party size, and reason for calling without confirming availability.
+- Collect a reservation-related callback request and send its summary to ONE agreed destination for staff review.
+Probe: Would a clear callback message solve most missed calls, or do guests usually need a staff decision immediately?
+Useful when: Staff can return calls and make all reservation decisions themselves.; Most missed calls concern approved information or straightforward inquiries.
+
+LEVEL 2 — RECEPTIONIST
+Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
+- Qualify private-event inquiries using approved party-size, timing, and service-area criteria before a human review.
+- Offer screened transfers to the host or events contact under an agreed routing policy.
+- Use ONE compatible standard calendar for consultation booking OR one standard CRM for inquiry capture; choose one.
+Probe: Would connecting suitable callers to staff help more, or would you prefer an event consultation calendar or CRM inquiry record?
+Useful when: Staff need useful intake before receiving screened calls.; One verified calendar or CRM connection meets the desired next step.
+
+LEVEL 3 — MANAGER
+Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+- Gather a detailed service complaint, relevant visit context, and requested resolution for the human manager.
+- Explain approved reservation or cancellation policies and escalate requests requiring an exception.
+- Combine eligible calendar and CRM workflows within TWO standard integrations TOTAL, subject to compatibility and agreed scope.
+Probe: Which complaints or special requests need structured intake before your manager decides what to do?
+Useful when: Complex calls need an approved escalation path and consistent intake.; Two supported integrations provide a concrete benefit beyond the Receptionist workflow.
+
+SCOPE BOUNDARIES
+- Level 1 includes no booking, screened transfer, or CRM integration; message capture is not a confirmed reservation.
+- Level 2 allows ONE standard calendar OR CRM, not both. Level 3 allows TWO TOTAL, not two additional connections.
+- Restaurant reservation platforms, POS access, order entry, and table availability are not guaranteed standard integrations. Special workflows require compatibility checks and a separate quote where needed.
+- Do not handle payments, guarantee allergen safety, provide medical advice, or make unapproved dietary assurances. Route food-safety and ingredient concerns to restaurant staff.
+- Staff confirm menus, policies, availability, and services. Humans decide refunds, discounts, credits, and policy exceptions.
+- Use the shared phone-agent pricing source for fees and terms. Do not duplicate prices or present a proposal as an active Jaylene capability.
+
+CLIENT SETUP INFORMATION TO CONFIRM
+- Approve current FAQs and identify who maintains hours, menus, and policies.
+- Choose intake fields and ONE summary destination; collect only necessary details.
+- Define staff routing, acceptance rules, unavailable-staff fallbacks, and complaint escalation.
+- Verify actual software compatibility and distinguish consultation booking from restaurant reservations.
+- Test the agreed call paths before launch; never promise bookings, transfers, or messages without confirmed execution.
+
+ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
+- Websites and custom tools: When Guests cannot find current information. A separately scoped website could clarify menus, hours, and the inquiry path.
+- Business automation: When Staff repeatedly copy event inquiries between tools. A separately scoped workflow could route approved inquiry details for staff follow-up.
+
+ILLUSTRATIVE DISCOVERY CONVERSATION
+Caller: I own a restaurant. We miss private-party calls during dinner.
+Agent: Level 1 could capture the date, party size, and contact details for one summary destination. Would a callback usually be enough?
+Caller: Sometimes, but larger groups need our events person.
+Agent: Level 2 could qualify those inquiries and offer a screened transfer. Would a consultation calendar or CRM capture help your events person more?
+Caller: CRM capture. Managers also get cancellation complaints.
+Agent: Level 3 could capture those complaints, explain approved policy, and escalate exceptions for a human decision. Which details does your manager need before responding?
+
+SOURCES AND AUTHORSHIP
+- capability_source: https://ahernai.com/services/ai-phone-agents — Verified October 3, 2026. Shared published package capabilities and pricing are authoritative.
+- authored_guidance: AhernAI industry knowledge library — Illustrative restaurant discovery guidance authored October 3, 2026; no customer results, industry metrics, or application compatibility claims.

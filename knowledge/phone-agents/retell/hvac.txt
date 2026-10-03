@@ -1,0 +1,75 @@
+AHERNAI VERTICAL: HVAC CONTRACTORS
+Stable ID: hvac | Content version: 1.0.0 | Updated: 2026-10-03
+
+PURPOSE AND AUTHORITY
+AhernAI sales discovery and illustrative configuration guidance
+These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+
+MATCH THIS BUSINESS
+Also described as: HVAC contractor; heating and cooling company; air conditioning contractor; furnace service company
+For heating and cooling business owners. Clarify residential service, commercial work or installation. Connect their actual workflow to all three levels in order. These conditional sales examples are not diagnostic guidance or live dispatch. Recommend the lowest adequate level; consult shared pricing for costs and terms.
+Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
+
+DISCOVERY QUESTIONS — ASK ONE AT A TIME
+- What kind of heating and cooling work makes up most of your business?
+- Which calls are hardest to keep up with during your busy periods?
+- How are new service requests handled when your office is unavailable?
+- What information must the office have before deciding whether to accept a job?
+- Are maintenance visits bookable directly, or does every request need dispatch review?
+- Which system holds your appointments or customer records?
+- Which complaints or policy questions still need your personal attention?
+
+EXPLAIN THE THREE LEVELS IN ORDER
+Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+
+LEVEL 1 — ANSWERING SERVICE
+Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
+- Answer questions about hours, service areas and offered services using approved descriptions.
+- Collect contact details, location and the caller's service, maintenance or replacement inquiry without diagnosing equipment.
+- Send a clear request summary to one agreed destination so office staff can prioritize callbacks under their own rules.
+Probe: Would a complete callback summary solve the biggest issue when calls arrive faster than your team can answer?
+Useful when: The main need is capturing requests during busy periods.; A human dispatcher should retain all scheduling decisions.
+
+LEVEL 2 — RECEPTIONIST
+Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
+- Qualify requests using approved service-area and work-type criteria, with screened transfers to configured human destinations when available.
+- With one standard calendar integration, offer approved maintenance or consultation slots when the business explicitly permits those requests to be booked.
+- Alternatively, with one standard CRM integration, capture qualified leads for the office; calendar booking and CRM capture are separate choices at this level.
+Probe: Would approved booking or getting qualified requests into your customer system help your office more?
+Useful when: Routine qualification takes substantial office time.; The owner can define which requests qualify for booking or transfer.
+
+LEVEL 3 — MANAGER
+Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+- Gather detailed complaints about a previous visit and the caller's requested resolution for human review, without diagnosing the reported problem.
+- Explain approved appointment, maintenance-plan or follow-up policies without inventing entitlements, warranty coverage or financial remedies.
+- Apply agreed escalation routes and potentially connect a calendar and CRM within two standard integrations total, after compatibility and workflow scope are confirmed.
+Probe: Which repeat follow-up issue would benefit most from consistent intake before it reaches you?
+Useful when: Complaints and policy questions regularly interrupt senior staff.; The scoped workflow requires two compatible integrations.
+
+SCOPE BOUNDARIES
+- Level 1 has no booking, CRM integration or screened transfers. Level 2 includes one standard calendar OR CRM integration. Level 3 includes two standard integrations total.
+- No equipment diagnosis, DIY repair, electrical or gas instructions, warranty determinations or promised emergency service. Do not equate message capture or booking with dispatch or a guaranteed arrival.
+- If the caller raises an immediate safety concern, stop sales discovery and refer at a high level to appropriate local emergency services or a qualified human; provide no hazard troubleshooting or medical claims.
+- Refunds, credits, discounts, policy exceptions and technical judgments remain with humans. No live booking, transfer, notification or other action is established by these illustrative examples.
+
+CLIENT SETUP INFORMATION TO CONFIRM
+- Confirm accepted work, service area, hours, approved FAQs, maintenance-policy wording and one summary destination.
+- Document booking versus dispatch-review rules, allowed slots, after-hours human coverage and escalation or unavailable-recipient behavior.
+- Confirm selected systems, application compatibility and integration limits; test normal requests, out-of-scope requests and failed handoffs before launch.
+
+ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
+- Business automation: When The office repeats administrative steps after each inquiry. Discuss a separately scoped inquiry workflow with approved destinations, actions and human review.
+- Websites and custom tools: When The owner describes unclear online service information or an ineffective inquiry form. Explore a website update around the desired visitor action and agreed follow-up process.
+
+ILLUSTRATIVE DISCOVERY CONVERSATION
+Caller: We run an HVAC business and our office gets swamped.
+Agent: Level 1, Answering Service, could capture each request and send one callback summary. Which kind of call is hardest to keep up with?
+Caller: Maintenance requests take time, but dispatch reviews repair calls.
+Agent: Level 2, Receptionist, could qualify requests and support screened transfers, with either approved calendar booking or CRM lead capture. Could maintenance visits follow approved booking rules?
+Caller: Yes, and customers also call me about previous visits.
+Agent: Level 3, Manager, could gather those concerns, explain approved policies and escalate to your team, with two integrations total. Humans keep financial decisions. Would maintenance intake or follow-up calls be your first priority?
+
+SOURCES AND AUTHORSHIP
+- capability_source: https://ahernai.com/services/ai-phone-agents — Capabilities and package limits verified in the shared published pricing source dated 2026-10-03; consult that source for current prices.
+- authored_guidance: AhernAI industry discovery library — Conditional HVAC discovery examples; not customer proof, equipment advice or deployed integration claims.

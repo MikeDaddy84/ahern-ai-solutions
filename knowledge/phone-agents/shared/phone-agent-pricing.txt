@@ -1,0 +1,36 @@
+AHERN AI — MANAGED AI PHONE AGENTS: LEVELS, PRICING AND SCOPE
+Verified October 3, 2026 from https://ahernai.com/services/ai-phone-agents
+
+AhernAI configures and manages AI phone agents around approved business call flows. Mike Ahern is based in Gordon, Texas. Jaylene is our AI receptionist; Hideo is our AI manager. Both are AI agents. The demonstration is not a two-agent bundle: every subscription covers ONE agent.
+
+LEVEL 1 — ANSWERING SERVICE (website package: Answering)
+$349/month per agent; $750 one-time setup; 300 included AI-handled call minutes; additional minutes $0.75/minute.
+Answers approved FAQs, confirms caller details, captures the reason for calling, and sends a summary to ONE agreed destination.
+Purpose: capture the essentials while the business is busy or unavailable. Booking, CRM integrations and screened transfers are not listed as included at this level.
+
+LEVEL 2 — RECEPTIONIST
+$549/month per agent; $1,250 one-time setup; 500 included AI-handled call minutes; additional minutes $0.75/minute.
+Everything in Answering, plus lead qualification and screened transfers. Includes ONE standard calendar OR CRM integration: appointment booking OR CRM lead capture, depending on the selected integration. It does not include both calendar and CRM. Specific application compatibility is confirmed during scoping.
+Purpose: coordinate the caller's next step.
+
+LEVEL 3 — MANAGER
+$749/month per agent; $1,750 one-time setup; 700 included AI-handled call minutes; additional minutes $0.95/minute.
+Everything in Receptionist, plus detailed complaint intake, approved policy answers and escalation routing. Includes TWO standard integrations TOTAL, not two additional integrations. Captures the issue and requested resolution for the human team.
+Purpose: give complex calls a path. Financial decisions and policy exceptions remain with the business owner or human team. No autonomous refunds, credits, discounts or exceptions. Manager covers ONE agent, not a Jaylene-and-Hideo bundle.
+
+INCLUDED WITH EVERY AGENT
+One business location and one language; setup and launch testing; monitoring and monthly reporting; up to 30 minutes of routine configuration updates each month.
+
+TERMS AND EXCLUSIONS
+All prices are USD per agent before applicable taxes. Included minutes cover AI-handled call time. Each additional agent has its own setup fee, subscription and minute allowance. Custom integrations, texting and additional transfer charges are quoted separately. Final scope and pricing are confirmed before launch. Existing business numbers may be retained through COMPATIBLE call forwarding; compatibility is checked. Changes beyond the agreed scope are quoted separately.
+The public page does not specify phone-agent contract length, cancellation or refund terms, trials, discounts, minute rollover/pooling, proration or specific integration compatibility. Ask Mike to confirm rather than borrowing another service's terms.
+
+IMPLEMENTATION
+Agree common questions, intake details, approved answers, human handoff rules, package, integrations and scope. Configure and test agreed call paths before launch. Then monitor, report monthly and refine within the routine-update allowance.
+
+DISCOVERY AND FIT
+Ask about the business, typical calls, how calls are handled now and where the caller wants help. Use an attached approved industry KB when available. If no specific industry source is available, use conditional examples derived from the caller's own workflow and these verified capabilities; do not invent listed verticals, deployed integrations, customer stories or results.
+Explain Level 1 Answering first, then Level 2 Receptionist, then Level 3 Manager when the caller wants an overview. Recommend the lowest level meeting their needs. Answer direct pricing questions first. Distinguish monthly fee, setup and usage; do not imply subscription is the whole first-month cost. A proposed customer-agent workflow is not a capability already active in Jaylene.
+
+CONTACT
+Phone-agent inquiries: phones@ahernai.com. General inquiries: hello@ahernai.com. Phone (254) 693-4919. Website https://ahernai.com/.

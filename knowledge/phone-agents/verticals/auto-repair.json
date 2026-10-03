@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "id": "auto-repair",
+  "name": "Auto Repair",
+  "retell_name": "AhernAI - Auto Repair",
+  "version": "1.0.0",
+  "updated_at": "2026-10-03",
+  "purpose": "AhernAI sales discovery and illustrative configuration guidance",
+  "aliases": [
+    "auto repair shop",
+    "mechanic",
+    "automotive service",
+    "vehicle repair",
+    "garage"
+  ],
+  "summary": "Help repair-shop owners explore missed calls, inquiries, callbacks, and advisor decisions. These are conditional proposals, not customer results or a deployed agent. Explain Levels 1→2→3 on separate turns, with one probe each, then recommend the lowest suitable level. Answer direct questions first.",
+  "discovery_questions": [
+    "What kind of repair shop do you run, and which services do you offer?",
+    "Are most callers new customers, existing-job inquiries, or people trying to schedule service?",
+    "What happens when your service desk cannot answer?",
+    "Which calls need a service advisor immediately rather than a callback?",
+    "What calendar, CRM, or shop-management system do you use today?"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "use_cases": [
+        "Answer approved questions about hours, location, accepted service categories, and the stated drop-off process.",
+        "Capture contact details, basic vehicle information, and the caller's description of the service requested without diagnosing the vehicle.",
+        "Take an existing-job callback request and send its summary to ONE agreed destination without inventing repair status."
+      ],
+      "probe": "Would useful callback notes cover most missed calls, or do callers need a service advisor right away?",
+      "fit_signals": [
+        "The service desk can return messages and decide all scheduling details.",
+        "Routine FAQs and organized inquiry capture address the main interruption."
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "use_cases": [
+        "Qualify new inquiries against approved vehicle and service categories before an advisor reviews the request.",
+        "Offer screened transfers to a service advisor according to the shop's approved routing rules.",
+        "Book eligible intake appointments through ONE compatible standard calendar OR capture leads in one standard CRM; choose one."
+      ],
+      "probe": "Would appointment intake through a calendar help most, or would you prefer CRM capture before an advisor follows up?",
+      "fit_signals": [
+        "The shop has clear rules for eligible intake appointments and human handoffs.",
+        "One verified calendar or CRM connection meets the next-step requirement."
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "use_cases": [
+        "Collect detailed workmanship or service complaints, relevant visit context, and the requested resolution for the human manager.",
+        "Explain approved service policies and escalate warranty, billing, or policy-exception requests for human review.",
+        "Combine eligible calendar and CRM workflows within TWO standard integrations TOTAL, subject to compatibility and agreed configuration."
+      ],
+      "probe": "Which complaints or disputed expectations need a structured summary before you or your manager responds?",
+      "fit_signals": [
+        "Complex service concerns need consistent intake and a defined escalation path.",
+        "A second supported integration solves a clear operational need beyond Receptionist."
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Level 1 excludes booking, screened transfers, and CRM updates. Capturing a request does not accept a repair job.",
+    "Level 2 includes ONE standard calendar OR CRM; Level 3 includes TWO TOTAL, not two additional integrations.",
+    "Shop-management systems, repair orders, live job status, inventory, and estimates are not guaranteed capabilities; confirm compatibility and scope.",
+    "Do not diagnose faults, guarantee safe driving or completion times, or give unapproved technical instructions. Staff confirm services, policies, and operational decisions.",
+    "Do not handle payments, authorize repair work, or make medical claims. Warranty decisions, refunds, discounts, credits, and policy exceptions remain human.",
+    "Use shared phone-agent pricing for fees and terms. Do not duplicate prices, guarantee results, or present proposals as live Jaylene actions."
+  ],
+  "setup_requirements": [
+    "Approve supported vehicle/service categories, routine FAQs, and questions requiring an advisor.",
+    "Choose minimal intake fields and the ONE summary destination; avoid unnecessary customer records.",
+    "Verify the chosen calendar or CRM and distinguish intake availability from technician, bay, or parts availability.",
+    "Define screened-transfer recipients, unavailable-staff fallbacks, and complaint escalation ownership.",
+    "Before launch, test ambiguous symptoms, status requests, unsupported services, failed handoffs, and financial exceptions."
+  ],
+  "adjacent_services": [
+    {
+      "service": "Business automation",
+      "trigger": "Staff repeatedly copy inquiry information between existing tools.",
+      "example": "A separately scoped workflow could route approved intake details for advisor review."
+    },
+    {
+      "service": "Websites and custom tools",
+      "trigger": "Callers cannot find service information.",
+      "example": "A separately scoped website could clarify approved services and inquiries."
+    }
+  ],
+  "example_conversation": [
+    {
+      "speaker": "caller",
+      "text": "I own an auto shop. Our advisors miss calls when the counter is busy."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 1 could collect vehicle details and the reason for calling, then send one summary. Would most customers accept a callback?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Many would, but some need an advisor or a service appointment."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 2 could screen transfers and book eligible intake appointments using one compatible calendar. Which appointments can follow clear rules without an advisor's judgment?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Routine intake visits. Complaints and disputed bills still come to me."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 3 could capture those concerns and requested resolutions, then escalate them while you retain financial decisions. What information would make those calls easier to handle?"
+    }
+  ],
+  "provenance": [
+    {
+      "type": "capability_source",
+      "source": "https://ahernai.com/services/ai-phone-agents",
+      "note": "Verified October 3, 2026. Shared published package capabilities and pricing are authoritative."
+    },
+    {
+      "type": "authored_guidance",
+      "source": "AhernAI industry knowledge library",
+      "note": "Illustrative automotive discovery guidance authored October 3, 2026; no diagnostic advice, customer metrics, or application compatibility claims."
+    }
+  ]
+}

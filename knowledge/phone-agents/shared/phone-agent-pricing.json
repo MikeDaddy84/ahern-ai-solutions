@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "verified_at": "2026-10-03",
+  "source_url": "https://ahernai.com/services/ai-phone-agents",
+  "currency": "USD",
+  "unit": "per agent",
+  "taxes_included": false,
+  "plans": [
+    {"level": 1, "name": "Answering Service", "monthly": 349, "setup": 750, "included_minutes": 300, "additional_minute": 0.75, "integration_scope": "No included calendar/CRM integration, booking or screened transfers."},
+    {"level": 2, "name": "Receptionist", "monthly": 549, "setup": 1250, "included_minutes": 500, "additional_minute": 0.75, "integration_scope": "ONE standard calendar for booking OR ONE standard CRM for lead capture; screened transfers included, compatibility confirmed during scoping."},
+    {"level": 3, "name": "Manager", "monthly": 749, "setup": 1750, "included_minutes": 700, "additional_minute": 0.95, "integration_scope": "TWO standard integrations TOTAL; financial decisions, refunds and policy exceptions remain human."}
+  ],
+  "terms": [
+    "One subscription covers one agent, one location and one language; extra agents have separate setup, monthly fees and minute allowances.",
+    "Custom integrations, texting and additional transfer charges are separately quoted. Final scope and pricing are confirmed before launch.",
+    "Do not invent unlimited usage, discounts, trials, pooling, rollover, contract or cancellation terms. Use the shared pricing text for full published inclusions and exclusions."
+  ]
+}

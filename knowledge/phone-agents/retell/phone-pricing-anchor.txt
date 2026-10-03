@@ -1,0 +1,10 @@
+VERIFIED PHONE-AGENT PRICING — 2026-10-03
+Source: https://ahernai.com/services/ai-phone-agents
+Use these exact published amounts for phone-price questions even when industry retrieval does not include a pricing chunk. Do not guess, substitute remembered figures, or claim the published included minutes are unknown. This dated table and the shared pricing KB are the verified snapshot; flag any conflicting newer source for Mike instead of inventing a reconciliation.
+Prices are USD PER AGENT before applicable taxes. Distinguish MONTHLY subscription, ONE-TIME setup and usage charges.
+Level 1 Answering Service: $349/month; $750 one-time setup; 300 included AI-handled minutes/month; $0.75 per additional minute. No included calendar/CRM integration, booking or screened transfers.
+Level 2 Receptionist: $549/month; $1,250 one-time setup; 500 included AI-handled minutes/month; $0.75 per additional minute. ONE standard calendar for booking OR ONE standard CRM for lead capture; screened transfers included, compatibility confirmed during scoping.
+Level 3 Manager: $749/month; $1,750 one-time setup; 700 included AI-handled minutes/month; $0.95 per additional minute. TWO standard integrations TOTAL; financial decisions, refunds and policy exceptions remain human.
+One subscription covers one agent, one location and one language; extra agents have separate setup, monthly fees and minute allowances.
+Custom integrations, texting and additional transfer charges are separately quoted. Final scope and pricing are confirmed before launch.
+Do not invent unlimited usage, discounts, trials, pooling, rollover, contract or cancellation terms. Use the shared pricing text for full published inclusions and exclusions.

@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "id": "restaurants",
+  "name": "Restaurants",
+  "retell_name": "AhernAI - Restaurants",
+  "version": "1.0.0",
+  "updated_at": "2026-10-03",
+  "purpose": "AhernAI sales discovery and illustrative configuration guidance",
+  "aliases": [
+    "restaurant",
+    "cafe",
+    "diner",
+    "bistro",
+    "eatery"
+  ],
+  "summary": "Help restaurant owners explore handling calls during service and after hours. First identify their dining format, common inquiries, and current response process. These are conditional configuration proposals, not a deployed restaurant agent or customer results. Explain all three levels across separate turns, ask one question at each, and recommend the lowest level meeting the stated need. Answer direct questions first.",
+  "discovery_questions": [
+    "What kind of restaurant do you run, and which calls interrupt service most often?",
+    "What happens when a caller cannot reach your team?",
+    "Are callers mostly asking routine questions, requesting reservations, or planning larger events?",
+    "Who should receive messages, and when does someone need to speak to staff immediately?",
+    "Which reservation, calendar, or customer system do you use today?"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "use_cases": [
+        "Answer approved questions about hours, location, parking, and published dining arrangements.",
+        "Capture an event inquiry's contact details, requested date, party size, and reason for calling without confirming availability.",
+        "Collect a reservation-related callback request and send its summary to ONE agreed destination for staff review."
+      ],
+      "probe": "Would a clear callback message solve most missed calls, or do guests usually need a staff decision immediately?",
+      "fit_signals": [
+        "Staff can return calls and make all reservation decisions themselves.",
+        "Most missed calls concern approved information or straightforward inquiries."
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "use_cases": [
+        "Qualify private-event inquiries using approved party-size, timing, and service-area criteria before a human review.",
+        "Offer screened transfers to the host or events contact under an agreed routing policy.",
+        "Use ONE compatible standard calendar for consultation booking OR one standard CRM for inquiry capture; choose one."
+      ],
+      "probe": "Would connecting suitable callers to staff help more, or would you prefer an event consultation calendar or CRM inquiry record?",
+      "fit_signals": [
+        "Staff need useful intake before receiving screened calls.",
+        "One verified calendar or CRM connection meets the desired next step."
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "use_cases": [
+        "Gather a detailed service complaint, relevant visit context, and requested resolution for the human manager.",
+        "Explain approved reservation or cancellation policies and escalate requests requiring an exception.",
+        "Combine eligible calendar and CRM workflows within TWO standard integrations TOTAL, subject to compatibility and agreed scope."
+      ],
+      "probe": "Which complaints or special requests need structured intake before your manager decides what to do?",
+      "fit_signals": [
+        "Complex calls need an approved escalation path and consistent intake.",
+        "Two supported integrations provide a concrete benefit beyond the Receptionist workflow."
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Level 1 includes no booking, screened transfer, or CRM integration; message capture is not a confirmed reservation.",
+    "Level 2 allows ONE standard calendar OR CRM, not both. Level 3 allows TWO TOTAL, not two additional connections.",
+    "Restaurant reservation platforms, POS access, order entry, and table availability are not guaranteed standard integrations. Special workflows require compatibility checks and a separate quote where needed.",
+    "Do not handle payments, guarantee allergen safety, provide medical advice, or make unapproved dietary assurances. Route food-safety and ingredient concerns to restaurant staff.",
+    "Staff confirm menus, policies, availability, and services. Humans decide refunds, discounts, credits, and policy exceptions.",
+    "Use the shared phone-agent pricing source for fees and terms. Do not duplicate prices or present a proposal as an active Jaylene capability."
+  ],
+  "setup_requirements": [
+    "Approve current FAQs and identify who maintains hours, menus, and policies.",
+    "Choose intake fields and ONE summary destination; collect only necessary details.",
+    "Define staff routing, acceptance rules, unavailable-staff fallbacks, and complaint escalation.",
+    "Verify actual software compatibility and distinguish consultation booking from restaurant reservations.",
+    "Test the agreed call paths before launch; never promise bookings, transfers, or messages without confirmed execution."
+  ],
+  "adjacent_services": [
+    {
+      "service": "Websites and custom tools",
+      "trigger": "Guests cannot find current information.",
+      "example": "A separately scoped website could clarify menus, hours, and the inquiry path."
+    },
+    {
+      "service": "Business automation",
+      "trigger": "Staff repeatedly copy event inquiries between tools.",
+      "example": "A separately scoped workflow could route approved inquiry details for staff follow-up."
+    }
+  ],
+  "example_conversation": [
+    {
+      "speaker": "caller",
+      "text": "I own a restaurant. We miss private-party calls during dinner."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 1 could capture the date, party size, and contact details for one summary destination. Would a callback usually be enough?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Sometimes, but larger groups need our events person."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 2 could qualify those inquiries and offer a screened transfer. Would a consultation calendar or CRM capture help your events person more?"
+    },
+    {
+      "speaker": "caller",
+      "text": "CRM capture. Managers also get cancellation complaints."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 3 could capture those complaints, explain approved policy, and escalate exceptions for a human decision. Which details does your manager need before responding?"
+    }
+  ],
+  "provenance": [
+    {
+      "type": "capability_source",
+      "source": "https://ahernai.com/services/ai-phone-agents",
+      "note": "Verified October 3, 2026. Shared published package capabilities and pricing are authoritative."
+    },
+    {
+      "type": "authored_guidance",
+      "source": "AhernAI industry knowledge library",
+      "note": "Illustrative restaurant discovery guidance authored October 3, 2026; no customer results, industry metrics, or application compatibility claims."
+    }
+  ]
+}

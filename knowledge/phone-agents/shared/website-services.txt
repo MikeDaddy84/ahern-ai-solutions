@@ -1,0 +1,49 @@
+AHERN AI — SERVICE PILLARS AND PUBLIC PRICING
+Verified October 3, 2026 from the AhernAI pages cited below.
+
+BUSINESS
+Mike Ahern runs AhernAI in Gordon, Texas, serving North Texas. Customers work directly with Mike from scoping through build and handoff. Six service areas: managed AI phone agents; business automation; custom PCs; private/local AI; websites and custom tools; networks and cabling. A free initial consultation helps define the right scope. Contact hello@ahernai.com; phone-agent inquiries phones@ahernai.com; (254) 693-4919; https://ahernai.com/.
+For phone-agent Answering, Receptionist and Manager packages, use the separate Phone Agent Levels and Pricing source in this KB.
+Use public package prices as published, starting prices as starting prices, and ranges as indicative. Final scope must be confirmed. Do not transfer support/cancellation terms between unrelated services. Existing client agreements retain their agreed terms. Demonstrations, calculator estimates and reference projects are not measured client results or guaranteed savings.
+
+AI AUTOMATION — https://ahernai.com/services/automation
+Connect existing tools for lead capture/follow-up, scheduling, shared-inbox triage, data entry and repetitive administration. Agree automatic actions, human approval and failure handling.
+AI Workflow Audit: FREE 20-minute call plus a short written list of two automations worth doing first.
+AI Quickstart: $1,250 for one live automation, setup, testing and handoff, in about 7 days subject to agreed scope. Lead Response and Inbox Triage variants are described as FROM $1,250 when scope fits.
+Automation Sprint: $4,500 for 2–3 connected workflows over 2–3 weeks, team training, written handoff and 30 days of tuning after launch. Historical cleanup, complex migrations and custom apps are separate quotes.
+Monthly AI Support: $897/month for agreed named workflows and monitoring, maintenance and up to TWO hours of support/improvements per month; NO rollover. Investigation, changes and support count toward this allowance. Priority during agreed business support hours. Additional work/new workflows quoted separately. Software subscriptions and usage charges separate. No long-term contracts; cancel monthly support anytime. Existing agreements retain their terms.
+Outcome Partnership: advertised fee is 20–40% of the monthly cost of the problem removed. Baseline, data source, attribution, measurement period and fee cap agreed in writing BEFORE quoting. Recurring high-volume workflows, quarterly remeasurement, month-to-month/no long-term contract. The website's $8,000/month improvement with $1,600–3,200/month fee is illustrative, not a client result or guaranteed quote.
+Lead Response Quickstart: one intake source, one destination, routing and approved response method; test missing details, duplicates and failed handoffs. Inbox Triage: one mailbox, categories, replies prepared for review, uncertainty sent to a person. Use existing software where possible; software/tool costs and hardware are separate.
+Probe one at a time: Which task repeats most? Where must the information go? Which actions need approval? What tools are used?
+
+WEBSITES AND CUSTOM TOOLS — https://ahernai.com/services/websites
+Website Starter: $995 one-time build; ONE page, mobile layout, contact form, basic search setup and domain connection. Customer supplies business details, logo and images.
+Business Website: $1,995 one-time build; up to FIVE pages, shaping supplied content, inquiry form, mobile layout, basic search setup and launch on the customer's domain.
+The Front Door: FROM $2,995 for Business Website plus ONE defined automation, such as inquiry routing and acknowledgment. Tools, steps, approval rules, testing and handoff agreed. Extra workflows/subscriptions separate.
+Custom tool/internal app: $18,000–45,000, determined by process, user roles, integrations, migration and reporting. Substantial discovery separately quoted. Consider a simpler automation when sufficient.
+Optional website care: $99/month FROM LAUNCH; hosting, routine maintenance, up to TWENTY minutes minor edits monthly, NO rollover. Month-to-month, separately billed. A year of care is NOT included. New pages/features/integrations/automation support quoted separately. Self-managed hosting/handoff can be agreed before launch.
+Website packages include TWO revision rounds within scope. Domain registration, paid assets and third-party subscriptions separate. Stores, portals, complex integrations, substantial content work and migrations quoted separately. Additional minor work $150/hour, agreed before work starts. Existing agreements retain terms. Basic search setup does not guarantee rankings. Websites do not require automation.
+Probe: What should a visitor be able to do? What happens after an inquiry? Do you have content and a domain?
+
+CUSTOM PCS — https://ahernai.com/services/custom-pcs
+Gaming PCs, professional/creative workstations, everyday/office PCs, upgrades and tuning around workload, applications, performance, budget, noise, style and upgrade plans. Free consultation before components are selected. Confirm exact parts, compatibility, availability and scope before purchase.
+Estimates separate HARDWARE + disclosed TEN PERCENT handling + BUILD LABOR. Shipping, tax and peripherals separate. No universal fixed machine price. Interactive starting estimates at https://ahernai.com/pc-builder; written quote confirms the actual configuration.
+Service-page selected gaming example: $3,350–4,650 for typical 1440p high-detail build, September 2026 pricing, including parts plus 10% handling and build fee. Illustrative, time-sensitive, not a universal starting price or current binding quote.
+Agree testing workload; handoff documents parts, setup and completed checks. Migration, application setup, on-site walkthrough, travel and troubleshooting scoped separately. Annual cleaning/health check, upgrades and workstation support can be discussed; parts/unrelated repairs separate; warranty/support terms confirmed in writing. 3D models are illustrative, not exact supplied-part promises.
+Probe: Which games/applications? Target budget? What is wrong with the current machine?
+
+PRIVATE / LOCAL AI — https://ahernai.com/services/local-ai
+Private document search with source references, local assistants and workflows on customer-controlled hardware. Scope model, software, access controls, document pipeline and handoff together.
+Hardware/setup individually quoted; NO fixed universal price published. Paid pilot: ONE document collection, ONE user group, agreed test questions; written proceed/revise/stop recommendation. Pilot price agreed before work.
+Deployment line items: hardware, model setup, ingestion, access controls and training. Reuse suitable hardware; validate representative workload before purchase. Optional Private AI Care: agreed systems, monitoring, document freshness, approved updates and answer-quality checks; usage/support hours/backup responsibilities defined in quote.
+Some workflows may need cloud connections; identify information sent before implementation. Local AI does not automatically mean every task works offline, zero ongoing costs, guaranteed security or compliance certification. No confidential documents needed during phone discovery.
+Probe: What task? What document types? How many simultaneous users? Must processing remain local?
+
+NETWORKS AND CABLING — https://ahernai.com/services/networks-cabling
+Switch installation/configuration; Ethernet testing/troubleshooting; tracing/labeling; copper repair/termination; fiber termination; connection documentation.
+EVERY project quoted after an ON-SITE ASSESSMENT. NO fixed project price. Any assessment/travel charge agreed BEFORE visit; do not call the site visit free.
+Written quote covers equipment, materials, labor, testing and planned downtime; customer approval before installation/repair. Handoff includes agreed connection checks, setup notes, labels and test results. Further work/ongoing support agreed separately. Do not promise no downtime or immediate arrival.
+Probe: Where is the work? What fails or needs to change? What equipment/cabling? When would downtime be acceptable?
+
+DELIVERY AND OWNERSHIP
+Quotes identify included hardware/accounts/source or workflow exports/documentation/access. Explain third-party licenses and reusable AhernAI components separately. Agree acceptance checks, support hours and change handling before work. Ongoing assistance optional and scoped. Published times are indicative, not proof of Mike's availability or a promised launch date.

@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "id": "salons-spas",
+  "name": "Salons and Spas",
+  "retell_name": "AhernAI - Salons and Spas",
+  "version": "1.0.0",
+  "updated_at": "2026-10-03",
+  "purpose": "AhernAI sales discovery and illustrative configuration guidance",
+  "aliases": [
+    "salon",
+    "spa",
+    "barbershop",
+    "hair salon",
+    "beauty studio",
+    "nail salon"
+  ],
+  "summary": "Help salon and spa owners explore handling calls while staff serve clients. Clarify services, scheduling, and questions requiring professional judgment. These are conditional proposals, not a deployed agent or customer results. Explain Levels 1→2→3 across separate turns, ask one probe per level, then recommend the simplest fit. Answer direct questions first.",
+  "discovery_questions": [
+    "What services does your business offer, and who handles incoming calls?",
+    "Which calls interrupt appointments most often?",
+    "What happens when someone calls while everyone is with a client?",
+    "Which requests can be scheduled using clear rules, and which need staff judgment?",
+    "What calendar, booking platform, or CRM do you currently use?"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "use_cases": [
+        "Answer approved questions about hours, location, listed services, and the business's published appointment process.",
+        "Collect a prospect's contact details, requested service, and preferred callback time without confirming an appointment.",
+        "Capture an existing client's request to discuss an appointment and send the summary to ONE agreed destination."
+      ],
+      "probe": "Would taking clear messages while your team works with clients solve most of the problem?",
+      "fit_signals": [
+        "Staff prefer to assess requests and arrange appointments themselves.",
+        "Most calls need approved information or a reliable callback message."
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "use_cases": [
+        "Qualify inquiries using approved service, location, and consultation requirements without assessing medical suitability.",
+        "Offer screened transfers when a caller needs a staff member's decision or service clarification.",
+        "Book eligible appointments using ONE compatible standard calendar OR capture inquiries in one standard CRM; not both."
+      ],
+      "probe": "Would you rather use the included connection for rule-based appointment booking or for CRM lead capture?",
+      "fit_signals": [
+        "Eligible appointment types have clear, staff-approved durations and scheduling rules.",
+        "One verified calendar or CRM integration supports the desired next step."
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "use_cases": [
+        "Capture detailed service complaints and the caller's requested resolution for the owner or designated manager.",
+        "Explain approved cancellation or lateness policies and route exceptions to a human decision-maker.",
+        "Support eligible calendar and CRM workflows within TWO standard integrations TOTAL after compatibility and scope are confirmed."
+      ],
+      "probe": "Which complaints or policy questions need your attention after the routine call is handled?",
+      "fit_signals": [
+        "The business needs structured complaint intake and consistent escalation.",
+        "A second supported integration solves a specific gap in the current workflow."
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Level 1 does not book, change appointments, make screened transfers, or update a CRM. A preference is not a reservation.",
+    "Level 2 includes ONE standard calendar OR CRM. Level 3 includes TWO TOTAL, not two additional connections.",
+    "Specialist booking platforms, multi-provider resource scheduling, deposits, and POS connections are not guaranteed included capabilities; compatibility and custom scope must be checked.",
+    "Do not handle payments, provide medical advice, assess contraindications, or guarantee treatment suitability, allergy safety, or outcomes. Staff confirm services and relevant policies.",
+    "Collect only necessary inquiry details, not health histories or sensitive treatment records. Route health or service-safety concerns to qualified staff.",
+    "Humans decide refunds, discounts, credits, and exceptions. The shared phone-agent pricing source governs fees and terms; do not duplicate prices or promise unverified live actions."
+  ],
+  "setup_requirements": [
+    "Approve service descriptions, routine FAQs, and questions reserved for staff.",
+    "Choose necessary intake fields, the ONE summary destination, and contact-confirmation rules.",
+    "Verify the selected calendar or CRM and define which appointment types can be booked.",
+    "Agree provider, duration, scheduling, transfer, unavailable-staff, and escalation rules before configuration.",
+    "Test routine inquiries, ambiguous service requests, failed handoffs, and policy exceptions before launch."
+  ],
+  "adjacent_services": [
+    {
+      "service": "Websites and custom tools",
+      "trigger": "Clients struggle to understand services or the inquiry process.",
+      "example": "A separately scoped website could present approved services and a clearer appointment inquiry path."
+    },
+    {
+      "service": "Business automation",
+      "trigger": "Staff manually move approved inquiries between existing tools.",
+      "example": "A separately scoped workflow could route leads and prepare follow-up for review."
+    }
+  ],
+  "example_conversation": [
+    {
+      "speaker": "caller",
+      "text": "I own a salon. We cannot answer when everyone is with a client."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 1 could answer approved service questions and send callback details to one destination. Do most callers need information or an appointment?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Usually appointments, though some services require a consultation."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 2 could book eligible appointments through one compatible calendar and screen calls needing staff input. Which appointment types have clear booking rules?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Basic cuts do. I personally handle complaints and cancellation exceptions."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 3 could record those complaints and explain approved policy while leaving exceptions and financial decisions with you. What would you want captured before you respond?"
+    }
+  ],
+  "provenance": [
+    {
+      "type": "capability_source",
+      "source": "https://ahernai.com/services/ai-phone-agents",
+      "note": "Verified October 3, 2026. Shared published package capabilities and pricing are authoritative."
+    },
+    {
+      "type": "authored_guidance",
+      "source": "AhernAI industry knowledge library",
+      "note": "Illustrative salon and spa discovery guidance authored October 3, 2026; no medical advice, customer results, or application compatibility claims."
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "id": "cleaning-services",
+  "name": "Residential and Commercial Cleaning",
+  "retell_name": "AhernAI - Cleaning Services",
+  "version": "1.0.0",
+  "updated_at": "2026-10-03",
+  "purpose": "AhernAI sales discovery and illustrative configuration guidance",
+  "aliases": [
+    "house cleaning",
+    "maid service",
+    "residential cleaning",
+    "commercial cleaning",
+    "janitorial service",
+    "move-out cleaning",
+    "office cleaning"
+  ],
+  "summary": "Use for residential or commercial cleaning businesses; clarify customer type and services first. Explore missed inquiries, repeat questions, scheduling and service concerns. Examples are possible configured customer workflows, not Jaylene's current tools. Present Answering, Receptionist and Manager in separate turns, with a useful probe after each. Recommend the lowest suitable level. Use the shared pricing KB for costs and terms.",
+  "discovery_questions": [
+    "Do you clean homes, commercial premises or both?",
+    "Are most inquiries recurring service, one-time cleaning, move-out work or something else?",
+    "What happens when someone calls while the crew is working?",
+    "Which questions about service area, scope or estimates come up repeatedly?",
+    "Do you want staff to call back, book an estimate visit or receive a qualified lead in your CRM?",
+    "Which complaints, access concerns or scheduling exceptions need a supervisor?"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "use_cases": [
+        "Answer approved FAQs about service areas and cleaning categories without inventing inclusions or prices.",
+        "Capture caller details, residential or commercial scope, general property size, desired timing and the reason for calling.",
+        "Send a new inquiry, schedule-change request or service concern as a summary to one agreed destination for staff follow-up."
+      ],
+      "probe": "Would an organized message with the property and cleaning needs let your team handle the next step?",
+      "fit_signals": [
+        "Calls go unanswered while crews are working.",
+        "Staff want to review requests before quoting or scheduling."
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "use_cases": [
+        "Add qualification using approved service categories and service-area rules, plus screened transfers to the agreed human.",
+        "If a calendar is the selected integration, book an approved estimate visit or appointment type within configured availability.",
+        "Alternatively, capture qualified inquiries in one standard CRM; this option does not also include calendar booking."
+      ],
+      "probe": "Would you rather have callers arrange approved estimate appointments or send qualified inquiries directly into your CRM?",
+      "fit_signals": [
+        "The business has repeatable intake and a defined next step.",
+        "One standard calendar OR CRM connection meets the workflow need."
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "use_cases": [
+        "Gather detailed missed-service, quality or damage concerns and the caller's requested resolution for a supervisor.",
+        "Explain approved cancellation or service policies and escalate disputed charges or exceptions without making a decision.",
+        "Use two compatible standard integrations total, such as a calendar and CRM, for the agreed workflow."
+      ],
+      "probe": "How much time does someone spend collecting complaint details and coordinating the next step between systems?",
+      "fit_signals": [
+        "Service complaints need structured intake and consistent escalation.",
+        "The agreed workflow requires two standard integrations total."
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Do not request door, gate or alarm codes, keys, payment-card details or other access credentials during discovery or example intake.",
+    "Do not give chemical-mixing instructions or hazardous cleanup advice. Use approved human escalation for hazards or work outside the business's confirmed scope.",
+    "Do not promise a fixed quote, crew availability, rescheduling, arrival time, damage responsibility or a re-clean without an approved policy and configured capability.",
+    "Human staff decide refunds, credits, discounts, liability and policy exceptions. Texting, custom integrations and additional transfer charges are separately scoped."
+  ],
+  "setup_requirements": [
+    "Confirm residential/commercial focus, offered cleaning categories, service area, business hours and excluded work.",
+    "Supply approved FAQs, estimate rules, intake fields and the single summary destination.",
+    "Define appointments or CRM fields, qualification, transfer contacts and escalation fallbacks.",
+    "Provide cancellation, complaint and damage-reporting policies, plus a separate approved access-detail process.",
+    "Confirm compatibility; test inquiries, unavailable appointments and complaints before launch."
+  ],
+  "adjacent_services": [
+    {
+      "service": "Websites and custom tools",
+      "trigger": "Callers cannot tell which cleaning services are offered.",
+      "example": "Explore service pages and an inquiry form with approved scope questions."
+    },
+    {
+      "service": "Business automation",
+      "trigger": "Staff manually copy the same inquiry into several systems.",
+      "example": "Scope a separate workflow for approved lead routing and internal follow-up."
+    }
+  ],
+  "example_conversation": [
+    {
+      "speaker": "caller",
+      "text": "We clean homes and small offices. The crew misses new customer calls."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 1 could answer approved questions, capture the property and cleaning needs, then send one summary. Would a callback message solve it, or would appointment booking help more?"
+    },
+    {
+      "speaker": "caller",
+      "text": "We prefer to call back and assess the job ourselves."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 2 adds qualification, screened transfers and one calendar or CRM integration. It could capture qualified leads in a compatible CRM. Are complaints or policy questions taking much supervisor time?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Not really. We mostly need to stop losing new inquiries."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 3 adds detailed complaint intake, approved policy answers, escalation and two integrations total; financial decisions remain yours. Level 1 sounds like the best starting fit. What details must every callback message include?"
+    }
+  ],
+  "provenance": [
+    {
+      "type": "capability_source",
+      "source": "https://ahernai.com/services/ai-phone-agents",
+      "note": "Package capabilities checked October 3, 2026; shared pricing KB governs commercial terms."
+    },
+    {
+      "type": "authored_guidance",
+      "source": "AhernAI vertical library",
+      "note": "Illustrative discovery and configuration examples; not customer results or a promise of application support."
+    }
+  ]
+}

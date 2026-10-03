@@ -1,0 +1,76 @@
+AHERNAI VERTICAL: SMART HOME AND HOME TECHNOLOGY
+Stable ID: smart-home-technology | Content version: 1.0.0 | Updated: 2026-10-03
+
+PURPOSE AND AUTHORITY
+AhernAI sales discovery and illustrative configuration guidance
+These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+
+MATCH THIS BUSINESS
+Also described as: smart home; home automation; home technology installer; residential AV; home theater; Wi-Fi installer; low-voltage technology
+Use for home automation, audiovisual and home network installers. Clarify technology installation versus mains electrical work. Explore project inquiries, support calls and interruptions while onsite. Examples are possible configured customer workflows, not Jaylene's current tools. Explain levels sequentially, pausing for an answer between them. Recommend the lowest suitable level; use the shared pricing KB for prices and terms.
+Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
+
+DISCOVERY QUESTIONS — ASK ONE AT A TIME
+- Do you mainly install smart-home systems, home theaters and networks, or also perform electrical work?
+- Are most calls new projects, help with existing installations, or scheduling questions?
+- What happens to calls when your technicians are in a customer's home?
+- Which approved equipment and service-area questions do you answer repeatedly?
+- Would a detailed callback request solve the problem, or should callers arrange a consultation?
+- Which situations need the owner or a senior technician, and what system holds that information?
+
+EXPLAIN THE THREE LEVELS IN ORDER
+Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+
+LEVEL 1 — ANSWERING SERVICE
+Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
+- Answer approved service-area and installation-category FAQs without asserting unverified device compatibility.
+- Capture contact details, general project type, property location and whether the caller is an existing customer.
+- Record a plain-language support concern and send a callback summary to one agreed destination.
+Probe: When you finish an installation, would one organized summary give you enough to return the right calls?
+Useful when: Technicians need reliable message capture while onsite.; The team prefers to assess projects and schedule callbacks itself.
+
+LEVEL 2 — RECEPTIONIST
+Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
+- Add qualification using approved project categories, service area and desired timing, with screened transfers to the agreed human.
+- With the single calendar integration selected, offer approved consultation appointments subject to configured availability.
+- Alternatively, use the single CRM integration for qualified project lead capture; this option does not also include calendar booking.
+Probe: Would arranging consultations or entering qualified project leads remove more work for your team?
+Useful when: Calls require consistent qualification before a technician responds.; One calendar OR CRM connection covers the needed next step.
+
+LEVEL 3 — MANAGER
+Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+- Collect installation complaints, affected equipment categories and the requested resolution for human review.
+- Explain approved support or warranty policies and route disputed coverage or exceptions to the responsible person.
+- Where compatible and scoped, use two standard integrations total, such as a calendar and CRM, to coordinate the agreed workflow.
+Probe: How often do support complaints or handoffs between systems require someone to coordinate the whole issue?
+Useful when: Complaint intake and policy-based escalation recur regularly.; The workflow needs two confirmed standard integrations total.
+
+SCOPE BOUNDARIES
+- Do not collect Wi-Fi passwords, lock or alarm codes, private camera access, access tokens or security bypass instructions.
+- Do not provide electrical repair, wiring, bypass or hazardous troubleshooting instructions; use approved human escalation paths.
+- Do not guarantee device compatibility, network performance, remote repair, arrival times or coverage without approved facts.
+- Refunds, credits, financial commitments and policy exceptions remain human decisions. Texting, custom integrations and additional transfer charges are separately scoped.
+
+CLIENT SETUP INFORMATION TO CONFIRM
+- Confirm service categories, service area, business hours and the distinction between technology and electrical services.
+- Supply approved device/support FAQs, intake fields, information to avoid collecting and the summary destination.
+- Define appointment types or CRM fields, qualification rules, screened transfer contacts and escalation fallbacks.
+- Provide approved warranty language and complaint handling rules; confirm integration compatibility and test representative calls.
+
+ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
+- Websites and custom tools: When Prospects cannot understand installation options online. Explore a clear service page and project inquiry form.
+- Business automation: When Staff repeatedly retype project inquiries between tools. Scope a separate workflow for routing approved inquiry fields.
+- Networks and cabling: When The business needs help with its own network infrastructure. Discuss an assessment and written scope rather than promising a partnership or subcontracting arrangement.
+
+ILLUSTRATIVE DISCOVERY CONVERSATION
+Caller: We install home theaters and Wi-Fi. Calls interrupt our onsite work.
+Agent: Level 1 could answer your approved service questions, capture project details and send one callback summary. Would that be enough, or do you want callers to arrange consultations?
+Caller: Consultations would help. We use a shared calendar.
+Agent: Level 2 could qualify projects and book approved consultations through one compatible calendar. A CRM would be the alternative included integration. How do you handle complaints after an installation?
+Caller: The owner handles those; they are occasional.
+Agent: Level 3 adds complaint intake, approved policy answers, escalation and two integrations total. Decisions stay with your owner. Level 2 sounds closest to your current need. Which consultation details should callers provide?
+
+SOURCES AND AUTHORSHIP
+- capability_source: https://ahernai.com/services/ai-phone-agents — Package capabilities checked October 3, 2026; shared pricing KB governs commercial terms.
+- authored_guidance: AhernAI vertical library — Illustrative discovery and configuration examples; not customer results or a promise of application support.

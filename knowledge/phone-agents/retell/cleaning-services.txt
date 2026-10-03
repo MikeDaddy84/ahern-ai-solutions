@@ -1,0 +1,76 @@
+AHERNAI VERTICAL: RESIDENTIAL AND COMMERCIAL CLEANING
+Stable ID: cleaning-services | Content version: 1.0.0 | Updated: 2026-10-03
+
+PURPOSE AND AUTHORITY
+AhernAI sales discovery and illustrative configuration guidance
+These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+
+MATCH THIS BUSINESS
+Also described as: house cleaning; maid service; residential cleaning; commercial cleaning; janitorial service; move-out cleaning; office cleaning
+Use for residential or commercial cleaning businesses; clarify customer type and services first. Explore missed inquiries, repeat questions, scheduling and service concerns. Examples are possible configured customer workflows, not Jaylene's current tools. Present Answering, Receptionist and Manager in separate turns, with a useful probe after each. Recommend the lowest suitable level. Use the shared pricing KB for costs and terms.
+Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
+
+DISCOVERY QUESTIONS — ASK ONE AT A TIME
+- Do you clean homes, commercial premises or both?
+- Are most inquiries recurring service, one-time cleaning, move-out work or something else?
+- What happens when someone calls while the crew is working?
+- Which questions about service area, scope or estimates come up repeatedly?
+- Do you want staff to call back, book an estimate visit or receive a qualified lead in your CRM?
+- Which complaints, access concerns or scheduling exceptions need a supervisor?
+
+EXPLAIN THE THREE LEVELS IN ORDER
+Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+
+LEVEL 1 — ANSWERING SERVICE
+Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
+- Answer approved FAQs about service areas and cleaning categories without inventing inclusions or prices.
+- Capture caller details, residential or commercial scope, general property size, desired timing and the reason for calling.
+- Send a new inquiry, schedule-change request or service concern as a summary to one agreed destination for staff follow-up.
+Probe: Would an organized message with the property and cleaning needs let your team handle the next step?
+Useful when: Calls go unanswered while crews are working.; Staff want to review requests before quoting or scheduling.
+
+LEVEL 2 — RECEPTIONIST
+Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
+- Add qualification using approved service categories and service-area rules, plus screened transfers to the agreed human.
+- If a calendar is the selected integration, book an approved estimate visit or appointment type within configured availability.
+- Alternatively, capture qualified inquiries in one standard CRM; this option does not also include calendar booking.
+Probe: Would you rather have callers arrange approved estimate appointments or send qualified inquiries directly into your CRM?
+Useful when: The business has repeatable intake and a defined next step.; One standard calendar OR CRM connection meets the workflow need.
+
+LEVEL 3 — MANAGER
+Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+- Gather detailed missed-service, quality or damage concerns and the caller's requested resolution for a supervisor.
+- Explain approved cancellation or service policies and escalate disputed charges or exceptions without making a decision.
+- Use two compatible standard integrations total, such as a calendar and CRM, for the agreed workflow.
+Probe: How much time does someone spend collecting complaint details and coordinating the next step between systems?
+Useful when: Service complaints need structured intake and consistent escalation.; The agreed workflow requires two standard integrations total.
+
+SCOPE BOUNDARIES
+- Do not request door, gate or alarm codes, keys, payment-card details or other access credentials during discovery or example intake.
+- Do not give chemical-mixing instructions or hazardous cleanup advice. Use approved human escalation for hazards or work outside the business's confirmed scope.
+- Do not promise a fixed quote, crew availability, rescheduling, arrival time, damage responsibility or a re-clean without an approved policy and configured capability.
+- Human staff decide refunds, credits, discounts, liability and policy exceptions. Texting, custom integrations and additional transfer charges are separately scoped.
+
+CLIENT SETUP INFORMATION TO CONFIRM
+- Confirm residential/commercial focus, offered cleaning categories, service area, business hours and excluded work.
+- Supply approved FAQs, estimate rules, intake fields and the single summary destination.
+- Define appointments or CRM fields, qualification, transfer contacts and escalation fallbacks.
+- Provide cancellation, complaint and damage-reporting policies, plus a separate approved access-detail process.
+- Confirm compatibility; test inquiries, unavailable appointments and complaints before launch.
+
+ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
+- Websites and custom tools: When Callers cannot tell which cleaning services are offered. Explore service pages and an inquiry form with approved scope questions.
+- Business automation: When Staff manually copy the same inquiry into several systems. Scope a separate workflow for approved lead routing and internal follow-up.
+
+ILLUSTRATIVE DISCOVERY CONVERSATION
+Caller: We clean homes and small offices. The crew misses new customer calls.
+Agent: Level 1 could answer approved questions, capture the property and cleaning needs, then send one summary. Would a callback message solve it, or would appointment booking help more?
+Caller: We prefer to call back and assess the job ourselves.
+Agent: Level 2 adds qualification, screened transfers and one calendar or CRM integration. It could capture qualified leads in a compatible CRM. Are complaints or policy questions taking much supervisor time?
+Caller: Not really. We mostly need to stop losing new inquiries.
+Agent: Level 3 adds detailed complaint intake, approved policy answers, escalation and two integrations total; financial decisions remain yours. Level 1 sounds like the best starting fit. What details must every callback message include?
+
+SOURCES AND AUTHORSHIP
+- capability_source: https://ahernai.com/services/ai-phone-agents — Package capabilities checked October 3, 2026; shared pricing KB governs commercial terms.
+- authored_guidance: AhernAI vertical library — Illustrative discovery and configuration examples; not customer results or a promise of application support.

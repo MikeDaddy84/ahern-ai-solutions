@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "id": "residential-electrical",
+  "name": "Residential Electrical Contractors",
+  "retell_name": "AhernAI - Residential Electrical",
+  "version": "1.0.0",
+  "updated_at": "2026-10-03",
+  "purpose": "AhernAI sales discovery and illustrative configuration guidance",
+  "aliases": [
+    "residential electrician",
+    "electrical service contractor",
+    "home electrical contractor",
+    "residential electrical company"
+  ],
+  "summary": "For residential electrical business owners. Clarify electrical contracting versus low-voltage cabling or smart-home installation. Explore their workflow, then explain Answering Service, Receptionist and Manager in order. These conditional examples establish no qualifications, compatibility or active capabilities. Recommend the lowest useful level; consult shared pricing for costs.",
+  "discovery_questions": [
+    "Is your main work residential electrical service, installations or a different specialty?",
+    "Which types of calls interrupt your team most often?",
+    "What happens when someone calls while everyone is at a job?",
+    "What details does your office need before accepting a request?",
+    "Which requests can be booked directly, and which need an electrician's review first?",
+    "Where do you currently keep appointments and customer requests?",
+    "Who should handle complaints or requests outside your approved service scope?"
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "use_cases": [
+        "Answer approved hours, service-area and accepted-work questions without assessing installations or interpreting electrical requirements.",
+        "Collect contact details, property location and the caller's estimate or service request for human review.",
+        "Send a reason-for-call summary to one agreed destination while the crew is unavailable, preserving the office's control over scheduling."
+      ],
+      "probe": "Would consistent request capture be enough, or does the caller need another step during the call?",
+      "fit_signals": [
+        "Missed calls and incomplete voicemail details are the main problem.",
+        "A qualified person must review every job before scheduling."
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "use_cases": [
+        "Qualify inquiries using owner-approved service-area and work-category rules and offer screened transfers through configured human destinations.",
+        "Use one standard calendar integration for approved consultation or estimate slots if the business permits direct booking for those request types.",
+        "Alternatively, use one standard CRM integration to capture qualified inquiries for staff review; this choice does not also include calendar booking."
+      ],
+      "probe": "Would approved appointment booking or CRM lead capture remove more office work for you?",
+      "fit_signals": [
+        "The office repeatedly checks the same intake criteria.",
+        "There are documented eligibility and handoff rules for common requests."
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "use_cases": [
+        "Collect detailed complaints about a prior service experience and the requested resolution for an authorized human, without deciding fault.",
+        "Explain approved estimate, appointment-change and follow-up policies while sending exceptions and financial questions to the business owner.",
+        "Coordinate approved escalation routes and potentially support both a calendar and CRM within two standard integrations total, subject to compatibility and scope."
+      ],
+      "probe": "Which follow-up calls need clearer escalation rules?",
+      "fit_signals": [
+        "Repeat policy questions or complaints consume owner time.",
+        "The defined workflow needs two confirmed integrations."
+      ]
+    }
+  ],
+  "scope_boundaries": [
+    "Level 1 excludes booking, CRM integrations and screened transfers. Level 2 includes one standard calendar OR CRM integration; Level 3 includes two total, not two additional integrations.",
+    "Do not diagnose electrical hazards, provide DIY wiring or repair instructions, interpret code compliance, certify safety or promise that a described job is suitable.",
+    "For an immediate safety concern, stop the sales discussion and refer at a high level to appropriate local emergency services or a qualified human. Do not troubleshoot or instruct the caller to test equipment.",
+    "No promised emergency response, dispatch, arrival, price, refund, discount or policy exception. Human financial and technical decisions remain with the business; examples do not perform live actions."
+  ],
+  "setup_requirements": [
+    "Confirm business specialty, approved work categories, service area, hours, FAQs and one summary destination.",
+    "Document what may be booked, what requires technical review, calendar permissions and staff transfer or escalation availability.",
+    "Confirm compatible systems, the chosen integration count and fallback behavior; approve and test the configured call paths before launch."
+  ],
+  "adjacent_services": [
+    {
+      "service": "Business automation",
+      "trigger": "Office staff manually move the same inquiry between tools.",
+      "example": "Explore a separately scoped intake workflow with approved actions and human exception handling."
+    },
+    {
+      "service": "Websites and custom tools",
+      "trigger": "The owner says the website does not explain accepted work or capture inquiries.",
+      "example": "Discuss clear service pages and an inquiry form based on the business's actual service scope."
+    }
+  ],
+  "example_conversation": [
+    {
+      "speaker": "caller",
+      "text": "We are residential electricians and get interrupted by estimate calls."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 1, Answering Service, could collect request details and send one summary for your review. What do you need to know before deciding the next step?"
+    },
+    {
+      "speaker": "caller",
+      "text": "The location and kind of work, then we arrange an estimate."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 2, Receptionist, could qualify those details and support screened transfers, with either approved calendar booking or CRM lead capture. Can estimate visits be booked without an electrician reviewing them?"
+    },
+    {
+      "speaker": "caller",
+      "text": "Some can, but complaints always come to me."
+    },
+    {
+      "speaker": "agent",
+      "text": "Level 3, Manager, could gather complaints, explain approved policies and escalate exceptions, with two integrations total. You retain financial decisions. Which part of that would save you the most time?"
+    }
+  ],
+  "provenance": [
+    {
+      "type": "capability_source",
+      "source": "https://ahernai.com/services/ai-phone-agents",
+      "note": "Package capabilities and limits verified in the shared published pricing source dated 2026-10-03; prices intentionally centralized there."
+    },
+    {
+      "type": "authored_guidance",
+      "source": "AhernAI industry discovery library",
+      "note": "Illustrative sales guidance; not technical advice, customer proof or integration certification."
+    }
+  ]
+}

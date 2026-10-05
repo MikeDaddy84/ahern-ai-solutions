@@ -33,8 +33,11 @@ both themes, including daily-table expansion: no horizontal overflow or page
 JavaScript errors. Light/mobile and dark/desktop screenshots were inspected.
 Local sample screenshots are in `output/site-visits-review/` and are not published.
 
-Uses the existing GitHub main / Render auto-deploy workflow. Production owner
-sign-in and actual historical counts have not been verified in this session.
+Published application commit `ef5b3fe` through GitHub main / Render auto-deploy.
+Live checks confirmed the new portal version, exact deployed dashboard CSS,
+anonymous redirect to login, non-cacheable report responses, no preview report
+link, and a connected analytics database. Production owner sign-in and actual
+historical counts have not been verified in this session.
 No additional setup is expected when the website analytics database and owner
 portal account are already configured. Unrelated local backup work is excluded.
 

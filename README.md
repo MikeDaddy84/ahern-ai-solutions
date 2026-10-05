@@ -4,6 +4,40 @@ Node/Express site for Ahern AI: managed AI phone agents, AI automation, custom
 PCs, private local AI systems, websites and custom tools, and networks and
 cabling, based in Gordon, TX.
 
+## Private site visits — October 5, 2026
+
+Owners can open **Site visits** beside Satori in the signed-in portal, at
+`/portal/visits`. The report shows today, the last 7 and 30 calendar days,
+all recorded history, a 30-day bar chart with an expandable daily table,
+and the ten most-viewed pages in the last 30 days. Dates use UTC and include
+today. Refresh reloads the report from the existing website Turso database.
+
+These are **page views, not unique people or sessions**: repeat loads count
+again. Existing history is reused; no visitor IDs, new analytics cookies,
+third-party services, schema changes, dependencies, or secrets are added.
+Portal/login/API/inquiry-dashboard/health paths are excluded. Script blockers
+can prevent counts and automated traffic can be included. Query strings are
+omitted from displayed page names. No individual browser or referrer records
+are exposed by the report.
+
+Authorization is enforced on the server with the existing portal session:
+only owner accounts can read the report. Other account roles receive HTTP 403,
+anonymous visitors are redirected to login, and the preview has no report link.
+Responses are non-cacheable and excluded from indexing. An unavailable database
+shows an HTTP 503 retry state rather than misleading zero counts.
+
+Validation: all 10 dashboard/portal tests passed, including date boundaries,
+zero-filled days, escaped page names, empty data, owner-only access, and outages.
+The production build passed. Headless Edge checked 320, 390, 768, and 1440px in
+both themes, including daily-table expansion: no horizontal overflow or page
+JavaScript errors. Light/mobile and dark/desktop screenshots were inspected.
+Local sample screenshots are in `output/site-visits-review/` and are not published.
+
+Uses the existing GitHub main / Render auto-deploy workflow. Production owner
+sign-in and actual historical counts have not been verified in this session.
+No additional setup is expected when the website analytics database and owner
+portal account are already configured. Unrelated local backup work is excluded.
+
 ## AI phone agents — live, October 2, 2026
 
 Mike approved the reviewed update for production on October 2, 2026. Managed
@@ -1193,7 +1227,8 @@ the sequence is inside a JSON string.
 
 Every page load beacons `path` + `referrer` to `/api/track`, which writes a
 row to the `pageviews` table in Turso — first-party, no cookies, no
-third-party script. Query it directly via the Turso CLI or dashboard, e.g.:
+third-party script. Owners can view totals and popular pages at `/portal/visits`
+behind the portal login. Direct SQL remains available through Turso, e.g.:
 
 ```sql
 SELECT path, COUNT(*) AS views FROM pageviews GROUP BY path ORDER BY views DESC;

@@ -1,43 +1,93 @@
 # Ahern AI — Website
 
-## Reusable phone-agent industry knowledge — October 3, 2026
+## Phone-agent scope and discovery — October 7, 2026
 
-The [portable knowledge library](knowledge/phone-agents/README.md) now contains
-separate canonical JSON records and Retell text exports for restaurants,
-plumbing, residential electrical, HVAC, smart-home technology, auto repair,
-salons/spas, and cleaning services. Each includes business matching terms,
-discovery questions, Level 1 Answering → Level 2 Receptionist → Level 3 Manager
-examples and probes, plan-fit signals, scope boundaries, setup requirements,
-and an illustrative conversation. These are authored configuration examples,
-not customer results or guaranteed application integrations.
+Level 2 Receptionist now includes routine front-desk duties and the supporting
+automation/integration work within the agreed scope, without an extra AhernAI
+automation/build charge. Restaurant order-taking, appointment changes and
+customer-record updates are examples. Calendar and CRM duties can be combined.
+Named software compatibility, including direct Toast order submission, is
+verified during setup; it is not automatically an additional fee or a promise
+of universal application support.
 
-Eight separate KBs were created in the AhernAI Retell workspace and attached
-to Jaylene and Hideo alongside the shared Services & Pricing KB. Jaylene V28
-and Hideo V2 are published; Jaylene's internal handoff targets Hideo V2.
-The deployment mapping is in
-[`deployment/retell.json`](knowledge/phone-agents/deployment/retell.json).
-KCS agents and Alfred were not part of this update.
+Level 3 Manager is discussed when a caller raises difficult/disgruntled callers,
+employee coordination or supervisory needs, or explicitly asks about the tier.
+It adds approved complaint, policy, escalation and staff-coordination workflows.
+Financial decisions, staffing approvals, employment decisions and exceptions
+remain human. Prices, setup fees, minutes and overages are unchanged.
 
-Phone prices are centralized in the shared JSON/text snapshot. The generated
-[`phone-pricing-anchor.txt`](knowledge/phone-agents/retell/phone-pricing-anchor.txt)
-is also included in both agent prompts. Testing exposed a wrong Manager price
-when industry retrieval omitted pricing; the exact price anchor corrected that
-failure in fresh tests. Update the shared KB and both prompt anchors together
-when the published website prices change.
+The [portable knowledge library](knowledge/phone-agents/README.md) contains eight
+separate industry records, JSON sources, Retell text exports, shared pricing and
+a deterministic validator. Content version 2.0.0 replaces forced three-level
+discovery and the old calendar/CRM connection quotas. Match the business, ask
+one useful question at a time and recommend the lowest suitable plan as soon as
+the need is clear.
 
-**Validation:** all eight records passed structural checks and independent
-content review. All 11 generated exports passed deterministic consistency
-checks. Retell text tests covered restaurant discovery, electrical/smart-home
-clarification, smart-home plan comparison, calendar-versus-CRM limits, exact
-prices/setup/minutes/overages, human refund decisions, and reservation-system
-compatibility boundaries. Live voice calls, actual transfers, every possible
-industry conversation, and future-platform runtime behavior remain untested.
-No website application code, hosting configuration or production data changed.
+All nine existing AhernAI KBs were updated in place in Retell, with superseded
+source documents removed after replacement verification. Jaylene **V32** and
+Hideo **V4** are published; Jaylene's handoff selects Hideo V4, and the main
+number selects Jaylene's latest published version. Her fixed greeting is:
+“Thanks for calling! This is Jaylene. How can I help you today?”
+Routine surname/business-name repetition is suppressed. Model and voice
+choices were preserved; KCS and Alfred were outside this update.
 
+Validation: eight canonical records and 11 deterministic exports passed
+consistency checks. Retell text tests covered restaurant pickup ordering,
+Toast uncertainty without an assumed surcharge, exact Level 2 pricing,
+message-only Level 1 fit, conditional Manager discovery, and Hideo's combined
+booking/CRM explanation. All five website route tests passed; the updated
+package page was visually inspected on desktop. Initial route testing lacked
+the temporary copy's Three.js static files; restoring that dependency resolved
+the environment-only failure.
+
+The supplied live-call transcript informed the changes. New live audio,
+actual transfers, interruption timing and acoustic throat-clearing were not
+tested. Both prompts prohibit invented vocal effects. No customer Toast,
+ordering, payment, booking, CRM or employee-system integration was built.
+Full live prompts, call audio and private operational configuration are kept
+outside the public repository. See
+[deployment details](knowledge/phone-agents/deployment/retell.json).
 
 Node/Express site for Ahern AI: managed AI phone agents, AI automation, custom
 PCs, private local AI systems, websites and custom tools, and networks and
 cabling, based in Gordon, TX.
+
+## Private site visits — October 5, 2026
+
+Owners can open **Site visits** beside Satori in the signed-in portal, at
+`/portal/visits`. The report shows today, the last 7 and 30 calendar days,
+all recorded history, a 30-day bar chart with an expandable daily table,
+and the ten most-viewed pages in the last 30 days. Dates use UTC and include
+today. Refresh reloads the report from the existing website Turso database.
+
+These are **page views, not unique people or sessions**: repeat loads count
+again. Existing history is reused; no visitor IDs, new analytics cookies,
+third-party services, schema changes, dependencies, or secrets are added.
+Portal/login/API/inquiry-dashboard/health paths are excluded. Script blockers
+can prevent counts and automated traffic can be included. Query strings are
+omitted from displayed page names. No individual browser or referrer records
+are exposed by the report.
+
+Authorization is enforced on the server with the existing portal session:
+only owner accounts can read the report. Other account roles receive HTTP 403,
+anonymous visitors are redirected to login, and the preview has no report link.
+Responses are non-cacheable and excluded from indexing. An unavailable database
+shows an HTTP 503 retry state rather than misleading zero counts.
+
+Validation: all 10 dashboard/portal tests passed, including date boundaries,
+zero-filled days, escaped page names, empty data, owner-only access, and outages.
+The production build passed. Headless Edge checked 320, 390, 768, and 1440px in
+both themes, including daily-table expansion: no horizontal overflow or page
+JavaScript errors. Light/mobile and dark/desktop screenshots were inspected.
+Local sample screenshots are in `output/site-visits-review/` and are not published.
+
+Published application commit `ef5b3fe` through GitHub main / Render auto-deploy.
+Live checks confirmed the new portal version, exact deployed dashboard CSS,
+anonymous redirect to login, non-cacheable report responses, no preview report
+link, and a connected analytics database. Production owner sign-in and actual
+historical counts have not been verified in this session.
+No additional setup is expected when the website analytics database and owner
+portal account are already configured. Unrelated local backup work is excluded.
 
 ## AI phone agents — live, October 2, 2026
 
@@ -290,14 +340,14 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest attempt blocked:** October 2, 2026 at 9:00 p.m. Central
-(2026-10-03 02:00 UTC). The current Windows account cannot read the private
+**Latest attempt blocked:** October 7, 2026 at 8:34 a.m. Central
+(2026-10-07 13:34 UTC). The current Windows account cannot read the private
 backup configuration or last-success record. The backup exited before creating
 a snapshot; no restore, integrity, or retention checks ran. Private-folder
 permissions were not changed. Run under the original authorized Windows owner,
 or have an administrator explicitly migrate access to the intended account.
 The last success verified in this task was September 19 at 9:02 p.m. Central,
-about 312 hours earlier, exceeding the 36-hour limit. Newer backup status cannot
+about 420 hours earlier, exceeding the 36-hour limit. Newer backup status cannot
 be confirmed until private-folder access is restored. GitHub documentation
 publication does not constitute a successful backup. Protection remains local
 only; NAS, off-site, offline, database, and secret recovery remain pending.
@@ -1228,7 +1278,8 @@ the sequence is inside a JSON string.
 
 Every page load beacons `path` + `referrer` to `/api/track`, which writes a
 row to the `pageviews` table in Turso — first-party, no cookies, no
-third-party script. Query it directly via the Turso CLI or dashboard, e.g.:
+third-party script. Owners can view totals and popular pages at `/portal/visits`
+behind the portal login. Direct SQL remains available through Turso, e.g.:
 
 ```sql
 SELECT path, COUNT(*) AS views FROM pageviews GROUP BY path ORDER BY views DESC;

@@ -60,17 +60,17 @@ def render(v):
              f"Stable ID: {v['id']} | Content version: {v['version']} | Updated: {v['updated_at']}",
              '', 'PURPOSE AND AUTHORITY', v['purpose'],
              'These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.',
-             'Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.',
+             'Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-07. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.',
              '', 'MATCH THIS BUSINESS', 'Also described as: ' + '; '.join(v['aliases']), v['summary'],
              'Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.',
              '', 'DISCOVERY QUESTIONS — ASK ONE AT A TIME']
     lines += ['- ' + x for x in v['discovery_questions']]
-    lines += ['', 'EXPLAIN THE THREE LEVELS IN ORDER',
-              'Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.']
+    lines += ['', 'DISCOVERY: RECOMMEND BY NEED',
+              "Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell."]
     bounds = {
         1: 'Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.',
-        2: 'Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.',
-        3: 'Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.'}
+        2: 'Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.',
+        3: 'Scope: Receptionist plus difficult-caller handling, approved employee coordination, policy guidance and escalation. Human owners retain financial, employment and policy-exception decisions. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.'}
     for level in v['levels']:
         lines += ['', f"LEVEL {level['level']} — {level['name'].upper()}", bounds[level['level']]]
         lines += ['- ' + x for x in level['use_cases']]
@@ -104,7 +104,7 @@ def main():
     require([p['level'] for p in pricing['plans']] == [1, 2, 3], 'Pricing levels must be ordered')
     price_lines = ['VERIFIED PHONE-AGENT PRICING — ' + pricing['verified_at'],
                    'Source: ' + pricing['source_url'],
-                   'Use these exact published amounts for phone-price questions even when industry retrieval does not include a pricing chunk. Do not guess, substitute remembered figures, or claim the published included minutes are unknown. This dated table and the shared pricing KB are the verified snapshot; flag any conflicting newer source for Mike instead of inventing a reconciliation.',
+                   'Owner-approved scope updated October 7, 2026; amounts unchanged from the October 3 website snapshot. Quote the relevant plan first; quote all tiers only when explicitly requested. Use these exact amounts even when industry retrieval omits pricing. Do not guess, substitute remembered figures, or claim the published included minutes are unknown. This dated table and the shared pricing KB are the verified snapshot; flag any conflicting newer source for Mike instead of inventing a reconciliation.',
                    'Prices are USD PER AGENT before applicable taxes. Distinguish MONTHLY subscription, ONE-TIME setup and usage charges.']
     for p in pricing['plans']:
         for key in ['monthly', 'setup', 'included_minutes', 'additional_minute']:
@@ -112,7 +112,7 @@ def main():
         price_lines.append(f"Level {p['level']} {p['name']}: ${p['monthly']:,}/month; ${p['setup']:,} one-time setup; {p['included_minutes']} included AI-handled minutes/month; ${p['additional_minute']:.2f} per additional minute. {p['integration_scope']}")
     price_lines += pricing['terms']
     outputs['retell/phone-pricing-anchor.txt'] = '\n'.join(price_lines) + '\n'
-    outputs['catalog.json'] = json.dumps({'schema_version': '1.0', 'updated_at': '2026-10-03', 'pricing_source': 'shared/phone-agent-pricing.json', 'pricing_detail': 'shared/phone-agent-pricing.txt', 'agent_pricing_anchor': 'retell/phone-pricing-anchor.txt', 'verticals': catalog}, indent=2, ensure_ascii=False) + '\n'
+    outputs['catalog.json'] = json.dumps({'schema_version': '1.0', 'updated_at': max(v['updated_at'] for v in records), 'pricing_source': 'shared/phone-agent-pricing.json', 'pricing_detail': 'shared/phone-agent-pricing.txt', 'agent_pricing_anchor': 'retell/phone-pricing-anchor.txt', 'verticals': catalog}, indent=2, ensure_ascii=False) + '\n'
     outputs['compiled-library.json'] = json.dumps({'schema_version': '1.0', 'verticals': records}, indent=2, ensure_ascii=False) + '\n'
     check = '--check' in sys.argv
     for relative, content in outputs.items():

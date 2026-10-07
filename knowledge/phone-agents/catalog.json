@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-10-03",
+  "updated_at": "2026-10-07",
   "pricing_source": "shared/phone-agent-pricing.json",
   "pricing_detail": "shared/phone-agent-pricing.txt",
   "agent_pricing_anchor": "retell/phone-pricing-anchor.txt",
@@ -9,7 +9,7 @@
       "id": "auto-repair",
       "name": "Auto Repair",
       "retell_name": "AhernAI - Auto Repair",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "auto repair shop",
         "mechanic",
@@ -19,13 +19,13 @@
       ],
       "source": "verticals/auto-repair.json",
       "retell_document": "retell/auto-repair.txt",
-      "sha256": "f395c8bba7f1a58f47648dc4fb1bccaeba49ffb728940f77ceeacda23d7f2f0b"
+      "sha256": "1c4ad936921026b1de917a4a36dd97538cd1c27b609b0952ffb476f2820f5fa6"
     },
     {
       "id": "cleaning-services",
       "name": "Residential and Commercial Cleaning",
       "retell_name": "AhernAI - Cleaning Services",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "house cleaning",
         "maid service",
@@ -37,13 +37,13 @@
       ],
       "source": "verticals/cleaning-services.json",
       "retell_document": "retell/cleaning-services.txt",
-      "sha256": "f5e57dac19e08cf88aa4fb37b9b586f59c5b6aa77faa206e4e866f8f9b4768c6"
+      "sha256": "6e14226cd3e0b677635e64a9fdf9875549df30c03ee47af5982078a9614920cc"
     },
     {
       "id": "hvac",
       "name": "HVAC Contractors",
       "retell_name": "AhernAI - HVAC",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "HVAC contractor",
         "heating and cooling company",
@@ -52,13 +52,13 @@
       ],
       "source": "verticals/hvac.json",
       "retell_document": "retell/hvac.txt",
-      "sha256": "066c49abf794bf6a78b0e18e9b34a8d8672ead770b4b2818ea199f4bd540fb99"
+      "sha256": "c1471e1e4559433108e4fc166f09adefcefd39d26e326037c304de33bc553ba4"
     },
     {
       "id": "plumbing",
       "name": "Plumbing Contractors",
       "retell_name": "AhernAI - Plumbing",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "plumbing contractor",
         "residential plumber",
@@ -67,13 +67,13 @@
       ],
       "source": "verticals/plumbing.json",
       "retell_document": "retell/plumbing.txt",
-      "sha256": "859384902889db4c571dce139d025361df90a10176860035840cce71b48270a0"
+      "sha256": "208139e09a19dac0731315530680b02c24d960b47e1a7e3d75b236f9e9733b87"
     },
     {
       "id": "residential-electrical",
       "name": "Residential Electrical Contractors",
       "retell_name": "AhernAI - Residential Electrical",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "residential electrician",
         "electrical service contractor",
@@ -82,13 +82,13 @@
       ],
       "source": "verticals/residential-electrical.json",
       "retell_document": "retell/residential-electrical.txt",
-      "sha256": "706aef9475f84ac8ffb3e2c26e6b2c6929d7ecd3f324dcd7bda2ba23446b0ffe"
+      "sha256": "a864ba478f8e3346d697f3b728f39cb01a9ce5b93049a2218b7ad2b187b7e184"
     },
     {
       "id": "restaurants",
       "name": "Restaurants",
       "retell_name": "AhernAI - Restaurants",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "restaurant",
         "cafe",
@@ -98,13 +98,13 @@
       ],
       "source": "verticals/restaurants.json",
       "retell_document": "retell/restaurants.txt",
-      "sha256": "542fe372da530c9cc9bffea0b6d9358929c1b3443f304bd2fb87119b2509e982"
+      "sha256": "860d6d877ee9016e283ba34319f54ab2f0f4b518cf089dd53a089ea617edeb09"
     },
     {
       "id": "salons-spas",
       "name": "Salons and Spas",
       "retell_name": "AhernAI - Salons and Spas",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "salon",
         "spa",
@@ -115,13 +115,13 @@
       ],
       "source": "verticals/salons-spas.json",
       "retell_document": "retell/salons-spas.txt",
-      "sha256": "6c9ced1c51726ac84b323a146c6c60a2da0bca8c96e2a2d9a72e28de36676bd5"
+      "sha256": "9c6527fd95a451bf66b456d6ff1c3b3464bdbe2efdf52a7035b9cc519a1ae9a1"
     },
     {
       "id": "smart-home-technology",
       "name": "Smart Home and Home Technology",
       "retell_name": "AhernAI - Smart Home Technology",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "aliases": [
         "smart home",
         "home automation",
@@ -133,7 +133,7 @@
       ],
       "source": "verticals/smart-home-technology.json",
       "retell_document": "retell/smart-home-technology.txt",
-      "sha256": "1adb1ef9bbc7623f795a800266a1d58e202c43c4ab012cb8a2d17ca9ef07515e"
+      "sha256": "ea04caf03e9fd8217cc81fd87876f641b7c6e0eedb0adbb89933456eb96e6d47"
     }
   ]
 }

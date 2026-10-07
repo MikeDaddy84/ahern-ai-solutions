@@ -79,7 +79,7 @@ test('audience journeys retain content, valid destinations, metadata, and inquir
   assert.equal(titles.size, 6);
 });
 
-test('dedicated phone page preserves per-agent pricing, integration limits, and human decisions', async () => {
+test('dedicated phone page preserves per-agent pricing, included receptionist automation, and human decisions', async () => {
   const expected = [
     { name: 'Answering', monthly: '$349', setup: '$750', minutes: '300', additional: '$0.75' },
     { name: 'Receptionist', monthly: '$549', setup: '$1,250', minutes: '500', additional: '$0.75' },
@@ -98,13 +98,16 @@ test('dedicated phone page preserves per-agent pricing, integration limits, and 
     assert.equal(text(card.querySelector('.ph-setup')), price.setup + ' setup');
     assert.deepEqual([...card.querySelectorAll('.ph-allowance dd')].map(text), [price.minutes, price.additional + '/min']);
   }
-  assert.match(text(cards[1]), /One standard calendar OR CRM integration/);
-  assert.match(text(cards[2]), /[Tt]wo standard integrations total/);
+  assert.match(text(cards[1]), /Supporting automation and integration work for the agreed receptionist duties included/);
+  assert.match(text(cards[1]), /Order-taking, appointment booking and changes, and customer-record updates/);
+  assert.match(text(cards[2]), /Approved employee coordination/);
   const main = text(doc.querySelector('main'));
   assert.match(main, /Financial decisions and policy exceptions (?:stay|remain) with (?:your |the )?business owner(?:\/team| or team)/);
   assert.match(main, /Each additional agent has its own setup fee, subscription, and minute allowance/);
   assert.match(main, /Included minutes cover AI-handled call time/);
-  assert.match(main, /Custom integrations, texting, and additional transfer charges are quoted separately/);
+  assert.match(main, /without an additional AhernAI automation or integration-build fee/);
+  assert.match(main, /Naming a POS does not establish compatibility or automatically add an integration fee/);
+  assert.doesNotMatch(main, /one standard calendar OR CRM|two standard integrations total/i);
   assert.match(main, /[Oo]ne business location and one language/);
   assert.match(main, /[Uu]p to 30 minutes of routine configuration updates each month/);
   assert.match(main, /USD per agent, before applicable taxes/);

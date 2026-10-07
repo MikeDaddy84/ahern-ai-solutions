@@ -1,12 +1,16 @@
 {
   "schema_version": "1.0",
-  "verified_at": "2026-10-03",
+  "verified_at": "2026-10-07",
   "platform": "Retell AI",
   "workspace": "AhernAI",
   "status": "published",
   "shared_knowledge_base": {
     "name": "AhernAI Services & Pricing",
-    "knowledge_base_id": "knowledge_base_7e5f9bbed937580a"
+    "knowledge_base_id": "knowledge_base_7e5f9bbed937580a",
+    "documents": [
+      "Phone Agent Levels and Pricing — 2026-10-07",
+      "Website Service Pillars and Pricing — 2026-10-03 (phone scope clarified Oct 7)"
+    ]
   },
   "verticals": [
     {
@@ -61,7 +65,7 @@
   "agents": [
     {
       "name": "Jaylene Slide",
-      "published_version": 28,
+      "published_version": 32,
       "vertical_ids": [
         "auto-repair",
         "cleaning-services",
@@ -75,12 +79,15 @@
       "pricing_anchor": "retell/phone-pricing-anchor.txt",
       "handoff": {
         "agent": "Hideo",
-        "published_version": 2
-      }
+        "published_version": 4
+      },
+      "welcome_message": "Thanks for calling! This is Jaylene. How can I help you today?",
+      "welcome_message_mode": "custom",
+      "preserved_model": "GPT 5.6 Terra"
     },
     {
       "name": "Hideo",
-      "published_version": 2,
+      "published_version": 4,
       "vertical_ids": [
         "auto-repair",
         "cleaning-services",
@@ -91,26 +98,34 @@
         "salons-spas",
         "smart-home-technology"
       ],
-      "pricing_anchor": "retell/phone-pricing-anchor.txt"
+      "pricing_anchor": "retell/phone-pricing-anchor.txt",
+      "preserved_model": "GPT 6.1 Sol Fast"
     }
   ],
   "validation": {
-    "content": "Eight canonical records structurally validated and independently reviewed; deterministic exports checked.",
+    "content": "All eight canonical records and 11 deterministic exports validated. Existing nine Retell KBs updated in place; each superseded source removed and each saved replacement verified. No additional knowledge bases created.",
     "text_tests": [
-      "Restaurant business matching and sequential three-level discovery",
-      "Ambiguous home electrical wording clarified into electrician versus smart-home",
-      "Smart-home three-level comparison and calendar OR CRM limit",
-      "All three published prices, setup fees, minute allowances and overages",
-      "Human refund decisions and reservation-system compatibility boundaries"
+      "Restaurant pickup-order discovery recommends Level 2 without an unsolicited Manager pitch.",
+      "Toast request: supporting automation included; direct POS submission remains subject to verification, without an assumed surcharge.",
+      "Relevant Level 2 pricing: 549 monthly, 1250 setup, 500 minutes and 0.75 overage.",
+      "Employee shift callouts and disgruntled callers trigger Level 3; staffing, refunds and exceptions stay human.",
+      "Message-only cleaning caller receives Level 1 and its correct price, without a forced tier progression.",
+      "Hideo confirms combined calendar/CRM duties fit Level 2 and quotes all Level 2 amounts, per-agent and before tax."
     ],
-    "corrected_failures": [
-      "A Manager price was hallucinated when industry retrieval omitted pricing; generated exact pricing anchors were added to both agent prompts and both passed fresh price tests.",
-      "An ambiguous Hideo summary implied CRM booking; explicit calendar-booking OR CRM-lead-capture wording was added and verified."
-    ],
-    "not_tested": [
-      "Live voice calls or real transfers",
-      "Every possible industry conversation or integration",
-      "Future custom-platform import/runtime behavior"
+    "website": "All five route tests passed, including updated package scope and preserved prices, links, human-decision boundaries and compatibility caveats. Desktop preview visually inspected.",
+    "limitations": [
+      "The supplied October 7 live-call transcript informed this revision; no new live voice call or actual transfer was executed.",
+      "Throat-clearing/stage directions are prohibited in both prompts, but acoustic behavior and interruption timing remain unverified.",
+      "No actual Toast, ordering, payment, booking, CRM or employee-system integration was built or certified.",
+      "Some text responses exceed the preferred short-turn target; prompts set 25–45 words for ordinary discovery.",
+      "Future custom-platform runtime imports were not exercised."
     ]
+  },
+  "content_version": "2.0.0",
+  "live_inbound_routing": {
+    "number": "+12546934919",
+    "agent": "Jaylene Slide",
+    "version_selector": "Latest Published",
+    "verified": "2026-10-07"
   }
 }

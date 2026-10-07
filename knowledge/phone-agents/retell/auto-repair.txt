@@ -1,14 +1,14 @@
 AHERNAI VERTICAL: AUTO REPAIR
-Stable ID: auto-repair | Content version: 1.0.0 | Updated: 2026-10-03
+Stable ID: auto-repair | Content version: 2.0.0 | Updated: 2026-10-07
 
 PURPOSE AND AUTHORITY
 AhernAI sales discovery and illustrative configuration guidance
 These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
-Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-07. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
 
 MATCH THIS BUSINESS
 Also described as: auto repair shop; mechanic; automotive service; vehicle repair; garage
-Help repair-shop owners explore missed calls, inquiries, callbacks, and advisor decisions. These are conditional proposals, not customer results or a deployed agent. Explain Levels 1→2→3 on separate turns, with one probe each, then recommend the lowest suitable level. Answer direct questions first.
+For vehicle repair shops. Explore appointment intake, approved repair-status questions and service-advisor interruptions. Keep diagnosis and repair authorization with qualified staff. Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
 
 DISCOVERY QUESTIONS — ASK ONE AT A TIME
@@ -18,8 +18,8 @@ DISCOVERY QUESTIONS — ASK ONE AT A TIME
 - Which calls need a service advisor immediately rather than a callback?
 - What calendar, CRM, or shop-management system do you use today?
 
-EXPLAIN THE THREE LEVELS IN ORDER
-Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+DISCOVERY: RECOMMEND BY NEED
+Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 
 LEVEL 1 — ANSWERING SERVICE
 Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
@@ -30,48 +30,50 @@ Probe: Would useful callback notes cover most missed calls, or do callers need a
 Useful when: The service desk can return messages and decide all scheduling details.; Routine FAQs and organized inquiry capture address the main interruption.
 
 LEVEL 2 — RECEPTIONIST
-Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
-- Qualify new inquiries against approved vehicle and service categories before an advisor reviews the request.
-- Offer screened transfers to a service advisor according to the shop's approved routing rules.
-- Book eligible intake appointments through ONE compatible standard calendar OR capture leads in one standard CRM; choose one.
-Probe: Would appointment intake through a calendar help most, or would you prefer CRM capture before an advisor follows up?
-Useful when: The shop has clear rules for eligible intake appointments and human handoffs.; One verified calendar or CRM connection meets the next-step requirement.
+Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Qualify vehicle and service requests against approved shop rules and offer screened transfers to a service advisor when necessary.
+- Book or change eligible intake appointments and update approved customer or shop records through verified systems, with supporting receptionist automation included.
+- Provide approved job-status information only when available from an authorized verified source, and route requests needing an advisor to the agreed queue.
+Probe: Which appointment and status requests could follow clear rules without an advisor deciding?
+Useful when: The caller needs routine receptionist work completed rather than only a message.; Approved business rules and verified systems support the agreed workflow.
 
 LEVEL 3 — MANAGER
-Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+Scope: Receptionist plus difficult-caller handling, approved employee coordination, policy guidance and escalation. Human owners retain financial, employment and policy-exception decisions. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 - Collect detailed workmanship or service complaints, relevant visit context, and the requested resolution for the human manager.
 - Explain approved service policies and escalate warranty, billing, or policy-exception requests for human review.
-- Combine eligible calendar and CRM workflows within TWO standard integrations TOTAL, subject to compatibility and agreed configuration.
-Probe: Which complaints or disputed expectations need a structured summary before you or your manager responds?
-Useful when: Complex service concerns need consistent intake and a defined escalation path.; A second supported integration solves a clear operational need beyond Receptionist.
+- Support approved employee coordination, such as recording a shift callout or coverage request and routing it to the authorized supervisor. Employment, staffing approval, disciplinary, financial and policy-exception decisions remain human; do not request medical reasons or other sensitive employee details.
+Probe: Only after the caller raises a management need: Which situations should the agent handle under approved rules, and which should reach you?
+Useful when: The caller asks for help with difficult or disgruntled callers and escalations.; The caller wants approved employee coordination or supervisory support.
 
 SCOPE BOUNDARIES
 - Level 1 excludes booking, screened transfers, and CRM updates. Capturing a request does not accept a repair job.
-- Level 2 includes ONE standard calendar OR CRM; Level 3 includes TWO TOTAL, not two additional integrations.
 - Shop-management systems, repair orders, live job status, inventory, and estimates are not guaranteed capabilities; confirm compatibility and scope.
 - Do not diagnose faults, guarantee safe driving or completion times, or give unapproved technical instructions. Staff confirm services, policies, and operational decisions.
 - Do not handle payments, authorize repair work, or make medical claims. Warranty decisions, refunds, discounts, credits, and policy exceptions remain human.
 - Use shared phone-agent pricing for fees and terms. Do not duplicate prices, guarantee results, or present proposals as live Jaylene actions.
+- Level 1 captures approved FAQs, caller details and a summary to one destination; it does not book, submit orders, update a CRM or make screened transfers. Level 2 covers agreed routine receptionist duties and supporting automation. Package fit is based on duties, not a one-calendar/one-CRM or two-integration quota. Scope is agreed before launch; this is not an unlimited software-development commitment.
+- Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
+- Do not promise that a named app or POS is supported merely because the caller names it. Verify compatibility during setup and agree a workable destination or fallback; disclose any actual work outside the agreed duties before proceeding.
 
 CLIENT SETUP INFORMATION TO CONFIRM
 - Approve supported vehicle/service categories, routine FAQs, and questions requiring an advisor.
 - Choose minimal intake fields and the ONE summary destination; avoid unnecessary customer records.
-- Verify the chosen calendar or CRM and distinguish intake availability from technician, bay, or parts availability.
+- Verify the agreed booking and customer systems and distinguish intake availability from technician, bay, or parts availability.
 - Define screened-transfer recipients, unavailable-staff fallbacks, and complaint escalation ownership.
 - Before launch, test ambiguous symptoms, status requests, unsupported services, failed handoffs, and financial exceptions.
+- Agree the routine duties and supporting automation included in the package, approved actions, access permissions, successful completion signals and failure paths before launch.
 
 ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
-- Business automation: When Staff repeatedly copy inquiry information between existing tools. A separately scoped workflow could route approved intake details for advisor review.
+- Business automation: When The business needs broader back-office work beyond its agreed receptionist duties. Explore a separate project only for that broader need. Automation needed for agreed Level 2 receptionist work is already included; do not resell it as a Quickstart or add-on.
 - Websites and custom tools: When Callers cannot find service information. A separately scoped website could clarify approved services and inquiries.
 
 ILLUSTRATIVE DISCOVERY CONVERSATION
-Caller: I own an auto shop. Our advisors miss calls when the counter is busy.
-Agent: Level 1 could collect vehicle details and the reason for calling, then send one summary. Would most customers accept a callback?
-Caller: Many would, but some need an advisor or a service appointment.
-Agent: Level 2 could screen transfers and book eligible intake appointments using one compatible calendar. Which appointments can follow clear rules without an advisor's judgment?
-Caller: Routine intake visits. Complaints and disputed bills still come to me.
-Agent: Level 3 could capture those concerns and requested resolutions, then escalate them while you retain financial decisions. What information would make those calls easier to handle?
+Caller: Our repair shop wants calls booked and entered into our shop system.
+Agent: Those routine front-desk duties fit Level 2, with the supporting automation included. Which shop system do you use?
+Caller: We would also like her to tell customers when a job is ready.
+Agent: That could fit the agreed receptionist workflow using verified job-status information. Where does your staff record that a vehicle is ready?
 
 SOURCES AND AUTHORSHIP
-- capability_source: https://ahernai.com/services/ai-phone-agents — Verified October 3, 2026. Shared published package capabilities and pricing are authoritative.
-- authored_guidance: AhernAI industry knowledge library — Illustrative automotive discovery guidance authored October 3, 2026; no diagnostic advice, customer metrics, or application compatibility claims.
+- capability_source: https://ahernai.com/services/ai-phone-agents — Owner-approved package clarification on October 7, 2026: Level 2 includes automation for agreed routine receptionist duties; Level 3 is for stated management needs. Prices remain unchanged from the October 3 website snapshot. This supersedes the former calendar/CRM integration quotas.
+- authored_guidance: AhernAI industry knowledge library — Illustrative industry discovery updated October 7, 2026; no customer outcomes or application compatibility are asserted.

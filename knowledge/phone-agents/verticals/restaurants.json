@@ -3,8 +3,8 @@
   "id": "restaurants",
   "name": "Restaurants",
   "retell_name": "AhernAI - Restaurants",
-  "version": "1.0.0",
-  "updated_at": "2026-10-03",
+  "version": "2.0.0",
+  "updated_at": "2026-10-07",
   "purpose": "AhernAI sales discovery and illustrative configuration guidance",
   "aliases": [
     "restaurant",
@@ -13,13 +13,14 @@
     "bistro",
     "eatery"
   ],
-  "summary": "Help restaurant owners explore handling calls during service and after hours. First identify their dining format, common inquiries, and current response process. These are conditional configuration proposals, not a deployed restaurant agent or customer results. Explain all three levels across separate turns, ask one question at each, and recommend the lowest level meeting the stated need. Answer direct questions first.",
+  "summary": "For restaurant, cafe and dining-business owners. Explore phone orders, reservations, menu questions and service interruptions. Match the actual need instead of defaulting to private-event inquiries. Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.",
   "discovery_questions": [
-    "What kind of restaurant do you run, and which calls interrupt service most often?",
-    "What happens when a caller cannot reach your team?",
-    "Are callers mostly asking routine questions, requesting reservations, or planning larger events?",
-    "Who should receive messages, and when does someone need to speak to staff immediately?",
-    "Which reservation, calendar, or customer system do you use today?"
+    "What kinds of calls interrupt service most often?",
+    "How do phone orders reach your kitchen today?",
+    "Would you need pickup orders, delivery orders, or both?",
+    "Which ordering or POS system do you use?",
+    "What menu choices, modifiers and order changes should she confirm?",
+    "What should happen if the order cannot reach the agreed destination?"
   ],
   "levels": [
     {
@@ -40,14 +41,14 @@
       "level": 2,
       "name": "Receptionist",
       "use_cases": [
-        "Qualify private-event inquiries using approved party-size, timing, and service-area criteria before a human review.",
-        "Offer screened transfers to the host or events contact under an agreed routing policy.",
-        "Use ONE compatible standard calendar for consultation booking OR one standard CRM for inquiry capture; choose one."
+        "Take and read back a food order using the approved menu, sizes, modifiers and availability; capture pickup or delivery details and pass the order to the agreed destination through the configured workflow.",
+        "Book or change eligible reservations, qualify event inquiries and update approved customer records through verified systems and restaurant rules.",
+        "Offer screened transfers when requested or when staff judgment is needed; if staff are busy, use the agreed order-taking or follow-up workflow."
       ],
-      "probe": "Would connecting suitable callers to staff help more, or would you prefer an event consultation calendar or CRM inquiry record?",
+      "probe": "How do phone orders reach your kitchen today?",
       "fit_signals": [
-        "Staff need useful intake before receiving screened calls.",
-        "One verified calendar or CRM connection meets the desired next step."
+        "The caller needs routine receptionist work completed rather than only a message.",
+        "Approved business rules and verified systems support the agreed workflow."
       ]
     },
     {
@@ -56,29 +57,33 @@
       "use_cases": [
         "Gather a detailed service complaint, relevant visit context, and requested resolution for the human manager.",
         "Explain approved reservation or cancellation policies and escalate requests requiring an exception.",
-        "Combine eligible calendar and CRM workflows within TWO standard integrations TOTAL, subject to compatibility and agreed scope."
+        "Support approved employee coordination, such as recording a shift callout or coverage request and routing it to the authorized supervisor. Employment, staffing approval, disciplinary, financial and policy-exception decisions remain human; do not request medical reasons or other sensitive employee details."
       ],
-      "probe": "Which complaints or special requests need structured intake before your manager decides what to do?",
+      "probe": "Only after the caller raises a management need: Which situations should the agent handle under approved rules, and which should reach you?",
       "fit_signals": [
-        "Complex calls need an approved escalation path and consistent intake.",
-        "Two supported integrations provide a concrete benefit beyond the Receptionist workflow."
+        "The caller asks for help with difficult or disgruntled callers and escalations.",
+        "The caller wants approved employee coordination or supervisory support."
       ]
     }
   ],
   "scope_boundaries": [
     "Level 1 includes no booking, screened transfer, or CRM integration; message capture is not a confirmed reservation.",
-    "Level 2 allows ONE standard calendar OR CRM, not both. Level 3 allows TWO TOTAL, not two additional connections.",
-    "Restaurant reservation platforms, POS access, order entry, and table availability are not guaranteed standard integrations. Special workflows require compatibility checks and a separate quote where needed.",
     "Do not handle payments, guarantee allergen safety, provide medical advice, or make unapproved dietary assurances. Route food-safety and ingredient concerns to restaurant staff.",
     "Staff confirm menus, policies, availability, and services. Humans decide refunds, discounts, credits, and policy exceptions.",
-    "Use the shared phone-agent pricing source for fees and terms. Do not duplicate prices or present a proposal as an active Jaylene capability."
+    "Use the shared phone-agent pricing source for fees and terms. Do not duplicate prices or present a proposal as an active Jaylene capability.",
+    "Level 1 captures approved FAQs, caller details and a summary to one destination; it does not book, submit orders, update a CRM or make screened transfers. Level 2 covers agreed routine receptionist duties and supporting automation. Package fit is based on duties, not a one-calendar/one-CRM or two-integration quota. Scope is agreed before launch; this is not an unlimited software-development commitment.",
+    "Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.",
+    "Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.",
+    "Do not promise that a named app or POS is supported merely because the caller names it. Verify compatibility during setup and agree a workable destination or fallback; disclose any actual work outside the agreed duties before proceeding.",
+    "Food-order taking and readback fit Level 2. Direct Toast/POS submission must be verified; taking details is not successful submission. Payment collection is a distinct capability and must not be promised or requested in this sales call. Never guarantee allergen safety or availability from memory."
   ],
   "setup_requirements": [
     "Approve current FAQs and identify who maintains hours, menus, and policies.",
     "Choose intake fields and ONE summary destination; collect only necessary details.",
     "Define staff routing, acceptance rules, unavailable-staff fallbacks, and complaint escalation.",
     "Verify actual software compatibility and distinguish consultation booking from restaurant reservations.",
-    "Test the agreed call paths before launch; never promise bookings, transfers, or messages without confirmed execution."
+    "Test the agreed call paths before launch; never promise bookings, transfers, or messages without confirmed execution.",
+    "Agree the routine duties and supporting automation included in the package, approved actions, access permissions, successful completion signals and failure paths before launch."
   ],
   "adjacent_services": [
     {
@@ -88,46 +93,46 @@
     },
     {
       "service": "Business automation",
-      "trigger": "Staff repeatedly copy event inquiries between tools.",
-      "example": "A separately scoped workflow could route approved inquiry details for staff follow-up."
+      "trigger": "The business needs broader back-office work beyond its agreed receptionist duties.",
+      "example": "Explore a separate project only for that broader need. Automation needed for agreed Level 2 receptionist work is already included; do not resell it as a Quickstart or add-on."
     }
   ],
   "example_conversation": [
     {
       "speaker": "caller",
-      "text": "I own a restaurant. We miss private-party calls during dinner."
+      "text": "I run a restaurant. Food-order calls interrupt service."
     },
     {
       "speaker": "agent",
-      "text": "Level 1 could capture the date, party size, and contact details for one summary destination. Would a callback usually be enough?"
+      "text": "Level 2 could take those orders and pass them along, with the supporting automation included. How do phone orders reach your kitchen today?"
     },
     {
       "speaker": "caller",
-      "text": "Sometimes, but larger groups need our events person."
+      "text": "We use Toast. Can she take the order instead of transferring it?"
     },
     {
       "speaker": "agent",
-      "text": "Level 2 could qualify those inquiries and offer a screened transfer. Would a consultation calendar or CRM capture help your events person more?"
+      "text": "Yes, order-taking belongs in Level 2. We would confirm whether we can submit directly into Toast during setup. Would you need pickup orders, delivery orders, or both?"
     },
     {
       "speaker": "caller",
-      "text": "CRM capture. Managers also get cancellation complaints."
+      "text": "Pickup, and I do not want an extra automation charge."
     },
     {
       "speaker": "agent",
-      "text": "Level 3 could capture those complaints, explain approved policy, and escalate exceptions for a human decision. Which details does your manager need before responding?"
+      "text": "The automation for the agreed receptionist duties is included in Level 2. We still need to verify the Toast connection. What menu choices or modifiers should she confirm?"
     }
   ],
   "provenance": [
     {
       "type": "capability_source",
       "source": "https://ahernai.com/services/ai-phone-agents",
-      "note": "Verified October 3, 2026. Shared published package capabilities and pricing are authoritative."
+      "note": "Owner-approved package clarification on October 7, 2026: Level 2 includes automation for agreed routine receptionist duties; Level 3 is for stated management needs. Prices remain unchanged from the October 3 website snapshot. This supersedes the former calendar/CRM integration quotas."
     },
     {
       "type": "authored_guidance",
       "source": "AhernAI industry knowledge library",
-      "note": "Illustrative restaurant discovery guidance authored October 3, 2026; no customer results, industry metrics, or application compatibility claims."
+      "note": "Illustrative industry discovery updated October 7, 2026; no customer outcomes or application compatibility are asserted."
     }
   ]
 }

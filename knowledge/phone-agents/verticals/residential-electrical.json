@@ -3,8 +3,8 @@
   "id": "residential-electrical",
   "name": "Residential Electrical Contractors",
   "retell_name": "AhernAI - Residential Electrical",
-  "version": "1.0.0",
-  "updated_at": "2026-10-03",
+  "version": "2.0.0",
+  "updated_at": "2026-10-07",
   "purpose": "AhernAI sales discovery and illustrative configuration guidance",
   "aliases": [
     "residential electrician",
@@ -12,7 +12,7 @@
     "home electrical contractor",
     "residential electrical company"
   ],
-  "summary": "For residential electrical business owners. Clarify electrical contracting versus low-voltage cabling or smart-home installation. Explore their workflow, then explain Answering Service, Receptionist and Manager in order. These conditional examples establish no qualifications, compatibility or active capabilities. Recommend the lowest useful level; consult shared pricing for costs.",
+  "summary": "For residential electricians. Clarify mains electrical work versus smart-home, AV or network installation. Explore estimate requests and office coordination without technical diagnosis. Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.",
   "discovery_questions": [
     "Is your main work residential electrical service, installations or a different specialty?",
     "Which types of calls interrupt your team most often?",
@@ -41,14 +41,14 @@
       "level": 2,
       "name": "Receptionist",
       "use_cases": [
-        "Qualify inquiries using owner-approved service-area and work-category rules and offer screened transfers through configured human destinations.",
-        "Use one standard calendar integration for approved consultation or estimate slots if the business permits direct booking for those request types.",
-        "Alternatively, use one standard CRM integration to capture qualified inquiries for staff review; this choice does not also include calendar booking."
+        "Qualify requests against approved service areas and job categories, then offer screened transfers where human judgment is needed.",
+        "Book or change eligible estimate appointments and update the agreed customer or job system using verified availability and configured automation.",
+        "Collect approved project details and route estimate requests to the office, keeping safety concerns and technical decisions with qualified staff."
       ],
-      "probe": "Would approved appointment booking or CRM lead capture remove more office work for you?",
+      "probe": "Which estimate requests can follow standard booking rules?",
       "fit_signals": [
-        "The office repeatedly checks the same intake criteria.",
-        "There are documented eligibility and handoff rules for common requests."
+        "The caller needs routine receptionist work completed rather than only a message.",
+        "Approved business rules and verified systems support the agreed workflow."
       ]
     },
     {
@@ -57,31 +57,35 @@
       "use_cases": [
         "Collect detailed complaints about a prior service experience and the requested resolution for an authorized human, without deciding fault.",
         "Explain approved estimate, appointment-change and follow-up policies while sending exceptions and financial questions to the business owner.",
-        "Coordinate approved escalation routes and potentially support both a calendar and CRM within two standard integrations total, subject to compatibility and scope."
+        "Support approved employee coordination, such as recording a shift callout or coverage request and routing it to the authorized supervisor. Employment, staffing approval, disciplinary, financial and policy-exception decisions remain human; do not request medical reasons or other sensitive employee details."
       ],
-      "probe": "Which follow-up calls need clearer escalation rules?",
+      "probe": "Only after the caller raises a management need: Which situations should the agent handle under approved rules, and which should reach you?",
       "fit_signals": [
-        "Repeat policy questions or complaints consume owner time.",
-        "The defined workflow needs two confirmed integrations."
+        "The caller asks for help with difficult or disgruntled callers and escalations.",
+        "The caller wants approved employee coordination or supervisory support."
       ]
     }
   ],
   "scope_boundaries": [
-    "Level 1 excludes booking, CRM integrations and screened transfers. Level 2 includes one standard calendar OR CRM integration; Level 3 includes two total, not two additional integrations.",
     "Do not diagnose electrical hazards, provide DIY wiring or repair instructions, interpret code compliance, certify safety or promise that a described job is suitable.",
     "For an immediate safety concern, stop the sales discussion and refer at a high level to appropriate local emergency services or a qualified human. Do not troubleshoot or instruct the caller to test equipment.",
-    "No promised emergency response, dispatch, arrival, price, refund, discount or policy exception. Human financial and technical decisions remain with the business; examples do not perform live actions."
+    "No promised emergency response, dispatch, arrival, price, refund, discount or policy exception. Human financial and technical decisions remain with the business; examples do not perform live actions.",
+    "Level 1 captures approved FAQs, caller details and a summary to one destination; it does not book, submit orders, update a CRM or make screened transfers. Level 2 covers agreed routine receptionist duties and supporting automation. Package fit is based on duties, not a one-calendar/one-CRM or two-integration quota. Scope is agreed before launch; this is not an unlimited software-development commitment.",
+    "Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.",
+    "Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.",
+    "Do not promise that a named app or POS is supported merely because the caller names it. Verify compatibility during setup and agree a workable destination or fallback; disclose any actual work outside the agreed duties before proceeding."
   ],
   "setup_requirements": [
     "Confirm business specialty, approved work categories, service area, hours, FAQs and one summary destination.",
     "Document what may be booked, what requires technical review, calendar permissions and staff transfer or escalation availability.",
-    "Confirm compatible systems, the chosen integration count and fallback behavior; approve and test the configured call paths before launch."
+    "Confirm compatible systems, the agreed receptionist duties and fallback behavior; approve and test the configured call paths before launch.",
+    "Agree the routine duties and supporting automation included in the package, approved actions, access permissions, successful completion signals and failure paths before launch."
   ],
   "adjacent_services": [
     {
       "service": "Business automation",
-      "trigger": "Office staff manually move the same inquiry between tools.",
-      "example": "Explore a separately scoped intake workflow with approved actions and human exception handling."
+      "trigger": "The business needs broader back-office work beyond its agreed receptionist duties.",
+      "example": "Explore a separate project only for that broader need. Automation needed for agreed Level 2 receptionist work is already included; do not resell it as a Quickstart or add-on."
     },
     {
       "service": "Websites and custom tools",
@@ -92,39 +96,31 @@
   "example_conversation": [
     {
       "speaker": "caller",
-      "text": "We are residential electricians and get interrupted by estimate calls."
+      "text": "We are residential electricians. Estimate calls keep interrupting jobs."
     },
     {
       "speaker": "agent",
-      "text": "Level 1, Answering Service, could collect request details and send one summary for your review. What do you need to know before deciding the next step?"
+      "text": "Should those calls become callback messages, or could someone book the estimate visit?"
     },
     {
       "speaker": "caller",
-      "text": "The location and kind of work, then we arrange an estimate."
+      "text": "Book the estimate and record the job details."
     },
     {
       "speaker": "agent",
-      "text": "Level 2, Receptionist, could qualify those details and support screened transfers, with either approved calendar booking or CRM lead capture. Can estimate visits be booked without an electrician reviewing them?"
-    },
-    {
-      "speaker": "caller",
-      "text": "Some can, but complaints always come to me."
-    },
-    {
-      "speaker": "agent",
-      "text": "Level 3, Manager, could gather complaints, explain approved policies and escalate exceptions, with two integrations total. You retain financial decisions. Which part of that would save you the most time?"
+      "text": "Level 2 could handle those receptionist duties with the supporting automation included. Which estimate types can be booked under your rules?"
     }
   ],
   "provenance": [
     {
       "type": "capability_source",
       "source": "https://ahernai.com/services/ai-phone-agents",
-      "note": "Package capabilities and limits verified in the shared published pricing source dated 2026-10-03; prices intentionally centralized there."
+      "note": "Owner-approved package clarification on October 7, 2026: Level 2 includes automation for agreed routine receptionist duties; Level 3 is for stated management needs. Prices remain unchanged from the October 3 website snapshot. This supersedes the former calendar/CRM integration quotas."
     },
     {
       "type": "authored_guidance",
       "source": "AhernAI industry discovery library",
-      "note": "Illustrative sales guidance; not technical advice, customer proof or integration certification."
+      "note": "Illustrative industry discovery updated October 7, 2026; no customer outcomes or application compatibility are asserted."
     }
   ]
 }

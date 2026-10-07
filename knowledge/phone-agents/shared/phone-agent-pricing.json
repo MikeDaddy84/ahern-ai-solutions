@@ -1,18 +1,43 @@
 {
   "schema_version": "1.0",
-  "verified_at": "2026-10-03",
+  "verified_at": "2026-10-07",
   "source_url": "https://ahernai.com/services/ai-phone-agents",
   "currency": "USD",
   "unit": "per agent",
   "taxes_included": false,
   "plans": [
-    {"level": 1, "name": "Answering Service", "monthly": 349, "setup": 750, "included_minutes": 300, "additional_minute": 0.75, "integration_scope": "No included calendar/CRM integration, booking or screened transfers."},
-    {"level": 2, "name": "Receptionist", "monthly": 549, "setup": 1250, "included_minutes": 500, "additional_minute": 0.75, "integration_scope": "ONE standard calendar for booking OR ONE standard CRM for lead capture; screened transfers included, compatibility confirmed during scoping."},
-    {"level": 3, "name": "Manager", "monthly": 749, "setup": 1750, "included_minutes": 700, "additional_minute": 0.95, "integration_scope": "TWO standard integrations TOTAL; financial decisions, refunds and policy exceptions remain human."}
+    {
+      "level": 1,
+      "name": "Answering Service",
+      "monthly": 349,
+      "setup": 750,
+      "included_minutes": 300,
+      "additional_minute": 0.75,
+      "integration_scope": "No included calendar/CRM integration, booking or screened transfers."
+    },
+    {
+      "level": 2,
+      "name": "Receptionist",
+      "monthly": 549,
+      "setup": 1250,
+      "included_minutes": 500,
+      "additional_minute": 0.75,
+      "integration_scope": "Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge. Includes qualification, screened transfers, order-taking, appointment changes and agreed customer-record updates. Calendar and CRM work can belong to the same agreed scope."
+    },
+    {
+      "level": 3,
+      "name": "Manager",
+      "monthly": 749,
+      "setup": 1750,
+      "included_minutes": 700,
+      "additional_minute": 0.95,
+      "integration_scope": "Receptionist plus handling difficult callers, approved employee coordination, policy guidance and escalation. Financial, employment and policy-exception decisions remain human. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell."
+    }
   ],
   "terms": [
     "One subscription covers one agent, one location and one language; extra agents have separate setup, monthly fees and minute allowances.",
-    "Custom integrations, texting and additional transfer charges are separately quoted. Final scope and pricing are confirmed before launch.",
-    "Do not invent unlimited usage, discounts, trials, pooling, rollover, contract or cancellation terms. Use the shared pricing text for full published inclusions and exclusions."
+    "Agreed routine receptionist automation is included in Level 2 and Level 3. Separate projects outside the agreed duties, texting usage and additional transfer usage charges are disclosed separately; do not assume an integration surcharge. Final scope and pricing are confirmed before launch.",
+    "Named software compatibility is verified during setup. Included duties do not mean universal application support or unlimited development.",
+    "Do not invent unlimited usage, discounts, trials, pooling, rollover, contract or cancellation terms. Use the shared pricing text for full terms."
   ]
 }

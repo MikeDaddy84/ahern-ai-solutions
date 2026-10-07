@@ -1,14 +1,14 @@
 AHERNAI VERTICAL: SMART HOME AND HOME TECHNOLOGY
-Stable ID: smart-home-technology | Content version: 1.0.0 | Updated: 2026-10-03
+Stable ID: smart-home-technology | Content version: 2.0.0 | Updated: 2026-10-07
 
 PURPOSE AND AUTHORITY
 AhernAI sales discovery and illustrative configuration guidance
 These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
-Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-07. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
 
 MATCH THIS BUSINESS
 Also described as: smart home; home automation; home technology installer; residential AV; home theater; Wi-Fi installer; low-voltage technology
-Use for home automation, audiovisual and home network installers. Clarify technology installation versus mains electrical work. Explore project inquiries, support calls and interruptions while onsite. Examples are possible configured customer workflows, not Jaylene's current tools. Explain levels sequentially, pausing for an answer between them. Recommend the lowest suitable level; use the shared pricing KB for prices and terms.
+For smart-home, audiovisual and home-network installers. Clarify technology installation versus mains electrical work. Explore consultations, project intake and ordinary support coordination. Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
 
 DISCOVERY QUESTIONS — ASK ONE AT A TIME
@@ -19,8 +19,8 @@ DISCOVERY QUESTIONS — ASK ONE AT A TIME
 - Would a detailed callback request solve the problem, or should callers arrange a consultation?
 - Which situations need the owner or a senior technician, and what system holds that information?
 
-EXPLAIN THE THREE LEVELS IN ORDER
-Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+DISCOVERY: RECOMMEND BY NEED
+Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 
 LEVEL 1 — ANSWERING SERVICE
 Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
@@ -31,46 +31,49 @@ Probe: When you finish an installation, would one organized summary give you eno
 Useful when: Technicians need reliable message capture while onsite.; The team prefers to assess projects and schedule callbacks itself.
 
 LEVEL 2 — RECEPTIONIST
-Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
-- Add qualification using approved project categories, service area and desired timing, with screened transfers to the agreed human.
-- With the single calendar integration selected, offer approved consultation appointments subject to configured availability.
-- Alternatively, use the single CRM integration for qualified project lead capture; this option does not also include calendar booking.
-Probe: Would arranging consultations or entering qualified project leads remove more work for your team?
-Useful when: Calls require consistent qualification before a technician responds.; One calendar OR CRM connection covers the needed next step.
+Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Qualify project categories, service area and desired timing, and offer screened transfers to the appropriate human.
+- Book or reschedule approved consultations and update the agreed project or customer system through the included receptionist automation.
+- Capture ordinary support requests, share approved status information from authorized sources and route issues to the agreed technician queue.
+Probe: What should happen between a project inquiry and a confirmed consultation?
+Useful when: The caller needs routine receptionist work completed rather than only a message.; Approved business rules and verified systems support the agreed workflow.
 
 LEVEL 3 — MANAGER
-Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+Scope: Receptionist plus difficult-caller handling, approved employee coordination, policy guidance and escalation. Human owners retain financial, employment and policy-exception decisions. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 - Collect installation complaints, affected equipment categories and the requested resolution for human review.
 - Explain approved support or warranty policies and route disputed coverage or exceptions to the responsible person.
-- Where compatible and scoped, use two standard integrations total, such as a calendar and CRM, to coordinate the agreed workflow.
-Probe: How often do support complaints or handoffs between systems require someone to coordinate the whole issue?
-Useful when: Complaint intake and policy-based escalation recur regularly.; The workflow needs two confirmed standard integrations total.
+- Support approved employee coordination, such as recording a shift callout or coverage request and routing it to the authorized supervisor. Employment, staffing approval, disciplinary, financial and policy-exception decisions remain human; do not request medical reasons or other sensitive employee details.
+Probe: Only after the caller raises a management need: Which situations should the agent handle under approved rules, and which should reach you?
+Useful when: The caller asks for help with difficult or disgruntled callers and escalations.; The caller wants approved employee coordination or supervisory support.
 
 SCOPE BOUNDARIES
 - Do not collect Wi-Fi passwords, lock or alarm codes, private camera access, access tokens or security bypass instructions.
 - Do not provide electrical repair, wiring, bypass or hazardous troubleshooting instructions; use approved human escalation paths.
 - Do not guarantee device compatibility, network performance, remote repair, arrival times or coverage without approved facts.
-- Refunds, credits, financial commitments and policy exceptions remain human decisions. Texting, custom integrations and additional transfer charges are separately scoped.
+- Refunds, credits, financial commitments and policy exceptions remain human decisions. Texting and additional transfer usage charges retain their separately disclosed terms; included receptionist automation is not a separate build fee.
+- Level 1 captures approved FAQs, caller details and a summary to one destination; it does not book, submit orders, update a CRM or make screened transfers. Level 2 covers agreed routine receptionist duties and supporting automation. Package fit is based on duties, not a one-calendar/one-CRM or two-integration quota. Scope is agreed before launch; this is not an unlimited software-development commitment.
+- Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
+- Do not promise that a named app or POS is supported merely because the caller names it. Verify compatibility during setup and agree a workable destination or fallback; disclose any actual work outside the agreed duties before proceeding.
 
 CLIENT SETUP INFORMATION TO CONFIRM
 - Confirm service categories, service area, business hours and the distinction between technology and electrical services.
 - Supply approved device/support FAQs, intake fields, information to avoid collecting and the summary destination.
 - Define appointment types or CRM fields, qualification rules, screened transfer contacts and escalation fallbacks.
 - Provide approved warranty language and complaint handling rules; confirm integration compatibility and test representative calls.
+- Agree the routine duties and supporting automation included in the package, approved actions, access permissions, successful completion signals and failure paths before launch.
 
 ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
 - Websites and custom tools: When Prospects cannot understand installation options online. Explore a clear service page and project inquiry form.
-- Business automation: When Staff repeatedly retype project inquiries between tools. Scope a separate workflow for routing approved inquiry fields.
+- Business automation: When The business needs broader back-office work beyond its agreed receptionist duties. Explore a separate project only for that broader need. Automation needed for agreed Level 2 receptionist work is already included; do not resell it as a Quickstart or add-on.
 - Networks and cabling: When The business needs help with its own network infrastructure. Discuss an assessment and written scope rather than promising a partnership or subcontracting arrangement.
 
 ILLUSTRATIVE DISCOVERY CONVERSATION
-Caller: We install home theaters and Wi-Fi. Calls interrupt our onsite work.
-Agent: Level 1 could answer your approved service questions, capture project details and send one callback summary. Would that be enough, or do you want callers to arrange consultations?
-Caller: Consultations would help. We use a shared calendar.
-Agent: Level 2 could qualify projects and book approved consultations through one compatible calendar. A CRM would be the alternative included integration. How do you handle complaints after an installation?
-Caller: The owner handles those; they are occasional.
-Agent: Level 3 adds complaint intake, approved policy answers, escalation and two integrations total. Decisions stay with your owner. Level 2 sounds closest to your current need. Which consultation details should callers provide?
+Caller: We install home theaters and Wi-Fi. We need consultations booked and project leads recorded.
+Agent: Those duties fit Level 2, with the supporting automation included. Which systems do you use for appointments and project records?
+Caller: We use a calendar and a CRM. Is that an upgrade?
+Agent: Booking and recording the project can be part of the same agreed receptionist scope. We would verify both connections during setup. What details should each consultation include?
 
 SOURCES AND AUTHORSHIP
-- capability_source: https://ahernai.com/services/ai-phone-agents — Package capabilities checked October 3, 2026; shared pricing KB governs commercial terms.
-- authored_guidance: AhernAI vertical library — Illustrative discovery and configuration examples; not customer results or a promise of application support.
+- capability_source: https://ahernai.com/services/ai-phone-agents — Owner-approved package clarification on October 7, 2026: Level 2 includes automation for agreed routine receptionist duties; Level 3 is for stated management needs. Prices remain unchanged from the October 3 website snapshot. This supersedes the former calendar/CRM integration quotas.
+- authored_guidance: AhernAI vertical library — Illustrative industry discovery updated October 7, 2026; no customer outcomes or application compatibility are asserted.

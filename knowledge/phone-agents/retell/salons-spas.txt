@@ -1,14 +1,14 @@
 AHERNAI VERTICAL: SALONS AND SPAS
-Stable ID: salons-spas | Content version: 1.0.0 | Updated: 2026-10-03
+Stable ID: salons-spas | Content version: 2.0.0 | Updated: 2026-10-07
 
 PURPOSE AND AUTHORITY
 AhernAI sales discovery and illustrative configuration guidance
 These are authored, illustrative configurations for business-owner discovery, not claims of completed customer deployments. The published AhernAI package scope is the capability source. These examples do not enable tools or integrations in Jaylene or Hideo.
-Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-03. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
+Pricing authority: AhernAI Services & Pricing / Phone Agent Levels and Pricing — 2026-10-07. Retrieve that shared source for prices, setup, minutes and exclusions; do not infer prices from this vertical.
 
 MATCH THIS BUSINESS
 Also described as: salon; spa; barbershop; hair salon; beauty studio; nail salon
-Help salon and spa owners explore handling calls while staff serve clients. Clarify services, scheduling, and questions requiring professional judgment. These are conditional proposals, not a deployed agent or customer results. Explain Levels 1→2→3 across separate turns, ask one probe per level, then recommend the simplest fit. Answer direct questions first.
+For non-medical salons, spas and beauty services. Explore appointments, routine service questions and front-desk interruptions; keep professional judgments with staff. Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 Use only examples for the caller’s confirmed business. If the category is ambiguous, ask a clarifying question before selecting it. Do not combine unrelated vertical policies.
 
 DISCOVERY QUESTIONS — ASK ONE AT A TIME
@@ -18,8 +18,8 @@ DISCOVERY QUESTIONS — ASK ONE AT A TIME
 - Which requests can be scheduled using clear rules, and which need staff judgment?
 - What calendar, booking platform, or CRM do you currently use?
 
-EXPLAIN THE THREE LEVELS IN ORDER
-Use a short tailored Level 1 example and probe, wait for the answer, then Level 2 and its probe, then Level 3 and its probe. Answer direct questions first. Recommend the lowest level meeting the stated workflow after the overview; respect requests to skip or speak with a human.
+DISCOVERY: RECOMMEND BY NEED
+Ask one useful question at a time about the caller's actual workflow. Explain Level 1 when messages and FAQs fit; move directly to Level 2 when the caller needs routine work completed. Recommend the lowest suitable level as soon as the need is understood; no mandatory three-level tour. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 
 LEVEL 1 — ANSWERING SERVICE
 Scope: approved FAQs, caller details and reason, summary to ONE agreed destination. No included booking, CRM integration, or screened transfers.
@@ -30,48 +30,50 @@ Probe: Would taking clear messages while your team works with clients solve most
 Useful when: Staff prefer to assess requests and arrange appointments themselves.; Most calls need approved information or a reliable callback message.
 
 LEVEL 2 — RECEPTIONIST
-Scope: Answering plus qualification and screened transfers; ONE standard calendar OR CRM integration for appointment booking OR CRM lead capture. Compatibility and workflow feasibility must be confirmed.
-- Qualify inquiries using approved service, location, and consultation requirements without assessing medical suitability.
-- Offer screened transfers when a caller needs a staff member's decision or service clarification.
-- Book eligible appointments using ONE compatible standard calendar OR capture inquiries in one standard CRM; not both.
-Probe: Would you rather use the included connection for rule-based appointment booking or for CRM lead capture?
-Useful when: Eligible appointment types have clear, staff-approved durations and scheduling rules.; One verified calendar or CRM integration supports the desired next step.
+Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Qualify appointment requests using approved services, staff preferences and booking rules, and offer screened transfers for professional advice.
+- Book, reschedule or cancel eligible appointments and update approved client records through verified systems, with supporting receptionist automation included.
+- Handle routine availability and service questions using approved facts and route special requests to staff without inventing suitability or results.
+Probe: Which appointment types and changes could she handle under your normal booking rules?
+Useful when: The caller needs routine receptionist work completed rather than only a message.; Approved business rules and verified systems support the agreed workflow.
 
 LEVEL 3 — MANAGER
-Scope: Receptionist plus complaint intake, approved policy answers and escalation; TWO standard integrations TOTAL. Financial decisions, refunds and policy exceptions remain human. One subscription covers one agent.
+Scope: Receptionist plus difficult-caller handling, approved employee coordination, policy guidance and escalation. Human owners retain financial, employment and policy-exception decisions. Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
 - Capture detailed service complaints and the caller's requested resolution for the owner or designated manager.
 - Explain approved cancellation or lateness policies and route exceptions to a human decision-maker.
-- Support eligible calendar and CRM workflows within TWO standard integrations TOTAL after compatibility and scope are confirmed.
-Probe: Which complaints or policy questions need your attention after the routine call is handled?
-Useful when: The business needs structured complaint intake and consistent escalation.; A second supported integration solves a specific gap in the current workflow.
+- Support approved employee coordination, such as recording a shift callout or coverage request and routing it to the authorized supervisor. Employment, staffing approval, disciplinary, financial and policy-exception decisions remain human; do not request medical reasons or other sensitive employee details.
+Probe: Only after the caller raises a management need: Which situations should the agent handle under approved rules, and which should reach you?
+Useful when: The caller asks for help with difficult or disgruntled callers and escalations.; The caller wants approved employee coordination or supervisory support.
 
 SCOPE BOUNDARIES
 - Level 1 does not book, change appointments, make screened transfers, or update a CRM. A preference is not a reservation.
-- Level 2 includes ONE standard calendar OR CRM. Level 3 includes TWO TOTAL, not two additional connections.
 - Specialist booking platforms, multi-provider resource scheduling, deposits, and POS connections are not guaranteed included capabilities; compatibility and custom scope must be checked.
 - Do not handle payments, provide medical advice, assess contraindications, or guarantee treatment suitability, allergy safety, or outcomes. Staff confirm services and relevant policies.
 - Collect only necessary inquiry details, not health histories or sensitive treatment records. Route health or service-safety concerns to qualified staff.
 - Humans decide refunds, discounts, credits, and exceptions. The shared phone-agent pricing source governs fees and terms; do not duplicate prices or promise unverified live actions.
+- Level 1 captures approved FAQs, caller details and a summary to one destination; it does not book, submit orders, update a CRM or make screened transfers. Level 2 covers agreed routine receptionist duties and supporting automation. Package fit is based on duties, not a one-calendar/one-CRM or two-integration quota. Scope is agreed before launch; this is not an unlimited software-development commitment.
+- Routine receptionist duties and the supporting automation are included in the agreed Level 2 scope, without an additional AhernAI automation or integration-build charge. Confirm software compatibility, access, allowed actions and failure handling during setup; an unverified connection is not an automatic surcharge.
+- Introduce Level 3 only when the caller asks about it, requests all three levels, or raises employee coordination, supervisory duties or difficult/disgruntled callers. Routine order-taking, scheduling, CRM work or the number of connected tools does not trigger a Manager upsell.
+- Do not promise that a named app or POS is supported merely because the caller names it. Verify compatibility during setup and agree a workable destination or fallback; disclose any actual work outside the agreed duties before proceeding.
 
 CLIENT SETUP INFORMATION TO CONFIRM
 - Approve service descriptions, routine FAQs, and questions reserved for staff.
 - Choose necessary intake fields, the ONE summary destination, and contact-confirmation rules.
-- Verify the selected calendar or CRM and define which appointment types can be booked.
+- Verify the booking and customer systems and define which appointment types can be booked.
 - Agree provider, duration, scheduling, transfer, unavailable-staff, and escalation rules before configuration.
 - Test routine inquiries, ambiguous service requests, failed handoffs, and policy exceptions before launch.
+- Agree the routine duties and supporting automation included in the package, approved actions, access permissions, successful completion signals and failure paths before launch.
 
 ADJACENT AHERN AI SERVICES — ONLY WHEN A STATED NEED FITS
 - Websites and custom tools: When Clients struggle to understand services or the inquiry process. A separately scoped website could present approved services and a clearer appointment inquiry path.
-- Business automation: When Staff manually move approved inquiries between existing tools. A separately scoped workflow could route leads and prepare follow-up for review.
+- Business automation: When The business needs broader back-office work beyond its agreed receptionist duties. Explore a separate project only for that broader need. Automation needed for agreed Level 2 receptionist work is already included; do not resell it as a Quickstart or add-on.
 
 ILLUSTRATIVE DISCOVERY CONVERSATION
-Caller: I own a salon. We cannot answer when everyone is with a client.
-Agent: Level 1 could answer approved service questions and send callback details to one destination. Do most callers need information or an appointment?
-Caller: Usually appointments, though some services require a consultation.
-Agent: Level 2 could book eligible appointments through one compatible calendar and screen calls needing staff input. Which appointment types have clear booking rules?
-Caller: Basic cuts do. I personally handle complaints and cancellation exceptions.
-Agent: Level 3 could record those complaints and explain approved policy while leaving exceptions and financial decisions with you. What would you want captured before you respond?
+Caller: I need help booking salon appointments and updating client records.
+Agent: That fits Level 2, including the automation for those routine receptionist duties. Which booking system do you use?
+Caller: Would that need the Manager package because it does both?
+Agent: No, those are receptionist duties. We would confirm your systems and rules during setup. Which appointment changes should she be allowed to make?
 
 SOURCES AND AUTHORSHIP
-- capability_source: https://ahernai.com/services/ai-phone-agents — Verified October 3, 2026. Shared published package capabilities and pricing are authoritative.
-- authored_guidance: AhernAI industry knowledge library — Illustrative salon and spa discovery guidance authored October 3, 2026; no medical advice, customer results, or application compatibility claims.
+- capability_source: https://ahernai.com/services/ai-phone-agents — Owner-approved package clarification on October 7, 2026: Level 2 includes automation for agreed routine receptionist duties; Level 3 is for stated management needs. Prices remain unchanged from the October 3 website snapshot. This supersedes the former calendar/CRM integration quotas.
+- authored_guidance: AhernAI industry knowledge library — Illustrative industry discovery updated October 7, 2026; no customer outcomes or application compatibility are asserted.

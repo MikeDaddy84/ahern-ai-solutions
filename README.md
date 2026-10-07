@@ -2,6 +2,22 @@
 
 ## Phone-agent scope and discovery — October 7, 2026
 
+Published: PR #3 was merged on October 7 at 15:21 UTC after explicit owner
+approval. The approved commit `eca44d8` reached main by a normal fast-forward
+push after the merge connector failed. The live phone-agent page was verified
+to show the revised Receptionist and Manager cards and the automation/order
+FAQs; the active Windows checkout and unrelated local work were preserved.
+
+Post-call email alerts now include the full transcript in the message, a text
+attachment and a playable MP3 recording when Retell provides them. The existing
+private alert service was updated and verified healthy. Missing or oversized
+recordings are reported explicitly, with a recording link when available.
+Fifty offline checks passed, and a labeled preview of the owner's supplied test
+call reached the owner mailbox with both attachments verified and Gmail audio
+playback checked. A new incoming call remains the final automatic-flow check.
+Private sending code, credentials, call content and recordings remain outside
+this public website repository.
+
 Level 2 Receptionist now includes routine front-desk duties and the supporting
 automation/integration work within the agreed scope, without an extra AhernAI
 automation/build charge. Restaurant order-taking, appointment changes and

@@ -13,12 +13,13 @@ application source remains in its separate private repository, and campaign
 data stays outside this public repository. The destination uses Hosaka's access
 controls; a website portal session does not replace its authentication.
 
-The independent Relay service is running on HosakaBox with its existing campaign
-records migrated. Unauthenticated Relay requests are rejected, and Hosaka remains
-healthy. The website production build and all 61 website tests pass, including
-Relay role visibility, preview exclusion, and safe new-tab attributes. The
-owner portal entry is ready for publication; a signed-in production walkthrough
-remains pending the owner's existing Cloudflare Access and application sign-ins.
+The website production build and all 61 website tests pass, including Relay role
+visibility, preview exclusion, and safe new-tab attributes.
+[PR #4](https://github.com/MikeDaddy84/ahern-ai-solutions/pull/4) was merged into
+`main` at `4381908`, the branch used by the documented Render auto-deploy flow.
+The signed-in live portal check remains pending; the merge alone does not confirm
+the Render deployment. Relay operating records are maintained separately in its
+private repository.
 
 ## PHP security advisory review — October 21, 2026
 

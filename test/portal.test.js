@@ -62,6 +62,30 @@ test('sign-in is origin checked, credentials are hashed, and sessions use protec
   const rows=await store.client.execute('SELECT password_hash FROM portal_users');assert.ok(rows.rows.every(row=>row.password_hash.startsWith('scrypt:') && !row.password_hash.includes(pass)));
   const sessions=await store.client.execute('SELECT token_hash FROM portal_sessions');assert.ok(sessions.rows.every(row=>!alice.includes(row.token_hash)));
 });
+test('Relay is available only to signed-in owners in navigation and overview',async()=> {
+  const relayUrl='https://hosaka.ahernai.com/relay/';
+  const ownerPage=await call('/portal',{who:alice});assert.equal(ownerPage.status,200);
+  const ownerDoc=new JSDOM(await ownerPage.text()).window.document;
+  const ownerLinks=[...ownerDoc.querySelectorAll(`a[href="${relayUrl}"]`)];
+  assert.equal(ownerLinks.length,2);
+  assert.ok(ownerDoc.querySelector(`nav[aria-label="Workspace"] a[href="${relayUrl}"]`));
+  assert.ok(ownerDoc.querySelector(`main a[href="${relayUrl}"] h3`));
+  for(const link of ownerLinks) {
+    assert.equal(link.target,'_blank');
+    assert.ok(link.relList.contains('noopener'));assert.ok(link.relList.contains('noreferrer'));
+    assert.match(link.getAttribute('aria-label'),/opens in a new tab/);
+  }
+  for(const page of [await call('/portal',{who:bob}),await call('/portal/preview')]) {
+    assert.equal(page.status,200);
+    assert.equal(new JSDOM(await page.text()).window.document.querySelector(`a[href="${relayUrl}"]`),null);
+  }
+  for(const role of ['employee','client','member','unexpected']) {
+    assert.doesNotMatch(portal.shell({role}),/hosaka\.ahernai\.com\/relay\//);
+  }
+  assert.doesNotMatch(portal.shell({role:'owner',preview:true}),/hosaka\.ahernai\.com\/relay\//);
+  const settings=portal.shell({role:'owner',view:'settings',content:'<h1>Settings</h1>'});
+  assert.equal(new JSDOM(settings).window.document.querySelectorAll(`a[href="${relayUrl}"]`).length,1);
+});
 test('task writes enforce CSRF and account isolation in ONE shared Satori database',async()=> {
   assert.equal(satori.configuration('alice').url,satori.configuration('bob').url);
   const task={text:'Alice private task',type:'have_to',target:'today'};

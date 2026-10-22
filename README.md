@@ -1,5 +1,39 @@
 # Ahern AI — Website
 
+## PHP security advisory review — October 21, 2026
+
+The [PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)
+confirms CVE-2026-109618 and CVE-2026-109619 and the fixed releases
+8.5.12, 8.4.27, 8.3.36 and 8.2.35. These affect PHP request handling;
+a broadcast notification alone does not establish that this website is affected
+or compromised.
+
+**Repository findings:** the website declares Node.js/Express and starts with
+`node server.js`. Satori declares Node.js/Fastify; its Dockerfile uses
+`node:20-alpine` for both stages. A read-only review of tracked local source,
+filenames, manifests and lockfiles at application commit `2ada4c1` found no PHP
+source files, Composer manifests or PHP runtime configuration. The current
+GitHub `main` website/Satori manifests, server entry point and Satori Dockerfile
+were also checked and confirm the same runtime choices. Existing deployment
+documentation identifies Render hosting. No PHP remediation was identified
+for these declared application stacks.
+
+**Scope and remaining checks:** this was a repository review, not a production
+host/package audit or a DigitalOcean account inventory. Other servers,
+containers, CMS installations, hosting panels and appliance packages remain
+unverified. No PHP updates, server restarts or infrastructure changes were
+performed. Only this documentation was changed; application tests were not
+needed for the documentation-only update.
+
+**Recommended action for any PHP installation found elsewhere:** install an
+updated package/image containing both fixes, restart affected workers or
+redeploy containers, and verify the PHP used by the web service (a CLI version
+alone is insufficient). Confirm vendor backports against the two CVEs rather
+than relying solely on the version number. PHP 8.1 and older receive no normal
+upstream release updates; the advisory additionally provides minimal source
+backports for 7.4, 8.0 and 8.1 and notes vendor/LTS fixes. Upgrade to a supported
+branch where practical. Interim restrictions do not replace a patched runtime.
+
 ## Phone-agent scope and discovery — October 7, 2026
 
 Published: PR #3 was merged on October 7 at 15:21 UTC after explicit owner

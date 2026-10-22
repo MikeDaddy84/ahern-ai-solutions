@@ -1,5 +1,25 @@
 # Ahern AI — Website
 
+## Relay owner portal entry — October 22, 2026
+
+The signed-in owner's portal navigation and overview now include **Relay**, the
+AhernAI lead-generation workspace, linking to
+`https://hosaka.ahernai.com/relay/` in a new tab. Preview and non-owner accounts
+do not receive either link. Satori and the other portal tools retain their
+existing destinations.
+
+This website change contains only the owner-visible entry points. Relay's
+application source remains in its separate private repository, and campaign
+data stays outside this public repository. The destination uses Hosaka's access
+controls; a website portal session does not replace its authentication.
+
+The independent Relay service is running on HosakaBox with its existing campaign
+records migrated. Unauthenticated Relay requests are rejected, and Hosaka remains
+healthy. The website production build and all 61 website tests pass, including
+Relay role visibility, preview exclusion, and safe new-tab attributes. The
+owner portal entry is ready for publication; a signed-in production walkthrough
+remains pending the owner's existing Cloudflare Access and application sign-ins.
+
 ## PHP security advisory review — October 21, 2026
 
 The [PHP security advisory](https://www.php.net/archive/2026.php#2026-10-21-5)

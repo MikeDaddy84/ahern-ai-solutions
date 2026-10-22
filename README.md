@@ -17,9 +17,11 @@ The website production build and all 61 website tests pass, including Relay role
 visibility, preview exclusion, and safe new-tab attributes.
 [PR #4](https://github.com/MikeDaddy84/ahern-ai-solutions/pull/4) was merged into
 `main` at `4381908`, the branch used by the documented Render auto-deploy flow.
-The signed-in live portal check remains pending; the merge alone does not confirm
-the Render deployment. Relay operating records are maintained separately in its
-private repository.
+The signed-in live owner portal was verified on October 22: both the Relay
+navigation item beside Satori and the overview link appear with the intended
+destination. This confirms the portal change is live. Relay operating records
+are maintained separately in its private repository. This follow-up changes
+documentation only; no application tests were repeated.
 
 ## PHP security advisory review — October 21, 2026
 

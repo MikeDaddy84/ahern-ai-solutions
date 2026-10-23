@@ -17,8 +17,12 @@ The earlier PHP review does not establish safety from this separate Node issue.
 of `apps/satori/Dockerfile` use `node:20-alpine`. These settings do not ensure
 a patched runtime. The Satori Render definition selects Docker and disables
 automatic deployment. Hosting settings and actual running versions were not
-inspected, and this repository has not been established as the source of the
-separate provider-notified server.
+inspected. Follow-up review located the separate provider-notified server's
+existing private deployment inventory and saved administration route, and
+confirmed the resource is online. The required administrator key is not
+currently available through the local SSH agent, so authenticated host and
+container inspection remain pending. Connection details and key material stay
+outside this public repository.
 
 The local code/dependency review found outbound fetching for notifications
 and calendars, plus an HTTP-client dependency capable of native Brotli response

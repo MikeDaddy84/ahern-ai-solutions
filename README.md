@@ -31,6 +31,14 @@ public fingerprint through the agent. Switching agent providers can affect
 other SSH identities. These are instructions only; no vault, Windows service
 or SSH-agent settings were changed in this review.
 
+Desktop sign-in must succeed before agent setup. If another client can log
+in successfully, first compare its account/server selection with the desktop
+app's `Accessing` or `Logging in on` selector:
+[Bitwarden client server configuration](https://bitwarden.com/help/change-client-environment/).
+A region mismatch is a diagnostic possibility, not a confirmed cause. The exact
+desktop error and server selection are needed before further troubleshooting;
+no credential changes, vault-data removal or agent reconfiguration were made.
+
 The local code/dependency review found outbound fetching for notifications
 and calendars, plus an HTTP-client dependency capable of native Brotli response
 decoding. No direct application-level Brotli call was found. The installed

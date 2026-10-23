@@ -1,5 +1,55 @@
 # Ahern AI — Website
 
+## Node.js security review — October 23, 2026
+
+**Runtime remediation remains pending.** The
+[Node.js October security advisory](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)
+confirms CVE-2026-111497, a High-severity flaw in its bundled Brotli decoder.
+The patched releases are
+[22.23.4](https://nodejs.org/en/blog/release/v22.23.4),
+[24.22.1](https://nodejs.org/en/blog/release/v24.22.1) and
+[26.12.1](https://nodejs.org/en/blog/release/v26.12.1).
+[Node 20 is end of life](https://nodejs.org/en/about/previous-releases).
+The earlier PHP review does not establish safety from this separate Node issue.
+
+**Verified repository state:** both the local checkout and current GitHub
+`main` allow Node `>=20` in the website's package manifest, while both stages
+of `apps/satori/Dockerfile` use `node:20-alpine`. These settings do not ensure
+a patched runtime. The Satori Render definition selects Docker and disables
+automatic deployment. Hosting settings and actual running versions were not
+inspected, and this repository has not been established as the source of the
+separate provider-notified server.
+
+The local code/dependency review found outbound fetching for notifications
+and calendars, plus an HTTP-client dependency capable of native Brotli response
+decoding. No direct application-level Brotli call was found. The installed
+Express body-parser 1.20.8 rejects inbound `br` bodies, but that limited finding
+does not cover outbound responses or other deployed applications. No exploit
+was run and no compromise assessment was performed.
+
+**Recommended next change, not yet applied:** identify each service's actual
+Node executable or container image and installation method. Prefer Node 24.22.1
+LTS or a later patched 24.x release after compatibility testing; an existing
+22.x service can use 22.23.4 or a later patched 22.x release. Align the selected
+major's minimum version across package engines/lock metadata, provider runtime
+settings and both Docker stages. Avoid a broad `>=22.23.4` range, which admits
+older vulnerable 24.x and 26.x releases. The existing Node 20 setup descriptions
+below describe the current configuration, not a secure deployment target.
+
+Rebuild/redeploy containers or update the installed runtime, then restart every
+affected service and verify its running version, health and application tests.
+A shell's `node -v` alone can refer to a different installation. Use distribution
+security advisories to verify backported fixes. Updating npm dependencies alone
+does not replace Node's native decoder. Inbound-only filtering does not address
+fetched Brotli responses; reject unsupported encoded bodies rather than merely
+removing their encoding header.
+
+Validation was read-only source/configuration review and official advisory
+verification. Only this documentation changed; no runtime upgrade, container
+build, production restart or application test under a patched runtime occurred.
+Server access and live-version verification remain outstanding. Unrelated local
+work was preserved.
+
 ## Relay owner portal entry — October 22, 2026
 
 The signed-in owner's portal navigation and overview now include **Relay**, the

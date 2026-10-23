@@ -24,6 +24,13 @@ currently available through the local SSH agent, so authenticated host and
 container inspection remain pending. Connection details and key material stay
 outside this public repository.
 
+**Windows SSH setup guidance:** follow
+[Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)
+using the existing vault key. Keep private keys in the vault and verify the
+public fingerprint through the agent. Switching agent providers can affect
+other SSH identities. These are instructions only; no vault, Windows service
+or SSH-agent settings were changed in this review.
+
 The local code/dependency review found outbound fetching for notifications
 and calendars, plus an HTTP-client dependency capable of native Brotli response
 decoding. No direct application-level Brotli call was found. The installed

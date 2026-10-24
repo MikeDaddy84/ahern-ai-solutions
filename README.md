@@ -1,111 +1,83 @@
 # Ahern AI — Website
 
-## Node.js security review — October 23, 2026
+## Node.js security update — October 24, 2026
 
-**Website/Satori runtime verification and remediation remain pending.** The
-[Node.js October security advisory](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)
-confirms CVE-2026-111497, a High-severity flaw in its bundled Brotli decoder.
-The patched releases are
-[22.23.4](https://nodejs.org/en/blog/release/v22.23.4),
-[24.22.1](https://nodejs.org/en/blog/release/v24.22.1) and
-[26.12.1](https://nodejs.org/en/blog/release/v26.12.1).
-[Node 20 is end of life](https://nodejs.org/en/about/previous-releases).
-The earlier PHP review does not establish safety from this separate Node issue.
+**Repository upgrade merged; live deployment verification remains pending.**
+[PR #5](https://github.com/MikeDaddy84/ahern-ai-solutions/pull/5) merged at
+`4853f03a528a13e7793f8f11262a3da16b8382e3`. Root and Satori version files select
+Node 24.22.1, both package manifests and lock metadata require
+`>=24.22.1 <25`, and both Satori Docker stages use `node:24.22.1-alpine`.
+Startup logs now include the running Node version. The Satori Docker context
+excludes host dependencies, generated output, environment files and local
+databases.
 
-**Verified repository state:** both the local checkout and current GitHub
-`main` allow Node `>=20` in the website's package manifest, while both stages
-of `apps/satori/Dockerfile` use `node:20-alpine`. These settings do not ensure
-a patched runtime. The Satori Render definition selects Docker and disables
-automatic deployment. The website and Satori hosting settings and live runtime
-versions remain unverified.
+The [Node.js October security advisory](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)
+identifies CVE-2026-111497 in native Brotli decoding and the patched releases
+22.23.4, 24.22.1 and 26.12.1. Node 20 is end of life. Updating npm packages alone
+does not replace the native decoder. Outbound fetching and dependencies can
+invoke Brotli even without a direct application-level call.
 
-**Separate provider-notified server:** the administrator key is available through
-the Bitwarden desktop SSH agent. Its server host fingerprint was independently
-verified in the provider's
-[Recovery Console](https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/),
-then recorded in this PC's local SSH trust file. SSH authentication succeeded
-with strict host checking. Private keys remain in Bitwarden; connection details
-and fingerprints stay outside this repository.
+**Validation:** the
+[Linux runtime workflow](https://github.com/MikeDaddy84/ahern-ai-solutions/actions/runs/40066765325)
+passed both production builds, all 61 website tests, all 90 Satori tests, eight
+Chicago time-zone checks, and a Docker build whose runtime was verified as
+`v24.22.1`. The merged commit's workflow also passed. On Windows, the
+checksum-verified official Node 24.22.1 runtime passed both builds and all
+90 Satori tests; the website's assertions passed but its existing cleanup step
+could not delete an open temporary SQLite database. The tests were left
+unchanged; Linux verification passed without that cleanup error.
 
-Read-only checks found no installed Node.js/PHP runtime packages, no matching
-host processes, and no runtime binaries in the accessible common installation
-locations searched. Running service processes included the saved remote-access
-services, Nginx and Docker. On October 24, the user supplied provider-console
-output confirming two running containers consistent with the private deployment
-inventory, each up for four weeks. Subsequent runtime checks returned
-"executable file not found in $PATH" for each of `node`, `nodejs` and `php`
-in both containers. All six checks completed; these messages indicate missing
-executables, not a service failure.
+**Production status:** the public website health endpoint returned HTTP 200
+with its database connected after merge. This alone does not prove the new
+deployment or Node version is live. Render's dashboard required sign-in;
+no Render deployment result was returned in the GitHub commit checks.
+Render's `NODE_VERSION` environment setting takes precedence over
+`.node-version`, so inspect the service setting and deployment/startup logs.
+The website is documented to auto-deploy from `main`. Determine whether the
+separate Satori Docker service is actually deployed; its saved Render definition
+disables auto-deploy. Do not equate the embedded Satori client with a separately
+running Docker backend.
 
-**Server finding:** no affected Node.js/PHP runtime was identified in the checked
-host packages/processes/common paths or on either running container's PATH.
-No runtime patch is indicated by this evidence for that server. This was a
-targeted inventory, not an exhaustive filesystem or embedded-library audit;
-custom installations outside those paths, stopped containers and other
-infrastructure were not ruled out. Image tags alone do not establish an exact
-image version. This finding does not resolve the website/Satori runtime work.
+**Separate provider-notified server:** the targeted inventory found no affected
+Node.js/PHP runtime in host package/process/common-path checks, and `node`,
+`nodejs` and `php` were absent from both running containers' PATH. This does
+not cover inaccessible/custom paths, stopped containers or embedded libraries.
+No Node/PHP runtime patch was indicated for that server by these checks.
 
-Privileged checks were run by the user in the provider console; credentials
-remain private. For browser-console checks, single-line commands with explicit
-shell separators avoid lost newlines during paste. The host reports a reboot
-is required and its login banner lists pending OS updates; those maintenance
-items remain outstanding. No reboot or package update was performed.
+DigitalOcean's dashboard confirmed weekly backups and four listed recovery
+points, the newest dated October 21. That verifies availability, not a successful
+restore. A fresh consistent backup and verification script was prepared outside
+the repository but has not run. The server's public HTTPS endpoint returned 200.
+Its banner reported pending Ubuntu updates and a required reboot; no package
+updates, container stops/replacements or reboot were performed.
 
-**Windows SSH setup reference:** use
-[Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)
-with the existing vault key and verify its public fingerprint through the agent.
-The user completed desktop/agent setup, and the key was successfully used for
-SSH authentication. No private keys or vault data were exported. The ordinary
-browser console's earlier connection problem remains undiagnosed; Recovery
-Console access succeeded without a password reset or firewall change.
+The server's SSH host key was independently verified through the provider's
+Recovery Console, and earlier SSH authentication through Bitwarden succeeded.
+Later maintenance attempts were refused by the agent. The provider console
+remains the available administration route, with sudo requiring the user's
+password. Private keys remain in Bitwarden; all connection details, credentials,
+backup material and private configuration stay outside this public repository.
 
-The local code/dependency review found outbound fetching for notifications
-and calendars, plus an HTTP-client dependency capable of native Brotli response
-decoding. No direct application-level Brotli call was found. The installed
-Express body-parser 1.20.8 rejects inbound `br` bodies, but that limited finding
-does not cover outbound responses or other deployed applications. No exploit
-was run and no compromise assessment was performed.
+**Resume checklist:** work stopped at the user's request on October 24.
+Finish Render sign-in and verify the merged deployment's actual runtime and
+core application flows. Complete sudo authentication in the provider console,
+review the package upgrade plan, create and validate a fresh consistent backup
+of persistent server data/configuration, then apply the Ubuntu updates and
+perform a graceful reboot. Verify SSH, both original containers, the HTTPS
+endpoint and an actual remote-access session afterward. Keep the existing
+server identity and deployed image; do not pull a moving `latest` tag as part
+of OS maintenance. No replacement-server restore test or end-to-end remote
+session has been completed in this review.
 
-**Work order recommended on October 24, not yet executed:** first inspect the
-active Render service runtimes and move any affected deployment to a patched
-supported Node release. Update the repository's runtime constraints and both
-Docker stages, run the build/tests under that runtime, then deploy and verify
-the live process version and core application flows. Establish whether the
-separate Satori Docker service is actually deployed before treating its
-Dockerfile as evidence of a live service. Second, verify a recoverable backup
-of the separate server's configuration and persistent application data, review
-its pending Ubuntu updates, apply them during a maintenance window, and reboot
-with provider-console access available. Confirm SSH, both containers, the web
-endpoint and an actual remote-access connection afterward. The reboot will
-briefly interrupt remote access. No production change or backup creation is
-claimed by this plan.
+**Separate dependency follow-up:** Satori's unchanged dependency graph reports
+17 npm audit findings (8 moderate, 6 high, 3 critical), including development
+tooling and runtime dependencies. These were not remediated by the Node upgrade;
+some fixes require major package changes and `xlsx` has no npm-reported fix.
+Review reachability and updates separately with compatibility tests.
 
-**Recommended next change, not yet applied:** identify each service's actual
-Node executable or container image and installation method. Prefer Node 24.22.1
-LTS or a later patched 24.x release after compatibility testing; an existing
-22.x service can use 22.23.4 or a later patched 22.x release. Align the selected
-major's minimum version across package engines/lock metadata, provider runtime
-settings and both Docker stages. Avoid a broad `>=22.23.4` range, which admits
-older vulnerable 24.x and 26.x releases. The existing Node 20 setup descriptions
-below describe the current configuration, not a secure deployment target.
-
-Rebuild/redeploy containers or update the installed runtime, then restart every
-affected service and verify its running version, health and application tests.
-A shell's `node -v` alone can refer to a different installation. Use distribution
-security advisories to verify backported fixes. Updating npm dependencies alone
-does not replace Node's native decoder. Inbound-only filtering does not address
-fetched Brotli responses; reject unsupported encoded bodies rather than merely
-removing their encoding header.
-
-Validation includes read-only source/configuration review, official advisory
-verification, independent host-fingerprint comparison, successful SSH
-authentication, a partial live host/package inventory and user-supplied results
-from runtime executable checks in both running containers. Repository changes
-remain documentation-only; the verified SSH trust record was saved outside the
-repository. No runtime upgrade, container build, production restart or
-application test under a patched runtime occurred. Website/Satori live-version
-verification and host OS maintenance remain outstanding. Unrelated local work
-was preserved.
+Work was isolated in a managed checkout on `codex/node-security-update`.
+The active project checkout's unfinished backup-script changes and untracked
+files were preserved. No credentials or production data were committed.
 
 ## Relay owner portal entry — October 22, 2026
 

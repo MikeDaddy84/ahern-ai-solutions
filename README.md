@@ -16,38 +16,36 @@ The earlier PHP review does not establish safety from this separate Node issue.
 `main` allow Node `>=20` in the website's package manifest, while both stages
 of `apps/satori/Dockerfile` use `node:20-alpine`. These settings do not ensure
 a patched runtime. The Satori Render definition selects Docker and disables
-automatic deployment. Hosting settings and actual running versions were not
-inspected. Follow-up review located the separate provider-notified server's
-existing private deployment inventory and saved administration route, and
-confirmed the resource is online. The expected administrator public fingerprint
-is now available through the local SSH agent, resolving the key-availability
-blocker. SSH reaches the server, but this PC has no trusted host-key record.
-Both OpenSSH and the Tailscale SSH wrapper refused the connection with strict
-host checking enabled. A public host fingerprint was observed in the handshake;
-verification against the provider console or an existing trusted session remains
-pending before it can be accepted. No server authentication or runtime inventory
-has completed. Connection details and key material stay outside this repository.
+automatic deployment. The website and Satori hosting settings and live runtime
+versions remain unverified.
 
-The provider browser terminal was observed stuck at "Connecting to droplet."
-The [ordinary Droplet Console](https://docs.digitalocean.com/products/droplets/how-to/connect-with-console/)
-depends on SSH reachability; saved access restrictions are a possible cause,
-not a confirmed diagnosis. Use the provider's
-[Recovery Console](https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/)
-with the existing OS account to obtain a trusted host fingerprint independently
-of the SSH network path. No reboot, recovery-ISO boot, password reset or firewall
-change was performed.
+**Separate provider-notified server:** the administrator key is available through
+the Bitwarden desktop SSH agent. Its server host fingerprint was independently
+verified in the provider's
+[Recovery Console](https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/),
+then recorded in this PC's local SSH trust file. SSH authentication succeeded
+with strict host checking. Private keys remain in Bitwarden; connection details
+and fingerprints stay outside this repository.
 
-**Windows SSH setup guidance:** follow
+Read-only checks found no installed Node.js/PHP runtime packages, no matching
+host processes, and no runtime binaries in the accessible common installation
+locations searched. Running service processes included the saved remote-access
+services, Nginx and Docker. This is a partial host inventory, not proof of absence
+inside containers or inaccessible directories. Docker inventory requires the
+administrator's sudo password; the unprivileged SSH account cannot access the
+Docker socket and noninteractive sudo was refused. Container images and runtime
+versions remain unchecked. A read-only container-list command was provided for
+the already-authenticated provider console; passwords must be entered there,
+never shared in chat. The host reports a reboot is required; no reboot was
+performed.
+
+**Windows SSH setup reference:** use
 [Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)
-using the existing vault key. Keep private keys in the vault and verify the
-public fingerprint through the agent. Switching agent providers can affect
-other SSH identities. These are instructions only; no vault, Windows service
-or SSH-agent settings were changed in this review.
-
-The user completed desktop/agent setup; `ssh-add -l` now returns the expected
-administrator fingerprint. This verifies agent availability only, not server
-authentication. Earlier login troubleshooting is no longer the active blocker;
-its cause was not established. No credentials or vault data were exported.
+with the existing vault key and verify its public fingerprint through the agent.
+The user completed desktop/agent setup, and the key was successfully used for
+SSH authentication. No private keys or vault data were exported. The ordinary
+browser console's earlier connection problem remains undiagnosed; Recovery
+Console access succeeded without a password reset or firewall change.
 
 The local code/dependency review found outbound fetching for notifications
 and calendars, plus an HTTP-client dependency capable of native Brotli response
@@ -74,10 +72,12 @@ fetched Brotli responses; reject unsupported encoded bodies rather than merely
 removing their encoding header.
 
 Validation includes read-only source/configuration review, official advisory
-verification, agent fingerprint comparison and SSH host-verification attempts.
-Only this documentation changed; no runtime upgrade, container
-build, production restart or application test under a patched runtime occurred.
-Server access and live-version verification remain outstanding. Unrelated local
+verification, independent host-fingerprint comparison, successful SSH
+authentication and a partial live host/package inventory. Repository changes
+remain documentation-only; the verified SSH trust record was saved outside the
+repository. No runtime upgrade, container build, production restart or
+application test under a patched runtime occurred. Container inspection and
+website/Satori live-version verification remain outstanding. Unrelated local
 work was preserved.
 
 ## Relay owner portal entry — October 22, 2026

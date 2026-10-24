@@ -58,9 +58,12 @@ remains the available administration route, with sudo requiring the user's
 password. Private keys remain in Bitwarden; all connection details, credentials,
 backup material and private configuration stay outside this public repository.
 
-**Resume checklist:** work stopped at the user's request on October 24.
-Finish Render sign-in and verify the merged deployment's actual runtime and
-core application flows. Complete sudo authentication in the provider console,
+**Resume checklist:** maintenance remains paused at the user's request.
+The user subsequently reported completing Render sign-in; the merged
+deployment's actual runtime and core application flows remain unverified.
+A read-only console check confirmed three rejected sudo password attempts and
+a return to the normal shell prompt. No password reset or account change was
+made. Complete sudo authentication with the existing Linux account password,
 review the package upgrade plan, create and validate a fresh consistent backup
 of persistent server data/configuration, then apply the Ubuntu updates and
 perform a graceful reboot. Verify SSH, both original containers, the HTTPS

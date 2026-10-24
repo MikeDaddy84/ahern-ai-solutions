@@ -28,6 +28,15 @@ verification against the provider console or an existing trusted session remains
 pending before it can be accepted. No server authentication or runtime inventory
 has completed. Connection details and key material stay outside this repository.
 
+The provider browser terminal was observed stuck at "Connecting to droplet."
+The [ordinary Droplet Console](https://docs.digitalocean.com/products/droplets/how-to/connect-with-console/)
+depends on SSH reachability; saved access restrictions are a possible cause,
+not a confirmed diagnosis. Use the provider's
+[Recovery Console](https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/)
+with the existing OS account to obtain a trusted host fingerprint independently
+of the SSH network path. No reboot, recovery-ISO boot, password reset or firewall
+change was performed.
+
 **Windows SSH setup guidance:** follow
 [Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)
 using the existing vault key. Keep private keys in the vault and verify the

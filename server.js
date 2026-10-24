@@ -260,7 +260,7 @@ app.get('/health', (req, res) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`Ahern AI site running at http://localhost:${PORT} (db: ${db.status().state})`));
+  app.listen(PORT, () => console.log(`Ahern AI site running at http://localhost:${PORT} (Node ${process.version}; db: ${db.status().state})`));
   const notificationTimer = setInterval(flushNotifications, 60000);
   notificationTimer.unref();
   flushNotifications();

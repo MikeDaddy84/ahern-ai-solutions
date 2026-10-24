@@ -4,6 +4,9 @@
   "description": "Matrix/cyberpunk daily agenda PWA replacing ToolBox Google Sheet",
   "main": "dist/server/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
   "scripts": {
     "dev": "tsx watch src/server/index.ts",
     "build:client": "vite build",

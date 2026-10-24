@@ -672,7 +672,7 @@ GoDaddy forwarding for `ahernautomations.com` is configured as a permanent
 
 ## Stack
 
-- **Server:** Express (Node ≥20), serves the static homepage plus a
+- **Server:** Express (Node 24.22.1 or a later patched 24.x), serves the static homepage plus a
   Markdown-backed blog, inquiry delivery, and first-party activity APIs.
 - **Database:** [Turso](https://turso.tech) (libSQL) — contact form
   submissions and first-party pageview analytics.
@@ -844,8 +844,9 @@ databases and mocked email; they do not send production notifications.
 ## Build studio and inquiry delivery — September 2026 update
 
 The existing Express/Render architecture is retained. Run `npm ci`,
-`npm test`, and `npm run build`; start with `npm start`. Node 20 or newer is
-required. There is no bundler: the build command validates the server/browser
+`npm test`, and `npm run build`; start with `npm start`. Use the Node 24.22.1
+runtime selected by `.node-version`; package engines allow patched 24.x updates.
+The build compiles the embedded Satori client and validates the server/browser
 source and the self-hosted Three.js assets.
 
 - `/pc-builder` now has a procedural 3D showroom: representative RTX-style

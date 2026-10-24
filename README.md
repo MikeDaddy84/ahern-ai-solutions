@@ -31,13 +31,15 @@ Read-only checks found no installed Node.js/PHP runtime packages, no matching
 host processes, and no runtime binaries in the accessible common installation
 locations searched. Running service processes included the saved remote-access
 services, Nginx and Docker. This is a partial host inventory, not proof of absence
-inside containers or inaccessible directories. Docker inventory requires the
-administrator's sudo password; the unprivileged SSH account cannot access the
-Docker socket and noninteractive sudo was refused. Container images and runtime
-versions remain unchecked. A read-only container-list command was provided for
-the already-authenticated provider console; passwords must be entered there,
-never shared in chat. The host reports a reboot is required; no reboot was
-performed.
+inside containers or inaccessible directories. On October 24, the user supplied
+provider-console output confirming two running containers consistent with the
+private deployment inventory, each up for four weeks. Their displayed image
+tags do not establish the embedded runtimes or exact image version. Checks for
+Node.js/PHP executables inside both running containers remain outstanding.
+Docker commands require sudo through the user's authenticated provider console;
+the SSH account cannot access the Docker socket and noninteractive sudo was
+refused. Passwords must remain in the console, never shared in chat. The host
+reports a reboot is required; no reboot was performed.
 
 **Windows SSH setup reference:** use
 [Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)

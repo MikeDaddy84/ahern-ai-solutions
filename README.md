@@ -66,6 +66,20 @@ Express body-parser 1.20.8 rejects inbound `br` bodies, but that limited finding
 does not cover outbound responses or other deployed applications. No exploit
 was run and no compromise assessment was performed.
 
+**Work order recommended on October 24, not yet executed:** first inspect the
+active Render service runtimes and move any affected deployment to a patched
+supported Node release. Update the repository's runtime constraints and both
+Docker stages, run the build/tests under that runtime, then deploy and verify
+the live process version and core application flows. Establish whether the
+separate Satori Docker service is actually deployed before treating its
+Dockerfile as evidence of a live service. Second, verify a recoverable backup
+of the separate server's configuration and persistent application data, review
+its pending Ubuntu updates, apply them during a maintenance window, and reboot
+with provider-console access available. Confirm SSH, both containers, the web
+endpoint and an actual remote-access connection afterward. The reboot will
+briefly interrupt remote access. No production change or backup creation is
+claimed by this plan.
+
 **Recommended next change, not yet applied:** identify each service's actual
 Node executable or container image and installation method. Prefer Node 24.22.1
 LTS or a later patched 24.x release after compatibility testing; an existing

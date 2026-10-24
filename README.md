@@ -2,7 +2,7 @@
 
 ## Node.js security update — October 24, 2026
 
-**Repository upgrade merged; live deployment verification remains pending.**
+**Repository upgrade merged and website production runtime verified.**
 [PR #5](https://github.com/MikeDaddy84/ahern-ai-solutions/pull/5) merged at
 `4853f03a528a13e7793f8f11262a3da16b8382e3`. Root and Satori version files select
 Node 24.22.1, both package manifests and lock metadata require
@@ -27,16 +27,17 @@ checksum-verified official Node 24.22.1 runtime passed both builds and all
 could not delete an open temporary SQLite database. The tests were left
 unchanged; Linux verification passed without that cleanup error.
 
-**Production status:** the public website health endpoint returned HTTP 200
-with its database connected after merge. This alone does not prove the new
-deployment or Node version is live. Render's dashboard required sign-in;
-no Render deployment result was returned in the GitHub commit checks.
-Render's `NODE_VERSION` environment setting takes precedence over
-`.node-version`, so inspect the service setting and deployment/startup logs.
-The website is documented to auto-deploy from `main`. Determine whether the
-separate Satori Docker service is actually deployed; its saved Render definition
-disables auto-deploy. Do not equate the embedded Satori client with a separately
-running Docker backend.
+**Production status:** Render's live deployment at commit `67849e3` succeeded
+on October 24. Its startup log explicitly reports **Node v24.22.1**, followed
+by a successful database connection. A fresh public `/health` request returned
+HTTP 200 with the database configured and connected. This verifies the patched
+runtime is running on the website, beyond repository and CI evidence.
+
+The standalone Satori Render service is separate: its dashboard points to
+`MikeDaddy84/satori` at `b579dbc`, deployed two months earlier. That deployed
+source uses `node:20-alpine` in both Docker stages. Changes to this website's
+`apps/satori` directory do not update that service. Its runtime remediation
+remains outstanding pending confirmation of whether it is still needed.
 
 **Separate provider-notified server:** the targeted inventory found no affected
 Node.js/PHP runtime in host package/process/common-path checks, and `node`,
@@ -46,32 +47,25 @@ No Node/PHP runtime patch was indicated for that server by these checks.
 
 DigitalOcean's dashboard confirmed weekly backups and four listed recovery
 points, the newest dated October 21. That verifies availability, not a successful
-restore. A fresh consistent backup and verification script was prepared outside
-the repository but has not run. The server's public HTTPS endpoint returned 200.
-Its banner reported pending Ubuntu updates and a required reboot; no package
-updates, container stops/replacements or reboot were performed.
+restore. A fresh consistent backup and verification script remains prepared
+outside the repository. No fresh backup, package upgrade, container stop or
+reboot was completed during the October 24 resumed maintenance attempt.
 
-The server's SSH host key was independently verified through the provider's
-Recovery Console, and earlier SSH authentication through Bitwarden succeeded.
-Later maintenance attempts were refused by the agent. The provider console
-remains the available administration route, with sudo requiring the user's
-password. Private keys remain in Bitwarden; all connection details, credentials,
-backup material and private configuration stay outside this public repository.
+The Recovery Console successfully verified cached sudo authorization, and a
+root shell could be opened. However, automated console entry altered letter
+case and truncated/garbled longer commands; incomplete commands were canceled
+before execution. Two SSH attempts were refused by the Bitwarden agent.
+Maintenance remains blocked on a reliable authenticated administration channel.
+Private keys remain in Bitwarden; all connection details, credentials, backup
+material and private configuration stay outside this public repository.
 
-**Resume checklist:** maintenance remains paused at the user's request.
-The user subsequently reported completing Render sign-in; the merged
-deployment's actual runtime and core application flows remain unverified.
-The user identified the sudo rejection as use of the wrong password and
-reported correcting it; successful sudo authentication has not been independently
-rechecked. No password reset or account change was made. Revalidate sudo when
-maintenance resumes, since its authorization may expire,
-review the package upgrade plan, create and validate a fresh consistent backup
-of persistent server data/configuration, then apply the Ubuntu updates and
-perform a graceful reboot. Verify SSH, both original containers, the HTTPS
-endpoint and an actual remote-access session afterward. Keep the existing
-server identity and deployed image; do not pull a moving `latest` tag as part
-of OS maintenance. No replacement-server restore test or end-to-end remote
-session has been completed in this review.
+**Remaining maintenance:** establish working SSH agent authorization, revalidate
+sudo, create and verify a fresh consistent backup of persistent data and server
+configuration, review the package upgrade plan, apply the Ubuntu updates, and
+perform a graceful reboot. Verify SSH, both original containers, HTTPS, and an
+actual remote-access session afterward. Preserve the existing server identity
+and deployed image; do not pull a moving `latest` tag for OS maintenance.
+No replacement-server restore test or end-to-end remote session was completed.
 
 **Separate dependency follow-up:** Satori's unchanged dependency graph reports
 17 npm audit findings (8 moderate, 6 high, 3 critical), including development

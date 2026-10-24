@@ -61,9 +61,10 @@ backup material and private configuration stay outside this public repository.
 **Resume checklist:** maintenance remains paused at the user's request.
 The user subsequently reported completing Render sign-in; the merged
 deployment's actual runtime and core application flows remain unverified.
-A read-only console check confirmed three rejected sudo password attempts and
-a return to the normal shell prompt. No password reset or account change was
-made. Complete sudo authentication with the existing Linux account password,
+The user identified the sudo rejection as use of the wrong password and
+reported correcting it; successful sudo authentication has not been independently
+rechecked. No password reset or account change was made. Revalidate sudo when
+maintenance resumes, since its authorization may expire,
 review the package upgrade plan, create and validate a fresh consistent backup
 of persistent server data/configuration, then apply the Ubuntu updates and
 perform a graceful reboot. Verify SSH, both original containers, the HTTPS

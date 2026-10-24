@@ -36,6 +36,9 @@ provider-console output confirming two running containers consistent with the
 private deployment inventory, each up for four weeks. Their displayed image
 tags do not establish the embedded runtimes or exact image version. Checks for
 Node.js/PHP executables inside both running containers remain outstanding.
+For browser-console runtime checks, use a single-line command with explicit
+shell separators to avoid lost newlines during paste. A continuation prompt
+means the shell is still waiting for a complete command, not a runtime result.
 Docker commands require sudo through the user's authenticated provider console;
 the SSH account cannot access the Docker socket and noninteractive sudo was
 refused. Passwords must remain in the console, never shared in chat. The host

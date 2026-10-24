@@ -19,10 +19,14 @@ a patched runtime. The Satori Render definition selects Docker and disables
 automatic deployment. Hosting settings and actual running versions were not
 inspected. Follow-up review located the separate provider-notified server's
 existing private deployment inventory and saved administration route, and
-confirmed the resource is online. The required administrator key is not
-currently available through the local SSH agent, so authenticated host and
-container inspection remain pending. Connection details and key material stay
-outside this public repository.
+confirmed the resource is online. The expected administrator public fingerprint
+is now available through the local SSH agent, resolving the key-availability
+blocker. SSH reaches the server, but this PC has no trusted host-key record.
+Both OpenSSH and the Tailscale SSH wrapper refused the connection with strict
+host checking enabled. A public host fingerprint was observed in the handshake;
+verification against the provider console or an existing trusted session remains
+pending before it can be accepted. No server authentication or runtime inventory
+has completed. Connection details and key material stay outside this repository.
 
 **Windows SSH setup guidance:** follow
 [Bitwarden's desktop SSH agent instructions](https://bitwarden.com/help/ssh-agent/)
@@ -31,13 +35,10 @@ public fingerprint through the agent. Switching agent providers can affect
 other SSH identities. These are instructions only; no vault, Windows service
 or SSH-agent settings were changed in this review.
 
-Desktop sign-in must succeed before agent setup. If another client can log
-in successfully, first compare its account/server selection with the desktop
-app's `Accessing` or `Logging in on` selector:
-[Bitwarden client server configuration](https://bitwarden.com/help/change-client-environment/).
-A region mismatch is a diagnostic possibility, not a confirmed cause. The exact
-desktop error and server selection are needed before further troubleshooting;
-no credential changes, vault-data removal or agent reconfiguration were made.
+The user completed desktop/agent setup; `ssh-add -l` now returns the expected
+administrator fingerprint. This verifies agent availability only, not server
+authentication. Earlier login troubleshooting is no longer the active blocker;
+its cause was not established. No credentials or vault data were exported.
 
 The local code/dependency review found outbound fetching for notifications
 and calendars, plus an HTTP-client dependency capable of native Brotli response
@@ -63,8 +64,9 @@ does not replace Node's native decoder. Inbound-only filtering does not address
 fetched Brotli responses; reject unsupported encoded bodies rather than merely
 removing their encoding header.
 
-Validation was read-only source/configuration review and official advisory
-verification. Only this documentation changed; no runtime upgrade, container
+Validation includes read-only source/configuration review, official advisory
+verification, agent fingerprint comparison and SSH host-verification attempts.
+Only this documentation changed; no runtime upgrade, container
 build, production restart or application test under a patched runtime occurred.
 Server access and live-version verification remain outstanding. Unrelated local
 work was preserved.

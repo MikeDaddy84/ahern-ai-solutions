@@ -5,7 +5,7 @@
   "description": "Ahern AI website — Node/Express server with Turso-backed contact form and analytics, static-Markdown blog.",
   "main": "server.js",
   "engines": {
-    "node": ">=20"
+    "node": ">=24.22.1 <25"
   },
   "scripts": {
     "start": "node server.js",

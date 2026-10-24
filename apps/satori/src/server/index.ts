@@ -15,7 +15,7 @@ async function start() {
 
   try {
     const address = await app.listen({ port, host });
-    console.log(`⚡ SATORI server running at ${address}`);
+    console.log(`⚡ SATORI server running at ${address} (Node ${process.version})`);
   } catch (err) {
     console.error('Failed to start SATORI server:', err);
     process.exit(1);

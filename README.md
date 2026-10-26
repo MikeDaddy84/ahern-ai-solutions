@@ -64,8 +64,14 @@ agent, but a fresh connection failed because the agent refused signing.
 No remote shell was obtained and no fresh backup, package update or reboot
 was performed. The public website health endpoint returned HTTP 200 with its
 database connected, and the remote-access HTTPS endpoint also returned 200.
-Resume after the user unlocks Bitwarden and approves a fresh SSH request;
-private keys must remain in the vault.
+A retry after the user reported approval still failed. SSH diagnostics confirm
+that the server accepts the offered public key, but the agent refuses the
+signature request. The Windows OpenSSH agent is stopped/disabled and Bitwarden
+2026.10.1 is running; the cause of its signing refusal remains unresolved.
+The next troubleshooting step is for the user to fully quit/reopen and unlock
+the Bitwarden desktop app before a coordinated retry. This is a recommendation,
+not a completed reset. Private keys remain in the vault; diagnostic logs stay
+outside this repository.
 
 **Remaining maintenance:** establish working SSH agent authorization, revalidate
 sudo, create and verify a fresh consistent backup of persistent data and server

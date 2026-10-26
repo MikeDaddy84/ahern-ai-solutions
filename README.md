@@ -81,6 +81,22 @@ restore test have not been performed. The fresh verified archive remains on
 the Droplet; no fresh off-host archive copy or new provider snapshot was
 confirmed. Keep the private backup and maintenance logs outside this repository.
 
+The final read-only check can be run after SSH login in the chat's terminal
+panel, whose output can be inspected directly:
+
+```bash
+uname -r
+uptime
+systemctl is-active docker nginx tailscaled apparmor
+ps -C hbbs,hbbr -o comm=
+test ! -e /var/run/reboot-required && echo NO_REBOOT_PENDING
+dpkg --audit
+apt list --upgradable
+```
+
+Successful command output is required before marking these checks complete;
+an acknowledgment of the instructions does not establish the server state.
+
 **Separate dependency follow-up:** Satori's unchanged dependency graph reports
 17 npm audit findings (8 moderate, 6 high, 3 critical), including development
 tooling and runtime dependencies. These were not remediated by the Node upgrade;

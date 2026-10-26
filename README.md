@@ -59,6 +59,14 @@ Maintenance remains blocked on a reliable authenticated administration channel.
 Private keys remain in Bitwarden; all connection details, credentials, backup
 material and private configuration stay outside this public repository.
 
+**October 26 access check:** the expected SSH public key is exposed by the
+agent, but a fresh connection failed because the agent refused signing.
+No remote shell was obtained and no fresh backup, package update or reboot
+was performed. The public website health endpoint returned HTTP 200 with its
+database connected, and the remote-access HTTPS endpoint also returned 200.
+Resume after the user unlocks Bitwarden and approves a fresh SSH request;
+private keys must remain in the vault.
+
 **Remaining maintenance:** establish working SSH agent authorization, revalidate
 sudo, create and verify a fresh consistent backup of persistent data and server
 configuration, review the package upgrade plan, apply the Ubuntu updates, and

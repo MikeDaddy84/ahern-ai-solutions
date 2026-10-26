@@ -61,21 +61,30 @@ material and private configuration stay outside this public repository.
 
 **October 26 access check:** the website health endpoint returns HTTP 200 with
 its database connected, and the remote-access HTTPS endpoint returns 200.
-SSH reaches the server, verifies its host key and offers a public key accepted
-by the server, but Bitwarden refuses the signing request. The user confirmed
-that the SSH authorization prompt appeared and was approved. The expected
-public key remains available through the agent. Windows OpenSSH's agent is
-stopped/disabled, and restarting Bitwarden 2026.10.1 did not resolve the issue.
-A separate local signing test using Windows ssh-keygen and harmless diagnostic
-text also returned `agent refused operation`, without contacting the server.
-This narrows investigation to local signing or the authorization flow; the
-underlying cause is not yet established. A direct SSH test from the user's
-own PowerShell session is pending to distinguish that context from the
-assistant's command session. No fresh backup, package update or reboot has
-run. Private keys remain in Bitwarden; diagnostic files stay outside the
-repository.
+Intermittent Bitwarden signing refusals were reproduced in both the user's
+PowerShell and the assistant's command session. A subsequent user login and
+a subsequent persistent assistant SSH session both succeeded; the cause of
+the intermittent refusals remains unresolved. Private keys remain in Bitwarden.
+The server has about 20 GB free; Docker, nginx and Tailscale are active and
+enabled at boot. The unprivileged package audit showed no pending dpkg issues.
+Sudo requires a password in the user's terminal.
 
-**Remaining maintenance:** establish working SSH agent authorization, revalidate
+**Prepared maintenance:** a private script was transferred through the authenticated
+SSH session, passed Python compilation and matched its local SHA-256 hash.
+The script checks container restart policies, stops the original RustDesk
+containers briefly to create a consistent private archive, extracts and compares
+persistent files and checks restored SQLite databases, then restarts the same
+containers. It applies ordinary Ubuntu package upgrades only after backup
+verification and refuses a simulation that proposes removals. It preserves
+existing configuration choices, checks package health, services, container image
+IDs and the RustDesk HTTP endpoint, and schedules a reboot only after those
+checks pass. The user has been given a command to install a root-owned copy
+and launch it as an independent systemd service using sudo in their working
+SSH terminal. At the last check the job had not started: no fresh backup,
+package upgrades or reboot were completed. Post-reboot verification remains
+required. Script and diagnostic files remain outside the public repository.
+
+**Remaining maintenance:** launch the prepared privileged maintenance job, revalidate
 sudo, create and verify a fresh consistent backup of persistent data and server
 configuration, review the package upgrade plan, apply the Ubuntu updates, and
 perform a graceful reboot. Verify SSH, both original containers, HTTPS, and an

@@ -59,22 +59,21 @@ Maintenance remains blocked on a reliable authenticated administration channel.
 Private keys remain in Bitwarden; all connection details, credentials, backup
 material and private configuration stay outside this public repository.
 
-**October 26 access check:** the expected SSH public key is exposed by the
-agent, but a fresh connection failed because the agent refused signing.
-No remote shell was obtained and no fresh backup, package update or reboot
-was performed. The public website health endpoint returned HTTP 200 with its
-database connected, and the remote-access HTTPS endpoint also returned 200.
-A retry after the user reported approval still failed. SSH diagnostics confirm
-that the server accepts the offered public key, but the agent refuses the
-signature request. The Windows OpenSSH agent is stopped/disabled and Bitwarden
-2026.10.1 is running; the cause of its signing refusal remains unresolved.
-Bitwarden's desktop restart was independently confirmed by new process IDs
-and start times. A coordinated retry after the user's ready message still
-returned an agent signing refusal while the expected public key remained
-available. Next, determine whether this new request produced a visible prompt
-and whether signing failed after approval; do not repeat restart requests
-without new evidence. No server maintenance has run. Private keys remain in
-the vault, and diagnostic logs stay outside this repository.
+**October 26 access check:** the website health endpoint returns HTTP 200 with
+its database connected, and the remote-access HTTPS endpoint returns 200.
+SSH reaches the server, verifies its host key and offers a public key accepted
+by the server, but Bitwarden refuses the signing request. The user confirmed
+that the SSH authorization prompt appeared and was approved. The expected
+public key remains available through the agent. Windows OpenSSH's agent is
+stopped/disabled, and restarting Bitwarden 2026.10.1 did not resolve the issue.
+A separate local signing test using Windows ssh-keygen and harmless diagnostic
+text also returned `agent refused operation`, without contacting the server.
+This narrows investigation to local signing or the authorization flow; the
+underlying cause is not yet established. A direct SSH test from the user's
+own PowerShell session is pending to distinguish that context from the
+assistant's command session. No fresh backup, package update or reboot has
+run. Private keys remain in Bitwarden; diagnostic files stay outside the
+repository.
 
 **Remaining maintenance:** establish working SSH agent authorization, revalidate
 sudo, create and verify a fresh consistent backup of persistent data and server

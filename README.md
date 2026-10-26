@@ -46,51 +46,40 @@ not cover inaccessible/custom paths, stopped containers or embedded libraries.
 No Node/PHP runtime patch was indicated for that server by these checks.
 
 DigitalOcean's dashboard confirmed weekly backups and four listed recovery
-points, the newest dated October 21. That verifies availability, not a successful
-restore. A fresh consistent backup and verification script remains prepared
-outside the repository. No fresh backup, package upgrade, container stop or
-reboot was completed during the October 24 resumed maintenance attempt.
+points on October 24, the newest dated October 21. This establishes recovery
+point availability, not a replacement-server restore test. Private keys remain
+in Bitwarden, and backup material and private configuration stay outside this
+public repository.
 
-The Recovery Console successfully verified cached sudo authorization, and a
-root shell could be opened. However, automated console entry altered letter
-case and truncated/garbled longer commands; incomplete commands were canceled
-before execution. Two SSH attempts were refused by the Bitwarden agent.
-Maintenance remains blocked on a reliable authenticated administration channel.
-Private keys remain in Bitwarden; all connection details, credentials, backup
-material and private configuration stay outside this public repository.
+**October 26 Droplet maintenance:** authenticated SSH access was established,
+and the user launched the prepared root-owned maintenance script through sudo.
+A fresh, private backup on the Droplet was verified before any package updates:
+all seven persistent files matched the extracted copy, and the restored SQLite
+database passed its integrity check. Both original containers restarted.
+The initial verifier stopped safely before updates because checking SQLite
+could change the copied shared-memory file before its byte comparison. The
+corrected verifier compares every file before opening any copied database.
+A synthetic WAL-mode database reproduced the problem; the corrected verifier
+passed and also rejected a deliberately corrupted copy.
 
-**October 26 access check:** the website health endpoint returns HTTP 200 with
-its database connected, and the remote-access HTTPS endpoint returns 200.
-Intermittent Bitwarden signing refusals were reproduced in both the user's
-PowerShell and the assistant's command session. A subsequent user login and
-a subsequent persistent assistant SSH session both succeeded; the cause of
-the intermittent refusals remains unresolved. Private keys remain in Bitwarden.
-The server has about 20 GB free; Docker, nginx and Tailscale are active and
-enabled at boot. The unprivileged package audit showed no pending dpkg issues.
-Sudo requires a password in the user's terminal.
+The ordinary Ubuntu upgrade completed: **27 packages upgraded, no additions
+or removals, and no packages kept back**. This included nginx, Docker and the
+distribution's Brotli library. Package consistency, nginx configuration,
+required services, original container image IDs and the RustDesk HTTP endpoint
+passed before reboot. No container image was pulled or replaced. The graceful
+reboot was issued at approximately 1:49 p.m. Central on October 26. Afterward,
+RustDesk HTTPS returned 200 and TCP ports 21115, 21116 and 21117 accepted
+connections over the private network. The separate Render website health
+endpoint also returned 200 with its database connected.
 
-**Prepared maintenance:** a private script was transferred through the authenticated
-SSH session, passed Python compilation and matched its local SHA-256 hash.
-The script checks container restart policies, stops the original RustDesk
-containers briefly to create a consistent private archive, extracts and compares
-persistent files and checks restored SQLite databases, then restarts the same
-containers. It applies ordinary Ubuntu package upgrades only after backup
-verification and refuses a simulation that proposes removals. It preserves
-existing configuration choices, checks package health, services, container image
-IDs and the RustDesk HTTP endpoint, and schedules a reboot only after those
-checks pass. The user has been given a command to install a root-owned copy
-and launch it as an independent systemd service using sudo in their working
-SSH terminal. At the last check the job had not started: no fresh backup,
-package upgrades or reboot were completed. Post-reboot verification remains
-required. Script and diagnostic files remain outside the public repository.
-
-**Remaining maintenance:** launch the prepared privileged maintenance job, revalidate
-sudo, create and verify a fresh consistent backup of persistent data and server
-configuration, review the package upgrade plan, apply the Ubuntu updates, and
-perform a graceful reboot. Verify SSH, both original containers, HTTPS, and an
-actual remote-access session afterward. Preserve the existing server identity
-and deployed image; do not pull a moving `latest` tag for OS maintenance.
-No replacement-server restore test or end-to-end remote session was completed.
+**Remaining verification:** post-reboot SSH attempts again encountered intermittent
+Bitwarden signing refusals. The user has been given a read-only PowerShell
+command to confirm the running kernel, local service state, both RustDesk
+processes, package audit and remaining upgrade/reboot state. Those results
+remain pending. An actual remote-access session and a replacement-server
+restore test have not been performed. The fresh verified archive remains on
+the Droplet; no fresh off-host archive copy or new provider snapshot was
+confirmed. Keep the private backup and maintenance logs outside this repository.
 
 **Separate dependency follow-up:** Satori's unchanged dependency graph reports
 17 npm audit findings (8 moderate, 6 high, 3 critical), including development

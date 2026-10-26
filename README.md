@@ -68,10 +68,13 @@ A retry after the user reported approval still failed. SSH diagnostics confirm
 that the server accepts the offered public key, but the agent refuses the
 signature request. The Windows OpenSSH agent is stopped/disabled and Bitwarden
 2026.10.1 is running; the cause of its signing refusal remains unresolved.
-The next troubleshooting step is for the user to fully quit/reopen and unlock
-the Bitwarden desktop app before a coordinated retry. This is a recommendation,
-not a completed reset. Private keys remain in the vault; diagnostic logs stay
-outside this repository.
+Bitwarden's desktop restart was independently confirmed by new process IDs
+and start times. A coordinated retry after the user's ready message still
+returned an agent signing refusal while the expected public key remained
+available. Next, determine whether this new request produced a visible prompt
+and whether signing failed after approval; do not repeat restart requests
+without new evidence. No server maintenance has run. Private keys remain in
+the vault, and diagnostic logs stay outside this repository.
 
 **Remaining maintenance:** establish working SSH agent authorization, revalidate
 sudo, create and verify a fresh consistent backup of persistent data and server

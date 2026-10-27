@@ -72,14 +72,18 @@ RustDesk HTTPS returned 200 and TCP ports 21115, 21116 and 21117 accepted
 connections over the private network. The separate Render website health
 endpoint also returned 200 with its database connected.
 
-**Remaining verification:** post-reboot SSH attempts again encountered intermittent
-Bitwarden signing refusals. The user has been given a read-only PowerShell
-command to confirm the running kernel, local service state, both RustDesk
-processes, package audit and remaining upgrade/reboot state. Those results
-remain pending. An actual remote-access session and a replacement-server
-restore test have not been performed. The fresh verified archive remains on
-the Droplet; no fresh off-host archive copy or new provider snapshot was
-confirmed. Keep the private backup and maintenance logs outside this repository.
+**October 27 health check:** fresh requests to the main website health endpoint
+and RustDesk HTTPS both returned HTTP 200; the website database was connected.
+The final SSH check was attempted in the chat's terminal, but Bitwarden refused
+the signing request and SSH exited with `Permission denied (publickey)` before
+any server verification commands ran.
+
+**Remaining verification:** the running kernel, local service state, both RustDesk
+processes, package audit and remaining upgrade/reboot state still need confirmation
+after reboot. An actual remote-access session and a replacement-server restore
+test have not been performed. The fresh verified archive remains on the Droplet;
+no fresh off-host archive copy or new provider snapshot was confirmed. Keep the
+private backup and maintenance logs outside this repository.
 
 The final read-only check can be run after SSH login in the chat's terminal
 panel, whose output can be inspected directly:
@@ -94,8 +98,7 @@ dpkg --audit
 apt list --upgradable
 ```
 
-Successful command output is required before marking these checks complete;
-an acknowledgment of the instructions does not establish the server state.
+Mark the post-reboot checks complete only after reviewing successful command output.
 
 **Separate dependency follow-up:** Satori's unchanged dependency graph reports
 17 npm audit findings (8 moderate, 6 high, 3 critical), including development

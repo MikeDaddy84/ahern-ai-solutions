@@ -1,5 +1,75 @@
 # Ahern AI — Website
 
+## Sales Call Desk — October 27, 2026
+
+`/portal/call-desk` is the cold-calling desk for website prospects: a clickable
+branching script, a live call sheet, a "find out, don't guess" question queue
+and a shared call log. v1.1.0, built with Claude Opus 5.5. It replaces the
+v1.0.0 prototype that ran as a claude.ai artifact (that copy held no data and
+can be deleted).
+
+### What changed
+- `lib/call-desk.js` adds the page and `/api/portal/call-desk/*` routes behind
+  the existing portal session and CSRF middleware.
+- `lib/portal-schema.sql` adds additive `calldesk_calls`, `calldesk_questions`
+  and `calldesk_config` tables in the **portal (Satori) Turso database**. No
+  existing table is altered.
+- The portal nav shows **Call Desk** to `owner` and `employee` accounts only.
+- An anonymous visit to `/portal/call-desk` redirects to
+  `/login?next=%2Fportal%2Fcall-desk`, and `public/portal.js` returns there
+  after sign-in. That is the only allowed `next` value. Every other private
+  page still redirects to plain `/login`.
+- `server.js` sends any request on host `calls.ahernai.com` to
+  `https://ahernai.com/portal/call-desk` with a 302. The desk is never served on
+  the subdomain because portal sign-in only accepts the ahernai.com origin and
+  its cookie is host-only.
+- Front end lives in `public/call-desk/` (template, `style.css`, `app.js`). It
+  follows the portal CSP: no inline script and no third-party fonts. It polls
+  the state endpoint every 20 s while the tab is visible.
+
+### Roles
+| Action | owner (Mike) | employee (Scotty) |
+| --- | --- | --- |
+| Use the script, log calls, queue find-out questions | ✓ | ✓ |
+| Mark an answered question as relayed | ✓ | ✓ |
+| Answer find-out questions | ✓ | — |
+| Mark booked consults as confirmed | ✓ | — |
+| Edit availability, consult length, callback number | ✓ | — |
+
+`client` and `member` accounts get a 403 and never see the nav link.
+
+### Behaviour worth knowing
+- Find-out questions are due by **5pm Central on the next business day**.
+  Friday questions are due Monday. This is computed server-side.
+- Do-not-call entries are returned in full on every load. They don't age out
+  with the 500-row log window, so the call sheet always flags a number that
+  asked to be removed.
+- Calls and questions carry a client `request_key`, so a retried save never
+  creates a duplicate.
+- Pricing on the script and cheat sheet matches `/services/websites` as of
+  October 27, 2026. When that page changes, update `public/call-desk/app.js`
+  (the `value`, `obj_price` and `voicemail` steps) and `public/call-desk/index.html`
+  (the cheat sheet).
+
+### Validation
+- `test/call-desk.test.js`: sign-in redirect and `next` hop, client refusal,
+  nav visibility, no inline scripts, CSRF and origin enforcement, input
+  validation, idempotent replays, owner-only answer/confirm/settings,
+  question-to-call linking, do-not-call in state, and Central-time due dates
+  across the November 1 DST change.
+- `test/routes.test.js`: the `calls.ahernai.com` redirect.
+- `npm run build` and `npm test`: 68 of 68 passing.
+
+### Outstanding setup (not done in code)
+1. **Render:** add the custom domain `calls.ahernai.com` to the website service.
+2. **GoDaddy DNS:** add a `CNAME` record for `calls` pointing at the service's
+   `onrender.com` host, then let Render verify it and issue the certificate.
+3. **Scotty's account:** in the Render shell for the website service, run
+   `PORTAL_USER_EMAIL=<his email> PORTAL_USER_NAME=Scotty PORTAL_USER_WORKSPACE=scotty PORTAL_USER_ROLE=employee npm run portal:setup`
+   and send him the one-time link it prints. It expires after 24 hours.
+4. **Desk settings:** sign in as owner, open Cheat sheet → Desk settings, and set
+   availability, consult length and Scotty's callback number.
+
 ## Node.js security update — October 24, 2026
 
 **Repository upgrade merged and website production runtime verified.**

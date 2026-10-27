@@ -1,0 +1,226 @@
+<!doctype html>
+<!--
+  ============================================================
+  Ahern AI — Call Desk (website prospects)
+  Version   : 1.1.0  (1.0.0 was the claude.ai artifact build)
+  Built by  : Claude Opus 5.5 (claude-opus-5-5)
+  Date      : 2026-10-27
+  Served by : lib/call-desk.js behind portal sign-in (owner + employee)
+  Data      : calldesk_* tables in the portal Turso database
+  Pricing   : sourced from ahernai.com/services/websites on 2026-10-27
+  ============================================================
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!-- PORTAL_SESSION --><meta name="robots" content="noindex,nofollow"><title>Ahern AI Call Desk</title><link rel="icon" href="/brand/favicon.png"><link rel="stylesheet" href="/call-desk/style.css?v=1.1.0"><script src="/call-desk/app.js?v=1.1.0" defer></script></head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>Ahern AI Call Desk</h1><span>websites · v1.1.0</span></div>
+    <a class="portal-link" href="/portal">Portal ↗</a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#call" data-tab="call">Call</a>
+      <a href="#questions" data-tab="questions">Find-outs <span class="count" id="qcount" data-zero>0</span></a>
+      <a href="#log" data-tab="log">Call log</a>
+      <a href="#cheat" data-tab="cheat">Cheat sheet</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ================= CALL ================= -->
+  <section class="view" id="view-call">
+    <div class="callgrid">
+      <div class="panel script" id="script">
+        <div class="stagebar">
+          <span class="stage-label" id="stage-label">Prep</span>
+          <h2 id="stage-title">Before you dial</h2>
+        </div>
+        <div id="stage-body" class="stack"></div>
+
+        <div class="fo" id="findout" hidden>
+          <h3>Find out — don't guess</h3>
+          <div class="say"><span class="say-tag">Say</span><p id="fo-line"></p></div>
+          <label class="f" for="fo-text">Their question, word for word
+            <textarea id="fo-text" placeholder="e.g. Can the contact form send texts to my phone?"></textarea>
+          </label>
+          <div class="fgrid">
+            <label class="f" for="fo-reach">How they want the answer
+              <select id="fo-reach"><option value="call">Call back</option><option value="email">Email</option><option value="text">Text</option></select>
+            </label>
+            <label class="f" for="fo-contactinfo">Number or email for the answer
+              <input id="fo-contactinfo" placeholder="Same as call sheet if blank">
+            </label>
+          </div>
+          <div class="do"><b>Do</b><span>Read the question back to them. Then save it, and go back to where you were in the script.</span></div>
+          <div class="row">
+            <button class="btn findout" id="fo-save">Save question for Mike</button>
+            <button class="btn" id="fo-cancel">Cancel</button>
+          </div>
+        </div>
+
+        <div class="utility">
+          <button class="btn" id="btn-back">← Back a step</button>
+          <button class="btn findout" id="btn-findout">They asked something I don't know</button>
+          <button class="btn" id="btn-obj" aria-expanded="false" aria-controls="objmenu">Objection…</button>
+          <button class="btn" id="btn-restart">New call</button>
+        </div>
+        <div class="objmenu" id="objmenu" hidden></div>
+      </div>
+
+      <aside class="panel sheet" aria-label="Call sheet">
+        <h3>Call sheet</h3>
+        <div class="alert bad" id="dnc-alert" hidden></div>
+        <div class="alert warn" id="prior-alert" hidden></div>
+        <div class="fgrid">
+          <label class="f full" for="s-business">Business<input id="s-business" autocomplete="off"></label>
+          <label class="f" for="s-phone">Phone<input id="s-phone" inputmode="tel" autocomplete="off"></label>
+          <label class="f" for="s-website">Their website (if any)<input id="s-website" autocomplete="off" placeholder="none"></label>
+          <label class="f full" for="s-seen">What I saw before calling
+            <select id="s-seen">
+              <option value="none">No website at all</option>
+              <option value="facebook">Facebook is their only web presence</option>
+              <option value="mobile">Site is hard to use on a phone</option>
+              <option value="contact">No easy way to send a request</option>
+              <option value="broken">Things broken or not loading</option>
+              <option value="dated">Site looks dated</option>
+              <option value="other">Something else (type it)</option>
+            </select>
+          </label>
+          <label class="f full" for="s-seenother" id="seenother-wrap" hidden>What you saw (finish the sentence "I noticed…")<input id="s-seenother" placeholder="your hours aren't listed anywhere"></label>
+          <label class="f" for="s-contact">Who I'm talking to<input id="s-contact" autocomplete="off" placeholder="First name"></label>
+          <label class="f" for="s-role">Their role<input id="s-role" autocomplete="off" placeholder="Owner, office mgr…"></label>
+          <label class="f" for="s-dm">Decision maker (if different)<input id="s-dm" autocomplete="off"></label>
+          <label class="f" for="s-email">Email<input id="s-email" inputmode="email" autocomplete="off"></label>
+          <label class="f full" for="s-best">Best time / direct line<input id="s-best" autocomplete="off"></label>
+        </div>
+
+        <div class="side-h">Consult times to offer</div>
+        <div class="avail" id="avail">Mike's availability hasn't been set yet. Ask Mike before offering times.</div>
+        <div class="fgrid">
+          <label class="f" for="s-slot1">Time A<input type="datetime-local" id="s-slot1"></label>
+          <label class="f" for="s-slot2">Time B<input type="datetime-local" id="s-slot2"></label>
+          <label class="f full" for="s-chosen">They picked
+            <select id="s-chosen"><option value="">Not booked</option><option value="1">Time A</option><option value="2">Time B</option></select>
+          </label>
+        </div>
+
+        <div class="side-h">Questions for Mike on this call</div>
+        <ul class="qlist" id="call-qs"></ul>
+
+        <div class="side-h">Outcome</div>
+        <div class="outcomes" id="outcomes" role="radiogroup" aria-label="Call outcome"></div>
+        <label class="f" for="s-notes">Notes<textarea id="s-notes" placeholder="What they said, what they care about, who else is involved"></textarea></label>
+        <div class="alert info" id="save-hint" hidden></div>
+        <button class="btn primary" id="btn-save">Save call to log</button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= QUESTIONS ================= -->
+  <section class="view" id="view-questions" hidden>
+    <div class="section-h">
+      <div>
+        <h2>Find-outs</h2>
+        <p>Every "I'll find out and get back to you" lands here. Mike answers, Scotty relays the answer to the prospect and marks it done. Promise is one business day.</p>
+      </div>
+      <div class="filters" id="qfilters">
+        <button data-f="open" aria-pressed="true">Needs answer</button>
+        <button data-f="answered" aria-pressed="false">Ready to relay</button>
+        <button data-f="relayed" aria-pressed="false">Done</button>
+        <button data-f="all" aria-pressed="false">All</button>
+      </div>
+    </div>
+    <div class="cards" id="qcards"></div>
+  </section>
+
+  <!-- ================= LOG ================= -->
+  <section class="view" id="view-log" hidden>
+    <div class="section-h">
+      <div>
+        <h2>Call log</h2>
+        <p>Every saved call. Booked consults need Mike to send the confirmation email, then mark them confirmed. Do-not-call numbers get flagged on the call sheet automatically.</p>
+      </div>
+      <div class="filters" id="lfilters">
+        <button data-f="all" aria-pressed="true">All</button>
+        <button data-f="booked" aria-pressed="false">Booked</button>
+        <button data-f="callback" aria-pressed="false">Call back</button>
+        <button data-f="sendinfo" aria-pressed="false">Send info</button>
+        <button data-f="dnc" aria-pressed="false">Do not call</button>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <label class="f" for="log-search" style="flex:1;min-width:200px">Search business, contact or phone<input id="log-search" type="search"></label>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>When</th><th>Business</th><th>Contact</th><th>Outcome</th><th>Consult</th><th>Notes</th><th>By</th><th></th></tr></thead>
+        <tbody id="logbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= CHEAT ================= -->
+  <section class="view" id="view-cheat" hidden>
+    <div class="section-h">
+      <div>
+        <h2>Cheat sheet</h2>
+        <p>Prices as published on ahernai.com/services/websites (checked Oct 27, 2026). If the site changes, these change. Anything not on this page is a find-out.</p>
+      </div>
+    </div>
+    <div class="cheatgrid">
+      <div class="panel cheat">
+        <h3 class="side-h">Website packages you can quote</h3>
+        <div class="price"><b>Website Starter</b><span class="amt">$995</span><small>One page. Mobile-friendly layout, contact form, basic search setup, connected to their domain.</small></div>
+        <div class="price"><b>Business Website</b><span class="amt">$1,995</span><small>Up to five pages, help shaping content they supply, inquiry form, mobile layout, search setup, launch on their domain.</small></div>
+        <div class="price"><b>The Front Door</b><span class="amt">from $2,995</span><small>Business Website plus one defined automation, like routing new inquiries and sending an acknowledgment.</small></div>
+        <div class="price"><b>Website care (optional)</b><span class="amt">$99/mo</span><small>Hosting, routine maintenance, up to 20 min of minor edits a month. Month to month. No rollover.</small></div>
+        <div class="price"><b>Extra minor work</b><span class="amt">$150/hr</span><small>Agreed before work starts.</small></div>
+        <div class="price"><b>Custom tools / internal apps</b><span class="amt">$18k–45k</span><small>Don't pitch these. If it comes up, it's a find-out for Mike.</small></div>
+      </div>
+
+      <div class="panel cheat">
+        <h3 class="side-h">Facts you can state</h3>
+        <ul class="rules yes">
+          <li>Mike Ahern builds every site himself. They work with him from first call through launch.</li>
+          <li>Ahern AI is based in Gordon, Texas and serves North Texas.</li>
+          <li>Website packages are one-time build prices with two revision rounds.</li>
+          <li>Care is optional and billed separately. A year of care is not included.</li>
+          <li>Domain registration, paid images and third-party subscriptions cost extra.</li>
+          <li>The consultation is free.</li>
+          <li>ahernai.com was built by Mike from scratch. It's the work sample.</li>
+        </ul>
+        <div class="copyrow">ahernai.com/services/websites <button class="btn sm" data-copy="ahernai.com/services/websites">Copy</button></div>
+        <div class="copyrow">hello@ahernai.com <button class="btn sm" data-copy="hello@ahernai.com">Copy</button></div>
+        <div class="copyrow">(254) 693-4919 <button class="btn sm" data-copy="(254) 693-4919">Copy</button></div>
+      </div>
+
+      <div class="panel cheat">
+        <h3 class="side-h">Never say — find out instead</h3>
+        <ul class="rules no">
+          <li>How long a build takes. No timeline is published.</li>
+          <li>"Yes, it can do that" to any feature, integration or app.</li>
+          <li>Prices for online stores, portals, integrations, migrations or content writing. Those are quoted separately.</li>
+          <li>Google rankings, "first page", or any traffic or lead guarantee.</li>
+          <li>Discounts, bundles or payment plans.</li>
+          <li>Anything about how their current site was built or what's wrong with it under the hood.</li>
+          <li>Anything bad about their current web person.</li>
+        </ul>
+        <p style="margin:0;font-size:.9rem;color:var(--muted)">The line, every time: <em>"Good question. I don't want to guess on that. Mike's the developer, and I'll get you a straight answer by [tomorrow]."</em></p>
+      </div>
+
+      <div class="panel cheat">
+        <h3 class="side-h">Desk settings</h3>
+        <p class="empty-hint" id="settings-note">Mike sets these. Scotty sees them on the call sheet.</p>
+        <label class="f" for="c-avail">Mike's consult availability<textarea id="c-avail" placeholder="Tue–Thu 9–11am and 2–4pm CT. No Mondays."></textarea></label>
+        <div class="fgrid">
+          <label class="f" for="c-length">Consult length (minutes)<input id="c-length" type="number" min="10" max="90" step="5" value="20"></label>
+          <label class="f" for="c-phone">Scotty's callback number<input id="c-phone" inputmode="tel"></label>
+        </div>
+        <button class="btn primary" id="c-save">Save settings</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">Ahern AI Call Desk · v1.1.0 · built with Claude Opus 5.5 · pricing checked 2026-10-27</footer>
+<div class="toast" id="toast" hidden></div>
+</body></html>

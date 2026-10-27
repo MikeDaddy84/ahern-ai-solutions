@@ -50,6 +50,14 @@ app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '20kb' }));
 
+// calls.ahernai.com is a short link for the sales team. Portal sign-in only
+// accepts the ahernai.com origin and its cookie is host-only, so the desk is
+// never served on the subdomain itself: it hops straight to the portal page.
+app.use((req, res, next) => {
+  if (req.hostname === 'calls.ahernai.com') return res.redirect(302, 'https://ahernai.com/portal/call-desk');
+  next();
+});
+
 // Before anything is served: while SITE_GATE_PASSWORD is set, this answers
 // every request with a password page. See lib/gate.js.
 app.use(gate.createGate());

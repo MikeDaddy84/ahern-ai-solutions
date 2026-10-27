@@ -129,3 +129,10 @@ test('private inbox stays inaccessible without separate credentials', async () =
   const invalid = await fetch(origin + '/leads', { headers: { Authorization: 'Basic ' + Buffer.from('mike:incorrect').toString('base64') } }); assert.equal(invalid.status, 401);
   delete process.env.LEADS_DASHBOARD_PASSWORD;
 });
+test('calls.ahernai.com hops to the sales desk on the main origin', async () => {
+  // fetch() refuses to override Host, so use a raw request.
+  const res = await new Promise((resolve, reject) => require('node:http').get(origin + '/anything', { headers: { Host: 'calls.ahernai.com' } }, r => { r.resume(); resolve(r); }).on('error', reject));
+  assert.equal(res.statusCode, 302);
+  assert.equal(res.headers.location, 'https://ahernai.com/portal/call-desk');
+  assert.notEqual((await fetch(origin + '/', { redirect: 'manual' })).status, 302);
+});

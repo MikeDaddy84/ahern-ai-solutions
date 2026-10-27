@@ -46,3 +46,30 @@ CREATE TABLE IF NOT EXISTS portal_crew_messages (
   UNIQUE(workspace_key,sender_id,request_key)
 );
 CREATE INDEX IF NOT EXISTS idx_portal_crew_workspace ON portal_crew_messages(workspace_key,seq);
+-- Call Desk (v1.1.0): sales call log, find-out questions and desk settings.
+-- Additive only. Shared across the owner and employee accounts, not per workspace.
+CREATE TABLE IF NOT EXISTS calldesk_calls (
+  id TEXT PRIMARY KEY, request_key TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL,
+  by_user TEXT NOT NULL REFERENCES portal_users(id),
+  business TEXT NOT NULL DEFAULT '', phone TEXT NOT NULL DEFAULT '', phone_norm TEXT NOT NULL DEFAULT '',
+  website TEXT NOT NULL DEFAULT '', seen TEXT NOT NULL DEFAULT 'none', seen_other TEXT NOT NULL DEFAULT '',
+  contact TEXT NOT NULL DEFAULT '', role TEXT NOT NULL DEFAULT '', dm TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '', best TEXT NOT NULL DEFAULT '',
+  outcome TEXT NOT NULL CHECK(outcome IN ('booked','callback','sendinfo','voicemail','notinterested','nocontact','dnc')),
+  consult_at TEXT NOT NULL DEFAULT '', consult_label TEXT NOT NULL DEFAULT '',
+  confirmed INTEGER NOT NULL DEFAULT 0, confirmed_at INTEGER, notes TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_calldesk_calls_created ON calldesk_calls(created_at);
+CREATE INDEX IF NOT EXISTS idx_calldesk_calls_phone ON calldesk_calls(phone_norm);
+CREATE TABLE IF NOT EXISTS calldesk_questions (
+  id TEXT PRIMARY KEY, request_key TEXT NOT NULL UNIQUE, call_id TEXT REFERENCES calldesk_calls(id),
+  asked_at INTEGER NOT NULL, due_by INTEGER NOT NULL, by_user TEXT NOT NULL REFERENCES portal_users(id),
+  text TEXT NOT NULL, reach TEXT NOT NULL CHECK(reach IN ('call','email','text')), reach_to TEXT NOT NULL DEFAULT '',
+  business TEXT NOT NULL DEFAULT '', contact TEXT NOT NULL DEFAULT '', phone TEXT NOT NULL DEFAULT '', email TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL CHECK(status IN ('open','answered','relayed')), answer TEXT NOT NULL DEFAULT '',
+  answered_at INTEGER, answered_by TEXT, relayed_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_calldesk_questions_asked ON calldesk_questions(asked_at);
+CREATE TABLE IF NOT EXISTS calldesk_config (
+  key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL, updated_by TEXT
+);

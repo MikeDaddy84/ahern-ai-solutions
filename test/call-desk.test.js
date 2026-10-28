@@ -120,3 +120,15 @@ test('find-out due dates land on the next business day at 5pm Central',()=>{
   // Tuesday 11pm Central is already Wednesday UTC; due is still Wednesday 5pm Central.
   assert.equal(new Date(desk.nextBusinessDay(Date.UTC(2026,9,28,4))).toISOString(),'2026-10-28T22:00:00.000Z');
 });
+test('employees see only their tools in the portal nav; Hosaka, Relay, Site visits and Crew Room stay owner-only',async()=>{
+  const labels=async cookie=>[...new JSDOM(await (await request('/portal',{cookie})).text()).window.document.querySelectorAll('nav[aria-label="Workspace"] a')].map(a=>a.textContent.trim());
+  const emp=(await labels(sales)).join('|');
+  assert.match(emp,/Satori/);assert.match(emp,/Call Desk/);
+  for(const hidden of ['Hosaka','Relay','Site visits','Crew Room']) assert.doesNotMatch(emp,new RegExp(hidden));
+  const own=(await labels(owner)).join('|');
+  for(const shown of ['Hosaka','Relay','Site visits','Crew Room','Call Desk']) assert.match(own,new RegExp(shown));
+  assert.doesNotMatch((await labels(client)).join('|'),/Hosaka|Call Desk/);
+  const overview=new JSDOM(await (await request('/portal',{cookie:sales})).text()).window.document;
+  assert.ok(overview.querySelector('main a.settings-shortcut[href="/portal/call-desk"]'),'employee overview links to the desk');
+  for(const route of ['/portal/visits','/portal/crew-room']) assert.equal((await request(route,{cookie:sales})).status,403,route);
+});

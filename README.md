@@ -60,6 +60,19 @@ can be deleted).
 - `test/routes.test.js`: the `calls.ahernai.com` redirect.
 - `npm run build` and `npm test`: 68 of 68 passing.
 
+### Employee portal view — October 27, 2026 (later)
+- The **Hosaka** nav link is now owner-only, like Relay, Site visits and
+  Crew Room. Employees see **Overview, Satori, Call Desk, Settings, Get help**.
+  Their overview shows a Call Desk shortcut where owners see the Relay card.
+  Hiding a link is not access control: Hosaka has its own sign-in, and Site
+  visits and Crew Room already return 403 to non-owners on the server.
+- New `npm run portal:role`. Run it with no variables to list every portal
+  account's email, name, role and activation status (never hashes or
+  sessions). Run it with `PORTAL_USER_EMAIL` and `PORTAL_USER_ROLE` to change
+  one account's role and sign that account out everywhere.
+- Test added: an employee's nav and overview, and owner-only routes returning
+  403 to employees. `npm test` 69 of 69 passing.
+
 ### Outstanding setup (not done in code)
 1. **Render:** add the custom domain `calls.ahernai.com` to the website service.
 2. **GoDaddy DNS:** add a `CNAME` record for `calls` pointing at the service's

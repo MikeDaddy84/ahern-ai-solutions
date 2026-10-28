@@ -15,6 +15,7 @@
     "postinstall": "npm ci --prefix apps/satori --include=dev --ignore-scripts",
     "portal:user": "node scripts/portal-user.js",
     "portal:setup": "node scripts/portal-setup.js",
+    "portal:role": "node scripts/portal-role.js",
     "portal:db": "node scripts/portal-db.js"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 /*
   Ahern AI — Call Desk client
-  Version  : 1.1.0
+  Version  : 1.2.0  (owner-only edit/delete for calls, delete for find-outs)
   Built by : Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27
   Talks to : /api/portal/call-desk/* (portal session cookie + X-CSRF-Token)
 */
@@ -401,6 +401,25 @@ $("#btn-save").addEventListener("click", async () => {
   } finally { btn.disabled = false; btn.textContent = "Save call to log"; }
 });
 
+
+/* ---------- two-step delete (the viewer blocks confirm()) ---------- */
+let armed = null; // { key, until }
+function deleteButton(key, label, confirmLabel, run) {
+  const isArmed = armed && armed.key === key && armed.until > Date.now();
+  const b = el("button", { class: "btn sm danger" + (isArmed ? " armed" : ""), type: "button", text: isArmed ? confirmLabel : label });
+  b.addEventListener("click", async () => {
+    if (!(armed && armed.key === key && armed.until > Date.now())) {
+      armed = { key, until: Date.now() + 5000 };
+      b.classList.add("armed"); b.textContent = confirmLabel;
+      setTimeout(() => { if (armed && armed.key === key && armed.until <= Date.now()) { armed = null; if (b.isConnected) { b.classList.remove("armed"); b.textContent = label; } } }, 5100);
+      return;
+    }
+    armed = null; b.disabled = true; b.textContent = "Deleting…";
+    try { await run(); } catch (e) { b.disabled = false; b.classList.remove("armed"); b.textContent = label; toast(e.message || "Didn't delete. Try again."); }
+  });
+  return b;
+}
+
 /* ---------- questions view ---------- */
 let qFilter = "open";
 $("#qfilters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; qFilter = b.dataset.f; [...$("#qfilters").children].forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderQuestions(); });
@@ -454,6 +473,11 @@ function renderQuestions() {
           catch (e) { ev.target.disabled = false; toast(e.message || "Didn't save. Try again."); }
         } })));
     }
+    if (IS_OWNER) card.append(el("div", { class: "row", style: "justify-content:flex-end" },
+      deleteButton("q:" + q.id, "Delete", "Confirm delete", async () => {
+        await api("/questions/" + encodeURIComponent(q.id), { method: "DELETE", body: {} });
+        toast("Question deleted."); refresh();
+      })));
     box.append(card);
   }
 }
@@ -489,7 +513,14 @@ function renderLog() {
       consult,
       el("td", { style: "max-width:320px;white-space:pre-wrap", text: c.notes || "" }),
       el("td", { text: c.by_name || "—" }),
-      el("td", {}, el("button", { class: "btn sm", type: "button", text: "Call again", onclick: () => loadForRecall(c) }))));
+      el("td", {}, el("div", { class: "actions" },
+        el("button", { class: "btn sm", type: "button", text: "Call again", onclick: () => loadForRecall(c) }),
+        IS_OWNER ? el("button", { class: "btn sm", type: "button", text: "Edit", onclick: () => openEdit(c) }) : null,
+        IS_OWNER ? deleteButton("c:" + c.id, "Delete", c.outcome === "dnc" ? "Confirm: removes do-not-call" : "Confirm delete", async () => {
+          await api("/calls/" + encodeURIComponent(c.id), { method: "DELETE", body: {} });
+          if (editing && editing.id === c.id) closeEdit();
+          toast("Call deleted."); refresh();
+        }) : null))));
   });
 }
 function loadForRecall(c) {
@@ -500,6 +531,43 @@ function loadForRecall(c) {
   fillSheet(); renderCallQs(); renderScript(); checkPrior();
   location.hash = "#call";
 }
+
+
+/* ---------- edit a logged call (owner) ---------- */
+let editing = null;
+const EF = ["business","phone","website","contact","role","dm","email","best","notes"];
+const eOutcome = $("#e-outcome");
+OUTCOMES.forEach(([k, label]) => eOutcome.append(el("option", { value: k, text: label })));
+function openEdit(c) {
+  editing = c;
+  EF.forEach(f => { $("#e-" + f).value = c[f] || ""; });
+  eOutcome.value = c.outcome;
+  $("#e-consult").value = c.consult_at || "";
+  $("#edit-meta").textContent = "Logged " + fmtWhen(c.created_at) + (c.by_name ? " by " + c.by_name : "");
+  $("#edit-hint").hidden = true;
+  $("#edit-panel").hidden = false;
+  $("#edit-panel").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  $("#e-business").focus();
+}
+function closeEdit() { editing = null; $("#edit-panel").hidden = true; }
+$("#edit-cancel").addEventListener("click", closeEdit);
+$("#edit-save").addEventListener("click", async () => {
+  if (!editing) return;
+  const hint = $("#edit-hint");
+  const body = { seen: editing.seen || "none", seen_other: editing.seen_other || "" };
+  EF.forEach(f => { body[f] = $("#e-" + f).value; });
+  body.outcome = eOutcome.value;
+  body.consult_at = body.outcome === "booked" ? $("#e-consult").value : "";
+  body.consult_label = body.consult_at ? fmtSlot(body.consult_at) : "";
+  if (body.outcome === "booked" && (!body.consult_at || !body.email.trim())) { hint.hidden = false; hint.textContent = "Booked calls need a consult time and an email."; return; }
+  const btn = $("#edit-save"); btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    const r = await api("/calls/" + encodeURIComponent(editing.id), { method: "PATCH", body });
+    const lost = editing.confirmed && !r.confirmed;
+    closeEdit(); toast(lost ? "Saved. The consult time changed, so it's back to unconfirmed." : "Changes saved."); refresh();
+  } catch (e) { hint.hidden = false; hint.textContent = e.message || "Didn't save. Try again."; }
+  finally { btn.disabled = false; btn.textContent = "Save changes"; }
+});
 
 /* ---------- settings ---------- */
 let configDirty = false;

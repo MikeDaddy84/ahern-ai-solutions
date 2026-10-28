@@ -1,4 +1,4 @@
-/* Ahern AI Call Desk · v1.1.0 · built with Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27 */
+/* Ahern AI Call Desk · v1.2.0 · built with Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27 */
 /* Layout: switchboard desk — branching script on the left, live call sheet on the right; tabs for questions, log, cheat sheet. */
 :root{
   --paper:#f3f5f7; --surface:#ffffff; --ink:#15202a; --muted:#596673; --line:#d7dde3;
@@ -174,3 +174,8 @@ footer{color:var(--muted);font-family:var(--f-mono);font-size:.74rem;padding-blo
 .portal-link:hover{color:var(--ink)}
 .stack{display:flex;flex-direction:column;gap:14px}
 .empty-hint{background:transparent!important;padding:0!important;color:var(--muted)}
+.edit-panel{padding:18px;display:flex;flex-direction:column;gap:14px;margin-bottom:14px;border:2px solid var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad-soft)}
+.btn.danger:hover{border-color:var(--bad)}
+.btn.danger.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+.actions{display:flex;gap:6px;flex-wrap:wrap}

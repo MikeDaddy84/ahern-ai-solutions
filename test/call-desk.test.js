@@ -132,3 +132,36 @@ test('employees see only their tools in the portal nav; Hosaka, Relay, Site visi
   assert.ok(overview.querySelector('main a.settings-shortcut[href="/portal/call-desk"]'),'employee overview links to the desk');
   for(const route of ['/portal/visits','/portal/crew-room']) assert.equal((await request(route,{cookie:sales})).status,403,route);
 });
+test('v1.2.0: only the owner edits or deletes calls and deletes questions',async()=>{
+  const make=async(key,extra={})=>{const r=await request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:key,business:'Edit Me Roofing',phone:'817-555-0177',outcome:'booked',email:'a@b.test',consult_at:'2026-11-03T10:00',consult_label:'Tue',...extra}});assert.equal(r.status,201);return (await r.json()).id;};
+  const id=await make('call-key-0100');
+  await request(API+`/calls/${id}/confirm`,{cookie:owner,token:ownerCsrf,body:{}});
+  const edit={business:'Edit Me Roofing LLC',phone:'(817) 555-0188',outcome:'booked',email:'a@b.test',consult_at:'2026-11-03T10:00',consult_label:'Tue',notes:'fixed typo'};
+  // Employees can't touch it; bad ids and bad bodies are refused.
+  assert.equal((await request(API+`/calls/${id}`,{cookie:sales,token:salesCsrf,method:'PATCH',body:edit})).status,403);
+  assert.equal((await request(API+`/calls/${id}`,{cookie:sales,token:salesCsrf,method:'DELETE',body:{}})).status,403);
+  assert.equal((await request(API+`/calls/${id}`,{cookie:owner,method:'PATCH',body:edit})).status,403,'needs CSRF');
+  assert.equal((await request(API+'/calls/not-a-uuid',{cookie:owner,token:ownerCsrf,method:'PATCH',body:edit})).status,404);
+  assert.equal((await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{...edit,consult_at:''}})).status,400,'booked still needs a time');
+  // Same booked time keeps the confirmation; phone_norm follows the new phone.
+  let r=await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:edit});assert.equal(r.status,200);assert.equal((await r.json()).confirmed,true);
+  let row=(await (await request(API+'/state',{cookie:owner})).json()).calls.find(c=>c.id===id);
+  assert.equal(row.business,'Edit Me Roofing LLC');assert.equal(row.phone_norm,'8175550188');assert.equal(row.notes,'fixed typo');assert.equal(row.confirmed,true);assert.equal(row.by_name,'Scotty','original author kept');
+  // Moving the time drops the confirmation.
+  r=await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{...edit,consult_at:'2026-11-04T14:00'}});assert.equal((await r.json()).confirmed,false);
+  // Delete unlinks questions rather than deleting them, and clears a do-not-call flag.
+  const dnc=await make('call-key-0101',{business:'Wrong Number Co',phone:'940-555-0999',outcome:'dnc',email:'',consult_at:'',consult_label:''});
+  const q=await (await request(API+'/questions',{cookie:sales,token:salesCsrf,body:{request_key:'q-key-0100',text:'Test question'}})).json();
+  await store.client.execute({sql:'UPDATE calldesk_questions SET call_id=? WHERE id=?',args:[dnc,q.id]});
+  assert.ok((await (await request(API+'/state',{cookie:sales})).json()).dnc.some(d=>d.phone_norm==='9405550999'));
+  assert.equal((await request(API+`/calls/${dnc}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  assert.equal((await request(API+`/calls/${dnc}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,404);
+  let s=await (await request(API+'/state',{cookie:sales})).json();
+  assert.ok(!s.dnc.some(d=>d.phone_norm==='9405550999'));assert.ok(!s.calls.some(c=>c.id===dnc));
+  assert.equal(s.questions.find(x=>x.id===q.id).call_id,null);
+  // Question delete: owner only.
+  assert.equal((await request(API+`/questions/${q.id}`,{cookie:sales,token:salesCsrf,method:'DELETE',body:{}})).status,403);
+  assert.equal((await request(API+`/questions/${q.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  s=await (await request(API+'/state',{cookie:owner})).json();
+  assert.ok(!s.questions.some(x=>x.id===q.id));
+});

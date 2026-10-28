@@ -60,6 +60,25 @@ can be deleted).
 - `test/routes.test.js`: the `calls.ahernai.com` redirect.
 - `npm run build` and `npm test`: 68 of 68 passing.
 
+### Call Desk v1.2.0 — owner edit and delete, October 27, 2026
+- **Call log → Edit** (owner only) opens a panel above the log to correct any
+  field on a logged call. The original author and time are kept. The phone
+  match key is recalculated, so do-not-call and "called before" checks follow
+  the corrected number. A confirmed consult stays confirmed only if it's still
+  booked at the same time; moving the time sends it back to unconfirmed.
+- **Call log → Delete** (owner only) uses two clicks: the button turns red and
+  asks for confirmation for five seconds. Deleting a do-not-call entry says so,
+  because it lifts that number's flag. Questions asked on a deleted call stay in
+  the Find-outs queue, unlinked.
+- **Find-outs → Delete** (owner only) removes a question, which is handy for
+  clearing test entries.
+- Deletes are permanent: there is no trash or undo.
+- New routes: `PATCH`/`DELETE /api/portal/call-desk/calls/:id` and
+  `DELETE /api/portal/call-desk/questions/:id`, behind the same session, CSRF
+  and owner checks as answer, confirm and settings. No schema change.
+- Test added for role gates, validation, confirmation rules, question
+  unlinking and do-not-call removal. `npm test` 70 of 70 passing.
+
 ### Employee portal view — October 27, 2026 (later)
 - The **Hosaka** nav link is now owner-only, like Relay, Site visits and
   Crew Room. Employees see **Overview, Satori, Call Desk, Settings, Get help**.

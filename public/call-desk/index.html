@@ -2,7 +2,7 @@
 <!--
   ============================================================
   Ahern AI — Call Desk (website prospects)
-  Version   : 1.1.0  (1.0.0 was the claude.ai artifact build)
+  Version   : 1.2.0  (1.2.0 owner edit/delete · 1.0.0 was the claude.ai artifact build)
   Built by  : Claude Opus 5.5 (claude-opus-5-5)
   Date      : 2026-10-27
   Served by : lib/call-desk.js behind portal sign-in (owner + employee)
@@ -10,11 +10,11 @@
   Pricing   : sourced from ahernai.com/services/websites on 2026-10-27
   ============================================================
 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!-- PORTAL_SESSION --><meta name="robots" content="noindex,nofollow"><title>Ahern AI Call Desk</title><link rel="icon" href="/brand/favicon.png"><link rel="stylesheet" href="/call-desk/style.css?v=1.1.0"><script src="/call-desk/app.js?v=1.1.0" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!-- PORTAL_SESSION --><meta name="robots" content="noindex,nofollow"><title>Ahern AI Call Desk</title><link rel="icon" href="/brand/favicon.png"><link rel="stylesheet" href="/call-desk/style.css?v=1.2.0"><script src="/call-desk/app.js?v=1.2.0" defer></script></head>
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><h1>Ahern AI Call Desk</h1><span>websites · v1.1.0</span></div>
+    <div class="brand"><h1>Ahern AI Call Desk</h1><span>websites · v1.2.0</span></div>
     <a class="portal-link" href="/portal">Portal ↗</a>
     <nav class="tabs" aria-label="Sections">
       <a href="#call" data-tab="call">Call</a>
@@ -150,6 +150,30 @@
     <div class="row" style="margin-bottom:12px">
       <label class="f" for="log-search" style="flex:1;min-width:200px">Search business, contact or phone<input id="log-search" type="search"></label>
     </div>
+    <section class="panel edit-panel" id="edit-panel" aria-labelledby="edit-title" hidden>
+      <div class="row" style="justify-content:space-between">
+        <h3 class="side-h" id="edit-title">Edit call</h3>
+        <span class="meta" id="edit-meta"></span>
+      </div>
+      <div class="fgrid">
+        <label class="f full" for="e-business">Business<input id="e-business" autocomplete="off"></label>
+        <label class="f" for="e-phone">Phone<input id="e-phone" inputmode="tel" autocomplete="off"></label>
+        <label class="f" for="e-website">Their website<input id="e-website" autocomplete="off"></label>
+        <label class="f" for="e-contact">Contact<input id="e-contact" autocomplete="off"></label>
+        <label class="f" for="e-role">Their role<input id="e-role" autocomplete="off"></label>
+        <label class="f" for="e-dm">Decision maker<input id="e-dm" autocomplete="off"></label>
+        <label class="f" for="e-email">Email<input id="e-email" inputmode="email" autocomplete="off"></label>
+        <label class="f full" for="e-best">Best time / direct line<input id="e-best" autocomplete="off"></label>
+        <label class="f" for="e-outcome">Outcome<select id="e-outcome"></select></label>
+        <label class="f" for="e-consult">Consult time (booked only)<input type="datetime-local" id="e-consult"></label>
+        <label class="f full" for="e-notes">Notes<textarea id="e-notes"></textarea></label>
+      </div>
+      <div class="alert info" id="edit-hint" hidden></div>
+      <div class="row">
+        <button class="btn primary" type="button" id="edit-save">Save changes</button>
+        <button class="btn" type="button" id="edit-cancel">Cancel</button>
+      </div>
+    </section>
     <div class="tablewrap">
       <table>
         <thead><tr><th>When</th><th>Business</th><th>Contact</th><th>Outcome</th><th>Consult</th><th>Notes</th><th>By</th><th></th></tr></thead>
@@ -221,6 +245,6 @@
   </section>
 </main>
 
-<footer class="wrap">Ahern AI Call Desk · v1.1.0 · built with Claude Opus 5.5 · pricing checked 2026-10-27</footer>
+<footer class="wrap">Ahern AI Call Desk · v1.2.0 · built with Claude Opus 5.5 · pricing checked 2026-10-27</footer>
 <div class="toast" id="toast" hidden></div>
 </body></html>

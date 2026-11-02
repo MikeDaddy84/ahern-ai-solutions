@@ -25,6 +25,8 @@ jobs:
             apps/satori/package-lock.json
       - run: node --version
       - run: npm ci --no-audit --no-fund
+      - run: npm audit --audit-level=moderate
+      - run: npm --prefix apps/satori audit --audit-level=moderate
       - run: npm run build
       - run: npm test
       - run: npm --prefix apps/satori run build

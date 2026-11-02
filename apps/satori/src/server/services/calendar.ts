@@ -1,7 +1,6 @@
 import ical from 'node-ical';
 import { formatInTimeZone } from 'date-fns-tz';
 import { CHICAGO_TZ } from '../utils/date.js';
-import { DateTime } from 'luxon';
 
 export function shortenTitle(title: string): string {
   let cleaned = title.replace(/https?:\/\/\S+/gi, '').trim();
@@ -187,13 +186,13 @@ export async function getEventsInWindow(
           const rawDates = event.rrule.between(rruleStart, rruleEnd);
 
           for (const rawD of rawDates) {
-            // rawD's UTC fields contain the wall-clock time in the server's timezone
-            // Convert back to true UTC via luxon, except for all-day events which are timezone-agnostic
+            // node-ical 0.27 returns true UTC recurrence instants.
+            // Date-only events remain anchored to their calendar day.
             let correctedDate;
             if (event.datetype === 'date') {
                 correctedDate = new Date(Date.UTC(rawD.getUTCFullYear(), rawD.getUTCMonth(), rawD.getUTCDate(), 12, 0, 0));
             } else {
-                correctedDate = DateTime.fromJSDate(rawD).toUTC().setZone('local', { keepLocalTime: true }).toJSDate();
+                correctedDate = rawD;
             }
             
             const dateStr = correctedDate.toISOString().substring(0, 10);

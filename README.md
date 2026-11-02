@@ -102,37 +102,79 @@ can be deleted).
 4. **Desk settings:** sign in as owner, open Cheat sheet → Desk settings, and set
    availability, consult length and Scotty's callback number.
 
-## Security follow-up priorities — November 2, 2026
+## Security maintenance — November 2, 2026
 
-This is a status review, not a new production security scan. The standalone
-[Satori Dockerfile](https://github.com/MikeDaddy84/satori/blob/main/Dockerfile)
-was rechecked on November 2 and still uses `node:20-alpine` in both stages.
-Its live Render runtime was not reinspected during this review.
+Production runtime verification covered the Render Node services and the
+DigitalOcean RustDesk Droplet. Patched runtime evidence comes from successful
+deployments and provider logs, with public health checks also passing.
 
-1. **Satori runtime:** if retained, upgrade the separate service to a supported
-   release containing the October security fixes, rebuild/redeploy, and verify
-   the live runtime. Retire it if it is no longer used. Updating this website's
-   `apps/satori` directory does not deploy that separate repository.
-2. **Application dependencies:** rerun the Satori dependency audit, assess which
-   findings are reachable in production, and test the required fixes. The
-   October audit recorded 17 findings including three critical; these are
-   historical counts, not a fresh November scan.
-3. **Droplet verification:** resolve the intermittent Bitwarden signing refusal
-   and finish the post-reboot kernel, service, process and package checks below,
-   followed by an actual RustDesk session.
-4. **Recovery:** copy the verified private archive off the Droplet to protected
-   storage, check its checksum, and test recovery. The local verified archive
-   and previously observed provider backups do not constitute a tested fresh
-   off-host restore.
-5. **Inventory coverage:** identify any other PHP installations across hosting
-   and containers, then patch and verify any affected runtimes found. The
-   targeted website/Droplet checks found no PHP runtime requiring remediation;
-   they were not a complete infrastructure inventory.
+| Render service | Verified Node runtime |
+| --- | --- |
+| Main website | 24.22.1 |
+| Standalone Satori | 24.22.2 |
+| Dende | 24.22.2 |
+| Family chore app | 22.23.4 |
+| Token Climb | 24.22.2 |
 
-Already completed: the main website's Node runtime upgrade and production
-verification, plus the October 26 Droplet backup verification, 27 package
-upgrades and reboot. Public recovery checks passed afterward. No additional
-deployment, package upgrade or infrastructure change was made in this review.
+The standalone Satori patch is merged in
+[Satori PR #1](https://github.com/MikeDaddy84/satori/pull/1).
+Its live security-only revision is `b4cb61c`, based on the previously live
+commit so unrelated calendar schema changes were not deployed. Its dependency
+audit fell from 26 findings to zero. The main-branch suite passed 94 tests;
+the production-baseline suite passed 91, plus all eight Chicago timezone checks.
+Linux CI and Docker verification passed. Calendar recurrence handling was
+adapted to the patched parser; production session secrets and trusted proxy
+addresses are validated.
+
+[Dende PR #4](https://github.com/MikeDaddy84/personal-ai-assistant-dende/pull/4)
+is merged and deployed at `f60d499`. Its audit fell from 38 findings to zero.
+Validation passed 124 tests, including a real loopback WebSocket exchange,
+typechecking, lint (no errors), production build, and isolated migration and
+repeat-migration checks. No SQL migration was added by this patch.
+
+[Token Climb PR #2](https://github.com/MikeDaddy84/token-climb/pull/2)
+removes 34 dependency findings, including unused Jimp development tooling.
+Its isolated SQLite startup test checks the homepage/CSP and unauthenticated
+API rejection; CI and audit passed.
+
+The website and its bundled Satori copy also now have zero audit findings in
+the prepared dependency update. Website runtime dependencies include patched
+Express, body-parser, proxy-addr, qs, and Nodemailer. The bundled Satori fix
+preserves its existing features and portable scripts. Both dependency graphs
+are checked by CI. The build, 94 bundled Satori tests, and eight timezone checks
+pass locally. The website's 70 assertions pass on Windows, but two existing
+temporary-database cleanup hooks fail with Windows file-lock errors; Linux CI
+is required before merging this update. This paragraph describes prepared
+source changes until deployment verification is recorded below.
+
+**Droplet verification completed:** authenticated SSH works through the existing
+Bitwarden agent; no client private key was exported. The running kernel is
+`6.8.0-147-generic`; Docker, nginx, Tailscale, and AppArmor are active; both
+RustDesk processes run; no reboot is pending; the package audit and failed-unit
+list are clean. Automatic Ubuntu security updates and both apt timers are
+enabled. Public SSH was unreachable on both public addresses while Tailscale
+SSH worked. A newer Tailscale package was available; it was not installed in
+this verification pass.
+
+**Recovery:** weekly DigitalOcean backups remain enabled, with an October 28
+recovery point visible. The verified October 26 private archive is still the
+source for the separate off-server recovery copy. A private destination and a
+checksum/SQLite recovery verifier have been prepared outside all repositories.
+The verifier accepts a valid SQLite fixture and rejects a bad checksum.
+The actual off-server transfer and recovery check remain pending until their
+successful results are recorded. A booted replacement-server restore and an
+interactive RustDesk session have not been performed.
+
+**Inventory scope:** the visible DigitalOcean account has the known Droplet,
+no App Platform apps, and no Kubernetes clusters. Render inventory includes
+the five Node services above and two Python services. No PHP workload was
+identified by these provider checks or the prior host/container inventory.
+This is not an assertion about every custom filesystem path or unconnected
+host. Dende's separately documented host-native installation requires its own
+runtime and deployment verification; updating Render does not update that host.
+
+Unrelated local website edits were preserved. Credentials, recovery archives,
+database fixtures, and private maintenance scripts remain outside this repository.
 
 ## Node.js security update — October 24, 2026
 

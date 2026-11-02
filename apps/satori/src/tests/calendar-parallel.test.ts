@@ -2,21 +2,21 @@ import ical from 'node-ical';
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { getEventsInWindow, fetchAllCalendarEventsForDay } from '../server/services/calendar.js';
 
+vi.mock('node-ical', async (importOriginal) => {
+  const actual = await importOriginal<{ default: typeof import('node-ical') }>();
+  return {
+    default: {
+      ...actual.default,
+      async: { ...actual.default.async, fromURL: vi.fn() }
+    }
+  };
+});
+
 describe('Parallel Feed Fetching (R166)', () => {
   let fromUrlMock: any;
 
   beforeAll(async () => {
-    // Mock the actual fromURL function
-    vi.mock('node-ical', async (importOriginal) => {
-      const actual = await importOriginal<{ default: typeof import('node-ical') }>();
-      return {
-        default: {
-          ...actual.default,
-          async: { ...actual.default.async, fromURL: vi.fn() }
-        }
-      };
-    });
-    // @ts-ignore
+
     const icalMock = await import('node-ical');
     fromUrlMock = vi.mocked(icalMock.default.async.fromURL);
   });
@@ -121,4 +121,3 @@ describe('Parallel Feed Fetching (R166)', () => {
     expect(res2.events[0].title).toBe('PERSONAL Event');
   });
 });
-

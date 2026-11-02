@@ -1,18 +1,20 @@
 import ical from 'node-ical';
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, afterAll } from 'vitest';
 import { getEventsInWindow } from '../server/services/calendar.js';
+
+vi.mock('node-ical', async (importOriginal) => {
+  const actual = await importOriginal<{ default: typeof import('node-ical') }>();
+  return {
+    default: {
+      ...actual.default,
+      async: { ...actual.default.async, fromURL: vi.fn() }
+    }
+  };
+});
 
 describe('RRULE occurrences across DST and Timezones (R135)', () => {
   
-  vi.mock('node-ical', async (importOriginal) => {
-    const actual = await importOriginal<{ default: typeof import('node-ical') }>();
-    return {
-      default: {
-        ...actual.default,
-        async: { ...actual.default.async, fromURL: vi.fn() }
-      }
-    };
-  });
+
   
   afterAll(() => {
     vi.restoreAllMocks();
@@ -33,7 +35,7 @@ describe('RRULE occurrences across DST and Timezones (R135)', () => {
     // Spring forward in 2024 is Mar 10.
     // Mar 4 is CST (UTC-6), Mar 11 is CDT (UTC-5).
     // If it is 10am CST, that's 16:00 UTC. If it is 10am CDT, that's 15:00 UTC.
-    // Satori currently sets UTC hours by overwriting with local hours. 
+    // Results must be independent of the server timezone.
     await setupFeed(`BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VTIMEZONE
@@ -204,4 +206,3 @@ END:VCALENDAR`);
     errorSpy.mockRestore();
   });
 });
-

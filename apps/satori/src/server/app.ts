@@ -1,4 +1,5 @@
 import fastify, { FastifyInstance } from 'fastify';
+import { getSessionSecret, getTrustedProxyRanges } from './security.js';
 import fastifyCookie from '@fastify/cookie';
 import fastifySession from '@fastify/session';
 import fastifyStatic from '@fastify/static';
@@ -47,14 +48,13 @@ export function buildApp(db: AppDatabase): FastifyInstance {
         }
       }
     },
-    // Validate the proxy address; hop-count-only trust permits spoofed headers.
-    trustProxy: ['loopback', 'linklocal', 'uniquelocal']
+    trustProxy: getTrustedProxyRanges()
   });
 
   // Register cookie and session
   app.register(fastifyCookie);
   app.register(fastifySession, {
-    secret: process.env.SESSION_SECRET || 'a_very_long_secret_key_that_is_at_least_32_chars_long!',
+    secret: getSessionSecret(),
     saveUninitialized: false,
     cookie: getSessionConfig(),
   });

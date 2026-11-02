@@ -20,16 +20,16 @@
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
-    "express": "^4.21.2",
+    "express": "^4.22.3",
     "gray-matter": "^4.0.3",
     "marked": "^13.0.3",
-    "nodemailer": "10.0.2",
+    "nodemailer": "10.3.1",
     "three": "0.180.0"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
   },
   "overrides": {
-    "qs": "6.16.0"
+    "qs": "6.17.1"
   }
 }

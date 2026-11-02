@@ -104,73 +104,85 @@ can be deleted).
 
 ## Security maintenance — November 2, 2026
 
-Production runtime verification covered the Render Node services and the
-DigitalOcean RustDesk Droplet. Patched runtime evidence comes from successful
-deployments and provider logs, with public health checks also passing.
+The five Render Node services are deployed on patched runtimes. Successful
+deployments, runtime logs, and public health/startup checks were verified.
+All six checked dependency graphs (five services plus bundled Satori) report
+zero npm audit findings at the tested lockfiles; this is not a guarantee against
+undisclosed vulnerabilities.
 
-| Render service | Verified Node runtime |
-| --- | --- |
-| Main website | 24.22.1 |
-| Standalone Satori | 24.22.2 |
-| Dende | 24.22.2 |
-| Family chore app | 22.23.4 |
-| Token Climb | 24.22.2 |
+| Render service | Verified Node runtime | Live security revision |
+| --- | --- | --- |
+| Main website | 24.22.1 | `09a29ad` |
+| Standalone Satori | 24.22.2 | `b4cb61c` |
+| Dende | 24.22.2 | `f60d499` |
+| Family chore app | 22.23.4 | `258e541` |
+| Token Climb | 24.22.2 | `62ff8dc` |
 
-The standalone Satori patch is merged in
-[Satori PR #1](https://github.com/MikeDaddy84/satori/pull/1).
-Its live security-only revision is `b4cb61c`, based on the previously live
-commit so unrelated calendar schema changes were not deployed. Its dependency
-audit fell from 26 findings to zero. The main-branch suite passed 94 tests;
-the production-baseline suite passed 91, plus all eight Chicago timezone checks.
+[Satori PR #1](https://github.com/MikeDaddy84/satori/pull/1) is merged.
+Production uses a security-only revision based on its previously live commit;
+unrelated calendar schema changes were not deployed. Its dependency audit fell
+from 26 findings to zero. The main-branch suite passed 94 tests and the
+production-baseline suite passed 91, plus eight Chicago timezone checks.
 Linux CI and Docker verification passed. Calendar recurrence handling was
 adapted to the patched parser; production session secrets and trusted proxy
 addresses are validated.
 
 [Dende PR #4](https://github.com/MikeDaddy84/personal-ai-assistant-dende/pull/4)
-is merged and deployed at `f60d499`. Its audit fell from 38 findings to zero.
-Validation passed 124 tests, including a real loopback WebSocket exchange,
-typechecking, lint (no errors), production build, and isolated migration and
-repeat-migration checks. No SQL migration was added by this patch.
+is merged and deployed. Its audit fell from 38 findings to zero. Validation
+passed 124 tests, including a real loopback WebSocket exchange, typechecking,
+lint (no errors), production build, and isolated migration/repeat-migration
+checks. No SQL migration was added by this patch.
 
 [Token Climb PR #2](https://github.com/MikeDaddy84/token-climb/pull/2)
-removes 34 dependency findings, including unused Jimp development tooling.
-Its isolated SQLite startup test checks the homepage/CSP and unauthenticated
-API rejection; CI and audit passed.
+is merged and deployed. It removes 34 dependency findings, including unused
+Jimp development tooling. The isolated SQLite startup test checks the
+homepage/CSP and unauthenticated API rejection. CI and audit passed; the live
+homepage returned 200 and the unauthenticated state API returned 401.
 
-The website and its bundled Satori copy also now have zero audit findings in
-the prepared dependency update. Website runtime dependencies include patched
-Express, body-parser, proxy-addr, qs, and Nodemailer. The bundled Satori fix
-preserves its existing features and portable scripts. Both dependency graphs
-are checked by CI. The build, 94 bundled Satori tests, and eight timezone checks
-pass locally. The website's 70 assertions pass on Windows, but two existing
-temporary-database cleanup hooks fail with Windows file-lock errors; Linux CI
-is required before merging this update. This paragraph describes prepared
-source changes until deployment verification is recorded below.
+[Website PR #6](https://github.com/MikeDaddy84/ahern-ai-solutions/pull/6)
+is merged and deployed. The website and bundled Satori now both have zero audit
+findings. Runtime updates include Express, body-parser, proxy-addr, qs, and
+Nodemailer. The bundled Satori update preserves its existing features and
+portable scripts. Both graphs are audited by CI. The production builds,
+94 bundled Satori tests, eight timezone checks, and Linux CI/Docker verification
+passed. Website assertions passed locally, but two existing Windows temporary
+SQLite cleanup hooks reported file locks; the unchanged suite passed on Linux.
+The deployed website health endpoint returned 200 with its database connected.
 
-**Droplet verification completed:** authenticated SSH works through the existing
-Bitwarden agent; no client private key was exported. The running kernel is
-`6.8.0-147-generic`; Docker, nginx, Tailscale, and AppArmor are active; both
-RustDesk processes run; no reboot is pending; the package audit and failed-unit
-list are clean. Automatic Ubuntu security updates and both apt timers are
-enabled. Public SSH was unreachable on both public addresses while Tailscale
-SSH worked. A newer Tailscale package was available; it was not installed in
-this verification pass.
+[Family chore app PR #16](https://github.com/MikeDaddy84/ahernfam_chores/pull/16)
+is merged and deployed. It pins the patched runtime and removes the remaining
+14 moderate audit findings through compatible tooling updates. Linux CI passed
+the test/build/typecheck/lint/audit checks, and the deployed health endpoint
+returned 200. Existing Windows SQLite cleanup failures were not treated as
+passing tests or used to weaken the Linux checks.
 
-**Recovery:** weekly DigitalOcean backups remain enabled, with an October 28
-recovery point visible. The verified October 26 private archive is still the
-source for the separate off-server recovery copy. A private destination and a
-checksum/SQLite recovery verifier have been prepared outside all repositories.
-The verifier accepts a valid SQLite fixture and rejects a bad checksum.
-The actual off-server transfer and recovery check remain pending until their
-successful results are recorded. A booted replacement-server restore and an
-interactive RustDesk session have not been performed.
+**Droplet verification completed:** the running kernel is `6.8.0-147-generic`;
+Docker, nginx, Tailscale, and AppArmor are active; both RustDesk processes run;
+no reboot is pending; the package audit and failed-unit list are clean.
+Automatic Ubuntu security updates and both apt timers are enabled. Public SSH
+was unreachable on both public addresses while Tailscale SSH worked.
+RustDesk HTTPS returned 200. Tailscale 1.104.4 remains available over installed
+1.104.2; installing this additional package update requires sudo authorization
+and was not completed in this pass. No Ubuntu release upgrade was attempted.
+
+**Recovery verified:** weekly DigitalOcean backups remain enabled, with an
+October 28 recovery point visible. The verified October 26 private archive was
+copied off the Droplet into restricted private storage outside all repositories
+on November 2. Its SHA-256 matches the server export. Isolated recovery restored
+and byte-verified 73 regular files, and the restored SQLite database passed its
+integrity check. Six links remain in the archive but were not materialized on
+Windows. A valid fixture and deliberately bad checksum also tested the verifier.
+The transfer used the existing authenticated encrypted SSH connection after
+new Bitwarden signing requests were refused; no Bitwarden client private key
+was exported. This verifies archive/file/database recovery, not a booted
+replacement-server restore. An interactive RustDesk session was not performed.
 
 **Inventory scope:** the visible DigitalOcean account has the known Droplet,
 no App Platform apps, and no Kubernetes clusters. Render inventory includes
 the five Node services above and two Python services. No PHP workload was
 identified by these provider checks or the prior host/container inventory.
-This is not an assertion about every custom filesystem path or unconnected
-host. Dende's separately documented host-native installation requires its own
+This does not cover every custom filesystem path or unconnected host.
+Dende's separately documented host-native installation requires its own
 runtime and deployment verification; updating Render does not update that host.
 
 Unrelated local website edits were preserved. Credentials, recovery archives,
@@ -209,11 +221,10 @@ by a successful database connection. A fresh public `/health` request returned
 HTTP 200 with the database configured and connected. This verifies the patched
 runtime is running on the website, beyond repository and CI evidence.
 
-The standalone Satori Render service is separate: its dashboard points to
-`MikeDaddy84/satori` at `b579dbc`, deployed two months earlier. That deployed
-source uses `node:20-alpine` in both Docker stages. Changes to this website's
-`apps/satori` directory do not update that service. Its runtime remediation
-remains outstanding pending confirmation of whether it is still needed.
+At the October 24 review, the separate standalone Satori service still used
+Node 20. That outstanding work was completed on November 2: its separate
+repository and live security-only deployment now use Node 24.22.2, as recorded
+above. Changes to this website's bundled copy do not deploy the separate service.
 
 **Separate provider-notified server:** the targeted inventory found no affected
 Node.js/PHP runtime in host package/process/common-path checks, and `node`,
@@ -254,12 +265,12 @@ The final SSH check was attempted in the chat's terminal, but Bitwarden refused
 the signing request and SSH exited with `Permission denied (publickey)` before
 any server verification commands ran.
 
-**Remaining verification:** the running kernel, local service state, both RustDesk
-processes, package audit and remaining upgrade/reboot state still need confirmation
-after reboot. An actual remote-access session and a replacement-server restore
-test have not been performed. The fresh verified archive remains on the Droplet;
-no fresh off-host archive copy or new provider snapshot was confirmed. Keep the
-private backup and maintenance logs outside this repository.
+**Post-reboot verification completed November 2:** the running kernel, required
+services, both RustDesk processes, package audit, and reboot state were checked
+successfully. The October 26 archive also has a verified off-server copy and
+isolated file/database recovery test, as recorded above. An interactive
+RustDesk session and booted replacement-server restore remain unperformed.
+Private backups and maintenance logs remain outside this repository.
 
 The final read-only check can be run after SSH login in the chat's terminal
 panel, whose output can be inspected directly:
@@ -274,13 +285,14 @@ dpkg --audit
 apt list --upgradable
 ```
 
-Mark the post-reboot checks complete only after reviewing successful command output.
+The post-reboot checks above were completed successfully on November 2.
+One newer Tailscale package remains available, as noted in the current status.
 
-**Separate dependency follow-up:** Satori's unchanged dependency graph reports
-17 npm audit findings (8 moderate, 6 high, 3 critical), including development
-tooling and runtime dependencies. These were not remediated by the Node upgrade;
-some fixes require major package changes and `xlsx` has no npm-reported fix.
-Review reachability and updates separately with compatibility tests.
+**Dependency follow-up completed November 2:** the October audit's 17 findings
+were historical. Fresh audits, compatible dependency changes, and tests were
+completed for both Satori copies and the other Render Node applications. All
+six checked dependency graphs now report zero findings at the tested lockfiles;
+see the current maintenance record above.
 
 Work was isolated in a managed checkout on `codex/node-security-update`.
 The active project checkout's unfinished backup-script changes and untracked

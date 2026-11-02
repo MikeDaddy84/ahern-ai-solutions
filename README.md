@@ -102,6 +102,38 @@ can be deleted).
 4. **Desk settings:** sign in as owner, open Cheat sheet → Desk settings, and set
    availability, consult length and Scotty's callback number.
 
+## Security follow-up priorities — November 2, 2026
+
+This is a status review, not a new production security scan. The standalone
+[Satori Dockerfile](https://github.com/MikeDaddy84/satori/blob/main/Dockerfile)
+was rechecked on November 2 and still uses `node:20-alpine` in both stages.
+Its live Render runtime was not reinspected during this review.
+
+1. **Satori runtime:** if retained, upgrade the separate service to a supported
+   release containing the October security fixes, rebuild/redeploy, and verify
+   the live runtime. Retire it if it is no longer used. Updating this website's
+   `apps/satori` directory does not deploy that separate repository.
+2. **Application dependencies:** rerun the Satori dependency audit, assess which
+   findings are reachable in production, and test the required fixes. The
+   October audit recorded 17 findings including three critical; these are
+   historical counts, not a fresh November scan.
+3. **Droplet verification:** resolve the intermittent Bitwarden signing refusal
+   and finish the post-reboot kernel, service, process and package checks below,
+   followed by an actual RustDesk session.
+4. **Recovery:** copy the verified private archive off the Droplet to protected
+   storage, check its checksum, and test recovery. The local verified archive
+   and previously observed provider backups do not constitute a tested fresh
+   off-host restore.
+5. **Inventory coverage:** identify any other PHP installations across hosting
+   and containers, then patch and verify any affected runtimes found. The
+   targeted website/Droplet checks found no PHP runtime requiring remediation;
+   they were not a complete infrastructure inventory.
+
+Already completed: the main website's Node runtime upgrade and production
+verification, plus the October 26 Droplet backup verification, 27 package
+upgrades and reboot. Public recovery checks passed afterward. No additional
+deployment, package upgrade or infrastructure change was made in this review.
+
 ## Node.js security update — October 24, 2026
 
 **Repository upgrade merged and website production runtime verified.**

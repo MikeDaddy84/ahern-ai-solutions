@@ -711,14 +711,14 @@ The active working copy is now `D:\AhernAI\Website`; do not write to the old
 OneDrive checkout. Existing local research and source files were copied to D:
 without deleting the original copy.
 
-**Latest attempt blocked:** November 7, 2026 at 8:56 p.m. Central
-(2026-11-08 02:56 UTC). The current Windows account cannot read the private
+**Latest attempt blocked:** November 8, 2026 at 8:58 p.m. Central
+(2026-11-09 02:58 UTC). The current Windows account cannot read the private
 backup configuration or last-success record. The backup exited before creating
 a snapshot; no restore, integrity, or retention checks ran. Private-folder
 permissions were not changed. Run under the original authorized Windows owner,
 or have an administrator explicitly migrate access to the intended account.
 The last success verified in this task was September 19 at 9:02 p.m. Central,
-about 1177 hours earlier, exceeding the 36-hour limit. Newer backup status cannot
+about 1201 hours earlier, exceeding the 36-hour limit. Newer backup status cannot
 be confirmed until private-folder access is restored. GitHub documentation
 publication does not constitute a successful backup. Protection remains local
 only; NAS, off-site, offline, database, and secret recovery remain pending.

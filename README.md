@@ -37,13 +37,25 @@ parent checks the exact sender origin, current frame window, and payload before
 rendering strings as text. No CORS, database migration, or new credential is
 needed. If a session has expired, open that tool, sign in, and refresh its widget.
 
-Validation: production build and **79 website tests pass on Node 24.22.1**,
+Validation: production build and **80 website tests pass on Node 24.22.1**,
 including authenticated role/workspace isolation, counts beyond 500 records,
 source failures, text escaping, bridge-origin/window rejection, incomplete
-payload rejection, and overlapping-refresh ordering. The Relay bridge also
+payload rejection, overlapping-refresh ordering, and readable recovery from
+non-JSON/network failures. The Relay bridge also
 passes all 73 tests/build against the deployed 0.5 source; Crew Room has 26 Python
-checks plus JavaScript bridge tests. External service rollout and live browser
-verification are tracked separately until completed.
+checks plus JavaScript bridge tests. The website is deployed on Render; both
+external summary services are deployed with their authentication intact. Live
+browser verification confirms the visits graph, current Satori agenda, Call Desk
+summary, and responsive layout. Verification of the two external widgets is
+waiting on fresh owner sign-ins to Hosaka and Crew Room.
+
+Relay's proxy permits portal framing only for the exact summary-document path;
+other routes retain their previous frame protections. The Relay source update is
+also preserved in private draft PR #2; that repository's older main branch must
+be reconciled with its deployed campaign version before merging. Its hosted CI
+could not start because GitHub reported an account billing/spending-limit issue;
+local validation passed. No messages, mailbox syncs, task changes, or call-log
+updates are triggered by loading this dashboard.
 
 
 ## Sales Call Desk — October 27, 2026

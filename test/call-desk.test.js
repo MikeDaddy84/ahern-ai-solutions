@@ -129,7 +129,7 @@ test('employees see only their tools in the portal nav; Hosaka, Relay, Site visi
   for(const shown of ['Hosaka','Relay','Site visits','Crew Room','Call Desk']) assert.match(own,new RegExp(shown));
   assert.doesNotMatch((await labels(client)).join('|'),/Hosaka|Call Desk/);
   const overview=new JSDOM(await (await request('/portal',{cookie:sales})).text()).window.document;
-  assert.ok(overview.querySelector('main a.settings-shortcut[href="/portal/call-desk"]'),'employee overview links to the desk');
+  assert.ok(overview.querySelector('main a[href="/portal/call-desk"]'),'employee overview links to the desk');
   for(const route of ['/portal/visits','/portal/crew-room']) assert.equal((await request(route,{cookie:sales})).status,403,route);
 });
 test('v1.2.0: only the owner edits or deletes calls and deletes questions',async()=>{

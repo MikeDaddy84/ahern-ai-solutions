@@ -146,12 +146,12 @@
       const response = await fetch(`/api/portal/overview/${id}`, { signal: controller.signal, credentials: 'same-origin', cache: 'no-store' });
       if (requests.get(id) !== controller) return;
       if (response.status === 401) { unavailable(id, 'Your portal session ended. Sign in again to load this tool.', 'Sign in'); return; }
-      const data = await response.json();
+      const data = await response.json().catch(() => { throw new Error('This summary could not be loaded. Please try again.'); });
       if (requests.get(id) !== controller) return;
       if (!response.ok || data.status !== 'ready') throw new Error(data.message || 'This summary could not be loaded. Please try again.');
       ready(id, data);
     } catch (error) {
-      if (requests.get(id) === controller) unavailable(id, error.name === 'AbortError' ? 'This tool is taking too long to respond. Please retry.' : error.message);
+      if (requests.get(id) === controller) unavailable(id, error.name === 'AbortError' ? 'This tool is taking too long to respond. Please retry.' : error.name === 'TypeError' ? 'This tool could not be reached. Please try again.' : error.message);
     } finally { clearTimeout(timer); }
   }
   function loadExternal(id) {

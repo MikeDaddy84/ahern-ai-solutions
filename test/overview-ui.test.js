@@ -155,6 +155,29 @@ test('expired sessions and unavailable sources display recovery states without i
   } finally { dom.window.close(); }
 });
 
+test('non-JSON and network failures show a readable recovery message and can be retried', async () => {
+  for (const failure of [new SyntaxError('Unexpected token < in <!DOCTYPE html>'), new TypeError('Failed to fetch')]) {
+    let attempt = 0;
+    const dom = open({ role: 'member', fetch: async () => {
+      if (++attempt > 1) return response(priority('Recovered priority'));
+      if (failure.name === 'TypeError') throw failure;
+      return { status: 200, ok: true, json: async () => { throw failure; } };
+    } });
+    try {
+      await flush();
+      const satori = card(dom, 'satori');
+      assert.equal(satori.dataset.state, 'unavailable');
+      assert.match(satori.textContent, /Please try again/);
+      assert.doesNotMatch(satori.textContent, /Unexpected token|DOCTYPE|Failed to fetch/);
+      assert.equal(satori.querySelector('.overview-metric'), null);
+      satori.querySelector('.overview-retry').click();
+      await flush();
+      assert.equal(satori.dataset.state, 'ready');
+      assert.match(satori.textContent, /Recovered priority/);
+    } finally { dom.window.close(); }
+  }
+});
+
 test('refresh prevents delayed JSON from an older local request replacing the latest summary', async () => {
   let releaseOld;
   const oldBody = new Promise(resolve => { releaseOld = resolve; });

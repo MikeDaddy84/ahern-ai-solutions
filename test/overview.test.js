@@ -94,14 +94,15 @@ test('overview APIs enforce real portal sessions and tool roles, isolate workspa
     };
     const app = express(); app.use(express.json());
     const router = portal.createRouter(deps);
-    // The module can be exercised before or after portal.js installs it: the
-    // portal session middleware always precedes this fallback registration.
-    overview.install(router, deps);
     app.use(router);
     server = app.listen(0, '127.0.0.1'); await new Promise(resolve => server.once('listening', resolve));
     const origin = 'http://127.0.0.1:' + server.address().port;
     const get = (widget, cookie) => fetch(origin + '/api/portal/overview/' + widget, { headers: cookie ? { Cookie: cookie } : {} });
-    for (const widget of ['satori', 'visits', 'call-desk']) assert.equal((await get(widget)).status, 401);
+    for (const widget of ['satori', 'visits', 'call-desk']) {
+      const anonymous = await get(widget);
+      assert.equal(anonymous.status, 401);
+      assert.match(anonymous.headers.get('content-type'), /^application\/json\b/);
+    }
     const cookies = {};
     for (const role of ['member', 'client', 'employee', 'owner']) {
       cookies[role] = auth.COOKIE + '=' + await store.login(role + '@example.test', password);
@@ -110,7 +111,13 @@ test('overview APIs enforce real portal sessions and tool roles, isolate workspa
       assert.equal(priorities.headers.get('cache-control'), 'no-store');
       assert.deepEqual((await priorities.json()).tasks, [{ id: role, text: role + ' private priority', status: 'today' }]);
       assert.equal((await get('visits', cookies[role])).status, role === 'owner' ? 200 : 403);
-      assert.equal((await get('call-desk', cookies[role])).status, ['owner', 'employee'].includes(role) ? 200 : 403);
+      const deskResponse = await get('call-desk', cookies[role]);
+      const hasDesk = ['owner', 'employee'].includes(role);
+      assert.equal(deskResponse.status, hasDesk ? 200 : 403);
+      assert.match(deskResponse.headers.get('content-type'), /^application\/json\b/, 'Call Desk summary must not match the HTML tool route');
+      const desk = await deskResponse.json();
+      assert.equal(desk.status, hasDesk ? 'ready' : 'unavailable');
+      if (hasDesk) assert.equal(desk.counts.actionable, 0);
       if (role !== 'owner') assert.equal(visitReads, 0, 'access checks precede owner-only database reads');
     }
     assert.deepEqual(seen.map(item => item.workspace), ['member', 'client', 'employee', 'owner']);
@@ -123,6 +130,9 @@ test('overview APIs enforce real portal sessions and tool roles, isolate workspa
     assert.equal(visits.timeZone, 'UTC');
     assert.equal(visits.metric, 'pageViews');
     assert.ok(Number.isFinite(Date.parse(visits.updatedAt)));
+    const deskPage = await fetch(origin + '/portal/call-desk', { headers: { Cookie: cookies.owner } });
+    assert.equal(deskPage.status, 200);
+    assert.match(deskPage.headers.get('content-type'), /^text\/html\b/, 'the standalone Call Desk remains an HTML page');
     assert.equal((await get('relay', cookies.owner)).status, 404, 'no implied external source');
     visitsFailed = true;
     let failed = await get('visits', cookies.owner);

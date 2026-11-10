@@ -1,5 +1,51 @@
 # Ahern AI — Website
 
+
+## Overview dashboard — November 10, 2026
+
+The signed-in Overview is now a responsive tool dashboard:
+
+- **Site visits:** the existing public page-view totals and a compact 30-day
+  graph with an accessible daily-count table. Dates remain UTC; repeat views
+  count again. Counts are not unique visitors or campaign-attributed leads.
+- **Satori:** outstanding Have Tos from the signed-in person's current Central
+  Time agenda, with a completion count and up to four task previews.
+- **Call Desk:** open find-outs, answers awaiting relay, and unconfirmed booked
+  consults. Totals include older unresolved records beyond the 500-row call-log
+  window; each queue supplies up to four previews. Callback/send-info outcomes
+  lack completion tracking and are not represented as due/overdue follow-ups.
+- **Relay:** recorded reply activities over the last seven days, the latest three
+  excerpts, and the last successful Gmail-sync timestamp. Loading the overview
+  does not run a mailbox sync or send outreach. These are not unread counts.
+- **Crew Room:** messages from other participants in the live shared room over
+  the last seven days, with the latest three excerpts. Owner posts and private
+  DM threads are excluded; the legacy portal notes are not used.
+
+Owners see all five tools. Employees see Satori and Call Desk; other accounts
+see their own Satori agenda. The public preview uses labeled sample priorities
+and never requests private summaries. Each widget loads independently and has
+its own unavailable state and retry; an outage or expired session is not zero.
+The page's Refresh button refreshes all visible summaries.
+
+The first three summaries use authenticated, role-gated routes at
+`GET /api/portal/overview/{satori,visits,call-desk}`. Relay and Crew Room use small
+read-only summary documents at `/relay/overview-widget` and `/overview-widget`
+on their existing origins. Their existing owner sessions remain required; the
+portal never receives credentials. Only those summary documents permit framing
+by `https://ahernai.com`; normal pages retain their existing protections. The
+parent checks the exact sender origin, current frame window, and payload before
+rendering strings as text. No CORS, database migration, or new credential is
+needed. If a session has expired, open that tool, sign in, and refresh its widget.
+
+Validation: production build and **79 website tests pass on Node 24.22.1**,
+including authenticated role/workspace isolation, counts beyond 500 records,
+source failures, text escaping, bridge-origin/window rejection, incomplete
+payload rejection, and overlapping-refresh ordering. The Relay bridge also
+passes all 73 tests/build against the deployed 0.5 source; Crew Room has 26 Python
+checks plus JavaScript bridge tests. External service rollout and live browser
+verification are tracked separately until completed.
+
+
 ## Sales Call Desk — October 27, 2026
 
 `/portal/call-desk` is the cold-calling desk for website prospects: a clickable

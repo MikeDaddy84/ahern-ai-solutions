@@ -22,7 +22,7 @@
     });
   }
   const date = document.getElementById('workspace-date');
-  if (date) { date.dateTime = new Date().toISOString(); date.textContent = new Intl.DateTimeFormat('en-US', { weekday:'long', month:'long', day:'numeric' }).format(new Date()); }
+  if (date) { date.dateTime = new Date().toISOString(); date.textContent = new Intl.DateTimeFormat('en-US', { timeZone:'America/Chicago', weekday:'long', month:'long', day:'numeric' }).format(new Date()); }
   const show = document.getElementById('show-password');
   if (show) show.addEventListener('click', () => { const input=document.getElementById('password'); const reveal=input.type==='password'; input.type=reveal?'text':'password'; show.textContent=reveal?'Hide':'Show'; show.setAttribute('aria-label',reveal?'Hide password':'Show password'); });
   const login = document.getElementById('login-form');

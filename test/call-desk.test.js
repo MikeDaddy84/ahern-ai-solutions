@@ -1,6 +1,7 @@
 // Call Desk tests — access, CSRF, roles, idempotency, do-not-call, due dates,
-// owner edit/delete (1.2.0), and the 1.2.1 do-not-call list, lookup, search and
-// double-booking guard. The desk version itself lives in lib/call-desk.js.
+// owner edit/delete (1.2.0), the 1.2.1 do-not-call list, lookup, search and
+// double-booking guard, and 1.3.0 alerts and follow-ups. The desk version itself
+// lives in lib/call-desk.js.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -260,4 +261,90 @@ test('v1.2.1: version comes from one place, the script uses the signed-in name, 
   assert.equal(desk.normBiz('The Strawn Diner, L.L.C.'),'strawn diner');
   assert.equal(desk.normBiz('Strawn Diner LLC'),'strawn diner');assert.equal(desk.normBiz('  strawn   diner, Inc. '),'strawn diner');
   assert.equal(desk.normBiz('A&B Plumbing Co'),'a and b plumbing');assert.equal(desk.normBiz('Co'),'co');
+});
+
+test('v1.3.0: the owner is emailed on a booked consult and a new find-out, and mail trouble never blocks a save',async()=>{
+  const sent=[];const tick=()=>new Promise(r=>setTimeout(r,20));
+  desk.setMailer(async m=>{sent.push(m);});
+  try {
+    assert.equal((await (await request(API+'/state',{cookie:owner})).json()).alerts,true);
+    const booked={request_key:'call-key-0500',business:'Ranger Roofing',contact:'Pat',phone:'325-555-0150',email:'pat@ranger.example',outcome:'booked',consult_at:'2026-12-01T09:00',consult_label:'Tuesday, Dec 1, 9:00 AM',notes:'wants a one-pager'};
+    const first=await request(API+'/calls',{cookie:sales,token:salesCsrf,body:booked});assert.equal(first.status,201);await tick();
+    assert.equal(sent.length,1);
+    assert.equal(sent[0].key,'ahern-calldesk-booked-'+(await first.json()).id);
+    assert.match(sent[0].subject,/consult booked, Ranger Roofing \(Tuesday, Dec 1, 9:00 AM\)/);
+    assert.equal(sent[0].replyTo,'pat@ranger.example');
+    assert.match(sent[0].text,/^Scotty booked a free consult/);assert.match(sent[0].text,/Notes: wants a one-pager/);assert.match(sent[0].text,/portal\/call-desk#log/);
+    // A replayed save and a non-booked call send nothing.
+    await request(API+'/calls',{cookie:sales,token:salesCsrf,body:booked});
+    await request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:'call-key-0501',business:'Quiet Co',outcome:'notinterested'}});await tick();
+    assert.equal(sent.length,1);
+    // An unusable email is never used as reply-to.
+    await request(API+'/calls',{cookie:sales,token:salesCsrf,body:{...booked,request_key:'call-key-0502',business:'Typo Tile',email:'pat at tile',consult_at:'2026-12-01T10:00'}});await tick();
+    assert.equal(sent.length,2);assert.equal(sent[1].replyTo,undefined);assert.match(sent[1].text,/call them to confirm/);
+    const q={request_key:'q-key-0500',text:'Can it take deposits?',reach:'text',reach_to:'325-555-0150',business:'Ranger Roofing',contact:'Pat'};
+    const made=await request(API+'/questions',{cookie:sales,token:salesCsrf,body:q});assert.equal(made.status,201);await tick();
+    assert.equal(sent.length,3);assert.equal(sent[2].key,'ahern-calldesk-question-'+(await made.json()).id);
+    assert.match(sent[2].subject,/find-out from Ranger Roofing, due /);assert.match(sent[2].text,/Question: Can it take deposits\?/);assert.match(sent[2].text,/Answer by: text to 325-555-0150/);
+    await request(API+'/questions',{cookie:sales,token:salesCsrf,body:q});await tick();assert.equal(sent.length,3,'retry does not re-alert');
+    // Mail failing must not fail the save.
+    desk.setMailer(async()=>{throw new Error('smtp down');});
+    assert.equal((await request(API+'/questions',{cookie:sales,token:salesCsrf,body:{...q,request_key:'q-key-0501',text:'Second question'}})).status,201);
+  } finally { desk.setMailer(null); }
+  assert.equal((await (await request(API+'/state',{cookie:owner})).json()).alerts,false);
+});
+test('v1.3.0: follow-ups get a date, show in the queue, and close when the prospect is called again',async()=>{
+  const add=async(key,extra)=>{const r=await request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:key,business:'Mingus Motors',phone:'(325) 555-0160',outcome:'callback',...extra}});return {status:r.status,...(await r.json())};};
+  const queue=async(cookie=sales)=>(await (await request(API+'/state',{cookie})).json()).followups;
+  // "Call back" with no date gets the next business day.
+  const a=await add('call-key-0600');assert.equal(a.status,201);assert.equal(a.follow_up,desk.nextBusinessDate());
+  let row=(await queue()).find(f=>f.id===a.id);assert.equal(row.follow_up,desk.nextBusinessDate());assert.equal(row.business,'Mingus Motors');assert.equal(row.by_name,'Scotty');
+  const s=await (await request(API+'/state',{cookie:sales})).json();
+  assert.match(s.today,/^\d{4}-\d{2}-\d{2}$/);assert.equal(s.next_business_date,desk.nextBusinessDate());
+  assert.equal(s.calls.find(c=>c.id===a.id).follow_up,desk.nextBusinessDate());
+  // Dates are validated, and outcomes that need no follow-up ignore one.
+  assert.equal((await add('call-key-0601',{phone:'325-555-0161',follow_up:'2026-02-30'})).status,400);
+  assert.equal((await add('call-key-0601',{phone:'325-555-0161',follow_up:'next week'})).status,400);
+  assert.equal((await add('call-key-0602',{business:'No Thanks LLC',phone:'325-555-0162',outcome:'notinterested',follow_up:'2026-12-10'})).follow_up,'');
+  assert.equal((await add('call-key-0603',{business:'Voicemail Vets',phone:'325-555-0163',outcome:'voicemail'})).follow_up,'','only call back is dated by default');
+  // Calling the same number again closes the first follow-up and opens the new one.
+  const b=await add('call-key-0604',{outcome:'sendinfo',follow_up:'2026-12-15'});assert.equal(b.follow_up,'2026-12-15');
+  let q=await queue();assert.ok(!q.some(f=>f.id===a.id));assert.equal(q.find(f=>f.id===b.id).follow_up,'2026-12-15');
+  // Anyone on the desk can move one or tick it off; clients cannot.
+  assert.equal((await request(API+`/followups/${b.id}`,{cookie:client,token:salesCsrf,method:'PUT',body:{due_on:'2026-12-16'}})).status,403);
+  assert.equal((await request(API+`/followups/${b.id}`,{cookie:sales,method:'PUT',body:{due_on:'2026-12-16'}})).status,403,'needs CSRF');
+  assert.equal((await request(API+`/followups/${b.id}`,{cookie:sales,token:salesCsrf,method:'PUT',body:{due_on:''}})).status,400);
+  assert.equal((await request(API+`/followups/${b.id}`,{cookie:sales,token:salesCsrf,method:'PUT',body:{due_on:'2026-12-16'}})).status,200);
+  assert.equal((await queue()).find(f=>f.id===b.id).follow_up,'2026-12-16');
+  assert.equal((await request(API+`/followups/${b.id}/done`,{cookie:sales,token:salesCsrf,body:{}})).status,200);
+  assert.equal((await request(API+`/followups/${b.id}/done`,{cookie:sales,token:salesCsrf,body:{}})).status,404);
+  assert.equal((await request(API+`/followups/${b.id}`,{cookie:sales,token:salesCsrf,method:'PUT',body:{due_on:'2026-12-17'}})).status,404,'a closed one cannot be moved');
+  assert.ok(!(await queue()).some(f=>f.id===b.id));
+  // Owner edits: a date reopens it, a blank date closes it, call back is never left without one, other outcomes close it.
+  const edit=body=>request(API+`/calls/${b.id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{business:'Mingus Motors',phone:'(325) 555-0160',...body}});
+  await edit({outcome:'sendinfo',follow_up:'2026-12-20'});assert.equal((await queue()).find(f=>f.id===b.id).follow_up,'2026-12-20');
+  await edit({outcome:'sendinfo',follow_up:''});assert.ok(!(await queue()).some(f=>f.id===b.id));
+  await edit({outcome:'callback',follow_up:''});assert.equal((await queue()).find(f=>f.id===b.id).follow_up,desk.nextBusinessDate());
+  await edit({outcome:'notinterested',follow_up:'2026-12-20'});assert.ok(!(await queue()).some(f=>f.id===b.id));
+  // Deleting the call removes its follow-up.
+  await edit({outcome:'callback'});assert.ok((await queue()).some(f=>f.id===b.id));
+  assert.equal((await request(API+`/calls/${b.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  assert.ok(!(await queue()).some(f=>f.id===b.id));
+  assert.equal(Number((await store.client.execute({sql:'SELECT COUNT(*) AS n FROM calldesk_followups WHERE call_id=?',args:[b.id]})).rows[0].n),0);
+});
+test('v1.3.0: older "Call back" calls are backfilled into the follow-up queue unless already called again',async()=>{
+  const statements=require('../lib/portal-db').statements();
+  const user=(await store.client.execute("SELECT id FROM portal_users WHERE email='sales@example.test'")).rows[0].id;
+  const raw=(id,key,at,phone)=>store.client.execute({sql:"INSERT INTO calldesk_calls(id,request_key,created_at,by_user,business,phone,phone_norm,outcome) VALUES(?,?,?,?,'Legacy Lawn',?,?,?)",args:[id,key,at,user,phone,phone,id.startsWith('3')?'voicemail':'callback']});
+  const day=Date.UTC(2026,9,20,15);
+  await raw('22222222-2222-4222-8222-222222222221','legacy-key-0010',day,'3255550170');           // open call back
+  await raw('22222222-2222-4222-8222-222222222222','legacy-key-0011',day,'3255550171');           // call back, then called again
+  await raw('33333333-3333-4333-8333-333333333333','legacy-key-0012',day+3600000,'3255550171');
+  await store.client.batch(statements,'write');await store.client.batch(statements,'write');
+  const rows=(await store.client.execute("SELECT call_id,due_on,done_at FROM calldesk_followups WHERE call_id LIKE '22222222%'")).rows;
+  assert.equal(rows.length,1);assert.equal(rows[0].call_id,'22222222-2222-4222-8222-222222222221');assert.equal(rows[0].due_on,'2026-10-21');assert.equal(rows[0].done_at,null);
+  // Closing it survives the next restart.
+  assert.equal((await request(API+'/followups/22222222-2222-4222-8222-222222222221/done',{cookie:sales,token:salesCsrf,body:{}})).status,200);
+  await store.client.batch(statements,'write');
+  assert.ok(!(await (await request(API+'/state',{cookie:sales})).json()).followups.some(f=>f.id==='22222222-2222-4222-8222-222222222221'));
 });

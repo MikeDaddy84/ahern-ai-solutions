@@ -1,7 +1,8 @@
 /*
   Ahern AI — Call Desk client
-  Version  : 1.2.1  (automated-answer branch, do-not-call list, all-history lookup
-             and search, double-booking warning, find-out retry fix, rep name)
+  Version  : 1.3.0  (Follow-ups tab with dated follow-ups, alert status for the owner)
+             1.2.1: automated-answer branch, do-not-call list, all-history lookup and
+             search, double-booking warning, find-out retry fix, rep name
   Built by : Claude Fable 5.2 (claude-fable-5-2) · 2026-11-10
              1.2.0 and earlier: Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27
   Talks to : /api/portal/call-desk/* (portal session cookie + X-CSRF-Token)
@@ -64,8 +65,8 @@ async function api(path, { method = "GET", body } = {}) {
 }
 
 /* ---------- state ---------- */
-const FIELDS = ["business","phone","website","seen","seenother","contact","role","dm","email","best","slot1","slot2","chosen","notes"];
-const blankSheet = () => ({ business:"", phone:"", website:"", seen:"none", seenother:"", contact:"", role:"", dm:"", email:"", best:"", slot1:"", slot2:"", chosen:"", notes:"", outcome:"", requestKey: key() });
+const FIELDS = ["business","phone","website","seen","seenother","contact","role","dm","email","best","follow","slot1","slot2","chosen","notes"];
+const blankSheet = () => ({ business:"", phone:"", website:"", seen:"none", seenother:"", contact:"", role:"", dm:"", email:"", best:"", follow:"", slot1:"", slot2:"", chosen:"", notes:"", outcome:"", requestKey: key() });
 let sheet = Object.assign(blankSheet(), store.get("desk.sheet", {}));
 if (!sheet.requestKey) sheet.requestKey = key();
 let nav = store.get("desk.nav", { node: "prep", history: [] });
@@ -73,6 +74,15 @@ let callQs = store.get("desk.callQs", []);
 let config = { availability: "", length: 20, callback_phone: "" };
 let calls = [], questions = [], dncList = [], nextDue = null, online = false;
 let dncActive = false, remotePrior = null, searchRows = null;
+let followups = [], today = "", nextBizDate = "", alertsOn = false;
+// Outcomes that can carry a follow-up date. Keep in step with FOLLOWABLE in lib/call-desk.js.
+const FOLLOWABLE = new Set(["callback", "sendinfo", "voicemail", "nocontact"]);
+const fmtDay = (d) => { const x = new Date(d + "T12:00:00"); return isNaN(x) ? d : x.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); };
+// "Call back" never goes without a date: default it to the next business day.
+function defaultFollow() {
+  if (sheet.outcome !== "callback" || sheet.follow || !nextBizDate) return;
+  sheet.follow = nextBizDate; $("#s-follow").value = sheet.follow; saveSheet();
+}
 
 const OUTCOMES = [
   ["booked","Consult booked"],["callback","Call back"],["sendinfo","Send info"],["voicemail","Left voicemail"],
@@ -183,7 +193,8 @@ const N = {
   gk_callback: { stage:"Opening", title:"Owner's not available",
     say: ["No problem. What's the owner's name, and when's the best time to catch them?",
           "Is there a direct line or an email that's better than this number?"],
-    do: ["Owner's name goes in 'Decision maker'. Time and direct line go in 'Best time / direct line'."],
+    do: ["Owner's name goes in 'Decision maker'. Time and direct line go in 'Best time / direct line'.",
+         "Set 'Follow up on' to the day they said. It shows up in the Follow-ups tab that morning."],
     options: [ {label:"Got a name and a time", to:"wrap", outcome:"callback"}, {label:"Got an email only", to:"wrap", outcome:"sendinfo"}, {label:"Got nothing", to:"wrap", outcome:"nocontact"} ] },
   gk_block: { stage:"Opening", title:"Front desk says no",
     say: ["Understood. Could I get the owner's name and an email? I'll send one short note with a link instead of calling back."],
@@ -238,7 +249,7 @@ const N = {
     do: ["Under 30 seconds. Say the number slowly, twice if you've got room."],
     options: [ {label:"Left it", to:"wrap", outcome:"voicemail"} ] },
   bad_time: { stage:"Objection", title:"\"Bad time\"", say: ["Totally fair. Is later today better, or tomorrow morning?"],
-    do: ["Get a specific time and put it in 'Best time'."],
+    do: ["Get a specific time and put it in 'Best time'.", "Set 'Follow up on' to that day."],
     options: [ {label:"Got a time", to:"wrap", outcome:"callback"}, {label:"\"Don't call back\"", to:"dnc", danger:true} ] },
   obj_notinterested: { stage:"Objection", title:"\"Not interested\"",
     say: ["No worries. Just so I know, is it the timing, or are you set on the website front?"], do: ["One question, then respect the answer."],
@@ -282,6 +293,7 @@ const N = {
     options: [ {label:"Save as Do not call", to:"wrap", outcome:"dnc", danger:true} ] },
   wrap: { stage:"Wrap up", title:"Log it before the next dial", say: [],
     do: ["Check the outcome on the call sheet, add notes, and hit Save call to log.",
+         "Trying them again? Set 'Follow up on'. A call back gets the next business day if you leave it blank.",
          "Booked? Mike gets it in the log to send the confirmation.",
          "Questions you couldn't answer are already queued for Mike."],
     options: [] },
@@ -297,7 +309,7 @@ function go(to, outcome, note) {
   if (to === "FINDOUT") { openFindout(); return; }
   nav.history.push(nav.node); if (nav.history.length > 60) nav.history.shift();
   nav.node = to;
-  if (outcome) { sheet.outcome = outcome; saveSheet(); renderOutcomes(); }
+  if (outcome) { sheet.outcome = outcome; saveSheet(); renderOutcomes(); defaultFollow(); }
   if (note && !sheet.notes.includes(note)) { sheet.notes = note + (sheet.notes ? "\n" + sheet.notes : ""); $("#s-notes").value = sheet.notes; saveSheet(); }
   store.set("desk.nav", nav);
   closeFindout(); $("#objmenu").hidden = true; $("#btn-obj").setAttribute("aria-expanded", "false");
@@ -424,7 +436,7 @@ function renderOutcomes() {
   OUTCOMES.forEach(([k, label]) => {
     const input = el("input", { type: "radio", name: "outcome", id: "o-" + k, value: k });
     input.checked = sheet.outcome === k;
-    input.addEventListener("change", () => { sheet.outcome = k; saveSheet(); });
+    input.addEventListener("change", () => { sheet.outcome = k; saveSheet(); defaultFollow(); });
     box.append(el("label", { for: "o-" + k }, input, el("span", { text: label })));
   });
 }
@@ -493,12 +505,13 @@ $("#btn-save").addEventListener("click", async () => {
     business: sheet.business, phone: sheet.phone, website: sheet.website, seen: sheet.seen, seen_other: sheet.seenother,
     contact: sheet.contact, role: sheet.role, dm: sheet.dm, email: sheet.email, best: sheet.best,
     outcome: sheet.outcome, consult_at: sheet.chosen === "1" ? sheet.slot1 : sheet.chosen === "2" ? sheet.slot2 : "",
-    consult_label: v.chosen || "", notes: sheet.notes, question_ids: callQs.map(q => q.id).filter(Boolean),
+    consult_label: v.chosen || "", notes: sheet.notes, follow_up: FOLLOWABLE.has(sheet.outcome) ? sheet.follow : "", question_ids: callQs.map(q => q.id).filter(Boolean),
   };
   const btn = $("#btn-save"); btn.disabled = true; btn.textContent = "Saving…";
   try {
     const r = await api("/calls", { method: "POST", body });
-    toast(r.dnc_hit ? "Saved and flagged for Mike: that number is on the do-not-call list." : "Call saved: " + outcomeLabel(body.outcome) + ".");
+    toast((r.dnc_hit ? "Saved and flagged for Mike: that number is on the do-not-call list." : "Call saved: " + outcomeLabel(body.outcome) + ".") +
+      (r.follow_up ? " Follow-up " + fmtDay(r.follow_up) + "." : ""));
     resetCall(); refresh();
   } catch (e) {
     say(e.status === 400 ? e.message : e.status === 403 ? "Your account can't save calls. Ask Mike to check your access." : "Didn't save. Check your connection and hit Save again. Nothing on the sheet was lost.");
@@ -522,6 +535,50 @@ function deleteButton(key, label, confirmLabel, run) {
     try { await run(); } catch (e) { b.disabled = false; b.classList.remove("armed"); b.textContent = label; toast(e.message || "Didn't delete. Try again."); }
   });
   return b;
+}
+
+/* ---------- follow-ups view ---------- */
+function renderFollowups() {
+  const due = followups.filter(f => f.follow_up <= today).length;
+  const c = $("#fcount"); c.textContent = due; if (due) c.removeAttribute("data-zero"); else c.setAttribute("data-zero", "");
+  const box = $("#fcards"); box.replaceChildren();
+  if (!online) { box.append(el("div", { class: "panel empty-state" }, el("strong", { text: "Loading follow-ups…" }), "If this doesn't clear, reload the page.")); return; }
+  if (!followups.length) {
+    box.append(el("div", { class: "panel empty-state" }, el("strong", { text: "No follow-ups waiting" }),
+      "Save a call as Call back, Send info or Left voicemail with a 'Follow up on' date and it lands here on that day."));
+    return;
+  }
+  const act = async (btn, run, done) => {
+    btn.disabled = true;
+    try { await run(); toast(done); refresh(); } catch (e) { btn.disabled = false; toast(e.message || "Didn't save. Try again."); }
+  };
+  const groups = [["Overdue", f => f.follow_up < today, "overdue"], ["Today", f => f.follow_up === today, "open"], ["Coming up", f => f.follow_up > today, "relayed"]];
+  for (const [label, test, cls] of groups) {
+    const list = followups.filter(test);
+    if (!list.length) continue;
+    const cards = el("div", { class: "cards" });
+    for (const f of list) {
+      const id = encodeURIComponent(f.id);
+      cards.append(el("div", { class: "panel qcard " + cls },
+        el("div", { class: "row", style: "justify-content:space-between" },
+          el("span", { class: "pill " + f.outcome, text: outcomeLabel(f.outcome) }),
+          el("span", { class: "meta", text: "Due " + fmtDay(f.follow_up) })),
+        el("div", { class: "qtext", text: f.business || "No business recorded" }),
+        el("div", { class: "meta" },
+          el("span", { text: [f.dm || f.contact, f.phone].filter(Boolean).join(" · ") || "No contact recorded" }),
+          f.best ? el("span", { text: "Best time / direct line: " + f.best }) : null,
+          el("span", { text: "Last call " + fmtWhen(f.created_at) + (f.by_name ? " by " + f.by_name : "") })),
+        f.notes ? el("div", { class: "answer", text: String(f.notes).slice(0, 240) }) : null,
+        el("div", { class: "row" },
+          isFlagged(f) ? el("span", { class: "pill dnc", text: "Do not call" })
+            : el("button", { class: "btn primary sm", type: "button", text: "Call now", onclick: () => loadForRecall(f) }),
+          nextBizDate && f.follow_up !== nextBizDate ? el("button", { class: "btn sm", type: "button", text: "Move to " + fmtDay(nextBizDate),
+            onclick: (ev) => act(ev.currentTarget, () => api("/followups/" + id, { method: "PUT", body: { due_on: nextBizDate } }), "Moved to " + fmtDay(nextBizDate) + ".") }) : null,
+          el("button", { class: "btn sm", type: "button", text: "Done",
+            onclick: (ev) => act(ev.currentTarget, () => api("/followups/" + id + "/done", { method: "POST", body: {} }), "Follow-up closed.") }))));
+    }
+    box.append(el("h3", { class: "side-h group-h", text: label + " (" + list.length + ")" }), cards);
+  }
 }
 
 /* ---------- questions view ---------- */
@@ -621,7 +678,7 @@ function renderLog() {
           } })
         : el("span", { class: "pill callback", text: "Mike to confirm" });
       consult = el("td", {}, el("div", { text: c.consult_label || fmtSlot(c.consult_at) || "—" }), action);
-    } else consult = el("td", { text: c.best || "—" });
+    } else consult = el("td", {}, el("div", { text: c.best || "—" }), c.follow_up ? el("div", { class: "meta", text: "Follow up " + fmtDay(c.follow_up) }) : null);
     tb.append(el("tr", {},
       el("td", { class: "num", text: fmtWhen(c.created_at) }),
       el("td", {}, el("div", { style: "font-weight:600", text: c.business || "—" }), el("div", { class: "meta", text: c.phone || "" })),
@@ -660,6 +717,7 @@ function openEdit(c) {
   EF.forEach(f => { $("#e-" + f).value = c[f] || ""; });
   eOutcome.value = c.outcome;
   $("#e-consult").value = c.consult_at || "";
+  $("#e-follow").value = c.follow_up || "";
   $("#edit-meta").textContent = "Logged " + fmtWhen(c.created_at) + (c.by_name ? " by " + c.by_name : "");
   $("#edit-hint").hidden = true;
   $("#edit-panel").hidden = false;
@@ -676,6 +734,7 @@ $("#edit-save").addEventListener("click", async () => {
   body.outcome = eOutcome.value;
   body.consult_at = body.outcome === "booked" ? $("#e-consult").value : "";
   body.consult_label = body.consult_at ? fmtSlot(body.consult_at) : "";
+  body.follow_up = FOLLOWABLE.has(body.outcome) ? $("#e-follow").value : "";
   if (body.outcome === "booked" && (!body.consult_at || !body.email.trim())) { hint.hidden = false; hint.textContent = "Booked calls need a consult time and an email."; return; }
   const btn = $("#edit-save"); btn.disabled = true; btn.textContent = "Saving…";
   try {
@@ -694,6 +753,9 @@ let configDirty = false;
 ["#c-avail", "#c-length", "#c-phone"].forEach(s => $(s).addEventListener("input", () => { configDirty = true; }));
 function renderConfig() {
   $("#avail").textContent = config.availability ? config.availability + "\nConsult: " + (config.length || 20) + " min" : "Mike's availability hasn't been set yet. Ask Mike before offering times.";
+  $("#alerts-note").textContent = !IS_OWNER || !online ? ""
+    : alertsOn ? "Email alerts are on: you get an email when a consult is booked or a find-out is queued."
+    : "Email alerts are OFF. Mail isn't set up on the server, so booked consults and find-outs only show up here and on the portal Overview.";
   if (!configDirty) { $("#c-avail").value = config.availability || ""; $("#c-length").value = config.length || 20; $("#c-phone").value = config.callback_phone || ""; }
 }
 ["#c-avail", "#c-length", "#c-phone", "#c-save"].forEach(s => { $(s).disabled = !IS_OWNER; });
@@ -727,11 +789,12 @@ document.addEventListener("click", async (e) => {
 });
 
 /* ---------- routing ---------- */
-const VIEWS = ["call", "questions", "log", "cheat"];
+const VIEWS = ["call", "followups", "questions", "log", "cheat"];
 function route() {
   const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "call";
   VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
   document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.tab === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (v === "followups") renderFollowups();
   if (v === "questions") renderQuestions();
   if (v === "log") renderLog();
 }
@@ -744,8 +807,9 @@ async function refresh() {
   try {
     const s = await api("/state");
     calls = s.calls || []; questions = s.questions || []; dncList = s.dnc || []; config = s.config || config; nextDue = s.next_due || null;
+    followups = s.followups || []; today = s.today || ""; nextBizDate = s.next_business_date || ""; alertsOn = !!s.alerts;
     online = true;
-    renderConfig(); renderQuestions(); renderDnc(); checkPrior(); checkSlots(); renderScript();
+    renderConfig(); renderQuestions(); renderFollowups(); renderDnc(); checkPrior(); checkSlots(); renderScript();
     if (lSearch.length >= 2) runSearch(0);
     if (!$("#view-log").hidden) renderLog();
   } catch (e) {

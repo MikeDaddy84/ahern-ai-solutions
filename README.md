@@ -95,6 +95,7 @@ can be deleted).
 | Edit availability, consult length, callback number | ✓ | — |
 | Edit or delete logged calls, delete find-outs (1.2.0) | ✓ | — |
 | Lift a do-not-call flag (1.2.1) | ✓ | — |
+| Move a follow-up or mark it done (1.3.0) | ✓ | ✓ |
 
 `client` and `member` accounts get a 403 and never see the nav link.
 
@@ -213,9 +214,10 @@ to `main`.
   against the required Node 24). They were not re-run on Node 24.
 
 **Not done (recommendations only)**
-- Email or text to Mike on a booked consult or a new find-out.
-- A dated callback queue, send-info tracking, lead-list import, real consult
-  slots with a calendar invite, call statistics, soft-delete for calls.
+- Email to Mike on a booked consult or a new find-out, and a dated callback
+  queue. (Both shipped in 1.3.0, below.)
+- Send-info tracking, lead-list import, real consult slots with a calendar
+  invite, call statistics, soft-delete for calls.
 - Reading prices from `lib/services.js` instead of the two hand-kept copies.
 - Self-serve password reset.
 - The page still polls the full state every 20 seconds.
@@ -225,6 +227,73 @@ to `main`.
   keep the address they were made with; history was not rewritten. The Windows
   working copy needs its own `git config user.email` change for future commits
   made there.
+
+### Call Desk v1.3.0 — owner alerts and follow-ups, November 10, 2026
+Built with Claude Fable 5.2. Pushed to `main`.
+
+**Email alerts to the owner**
+- A booked consult and a new find-out each send one email. The booked email
+  carries the time, the prospect's details and the notes, and its reply-to is
+  the prospect's address when a usable one was recorded, so replying sends the
+  confirmation. The find-out email carries the question and its due date.
+- It uses the same mail settings as website lead notifications
+  (`lib/notifications.js`, new `createMailer`). The recipient is
+  `CALLDESK_NOTIFY_TO` when set, otherwise `LEAD_NOTIFY_TO`. The sender is
+  `CALLDESK_NOTIFY_FROM`, otherwise `LEAD_NOTIFY_FROM`. No new required setting.
+- Alerts are best effort. They are sent after the save commits, retried once
+  after 30 seconds, and never fail or delay a save. A replayed save does not
+  send again. There is no outbox table, so an email lost on both attempts or
+  across a restart is not re-sent; the desk and the portal Overview remain the
+  record.
+- The owner's Desk settings panel says whether alerts are on. They are off
+  whenever mail is not configured on the server.
+- **Not verified in production:** whether the Render service has mail
+  configured was not checked from the workspace that made this change. Check
+  the alerts line on the cheat sheet tab after deploy.
+
+**Follow-ups**
+- The call sheet has a **Follow up on** date. It applies to Call back, Send
+  info, Left voicemail and No contact. A Call back saved without a date gets
+  the next business day (Central time).
+- A new **Follow-ups** tab lists everyone due another call, grouped as Overdue,
+  Today and Coming up. The tab badge counts overdue plus today. Each card has
+  Call now (loads the call sheet), Move to the next business day, and Done.
+  Owner and employee can both move and close them.
+- Logging any new call to the same phone number or the same business name
+  closes that prospect's open follow-up. Deleting a call removes its
+  follow-up. In the owner's Edit panel a date sets or reopens one, a blank date
+  closes it (Call back gets the default instead), and changing to an outcome
+  that needs no follow-up closes it.
+- The call log shows each row's open follow-up date.
+- New routes: `POST /api/portal/call-desk/followups/:id/done` and
+  `PUT /api/portal/call-desk/followups/:id`, behind the desk's session, CSRF
+  and role checks. `:id` is the call id.
+
+**Schema**
+- Additive only: `calldesk_followups` and one index. The schema file backfills
+  a follow-up, due the day after the call, for each earlier Call back whose
+  number has not been called since. Those will show as overdue on first load
+  and can be closed with Done. Safe to re-run; a closed follow-up stays closed.
+
+**Validation**
+- `test/call-desk.test.js`: 16 tests (3 new) covering alert content, reply-to
+  rules, no alert on replay, a failing mailer not blocking a save, follow-up
+  defaults, date validation, auto-close, move and done, edit rules, delete
+  cleanup, role gates and the backfill.
+- The real front end was driven in jsdom as both roles: badge count, grouping,
+  do-not-call cards without a Call now button, move and done requests, Call now
+  loading the sheet, the Call back date default, and the alert status line.
+- `npm test` in the cloud workspace: 85 of 88 passing. The same 3 Satori tests
+  fail there for the reason given under 1.2.1.
+- No one has used 1.2.1 or 1.3.0 on the live site yet, and the Render deploy
+  was not confirmed from that workspace.
+
+**Not done (recommendations only)**
+- An overdue reminder email for find-outs and follow-ups.
+- Send-info tracking, lead-list import, real consult slots with a calendar
+  invite, call statistics, soft-delete for calls.
+- Follow-up counts on the portal Overview card.
+- Reading prices from `lib/services.js`; self-serve password reset.
 
 ### Employee portal view — October 27, 2026 (later)
 - The **Hosaka** nav link is now owner-only, like Relay, Site visits and

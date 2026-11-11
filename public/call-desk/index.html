@@ -2,7 +2,8 @@
 <!--
   ============================================================
   Ahern AI — Call Desk (website prospects)
-  Version   : 1.2.1  (the visible version is filled in from VERSION in lib/call-desk.js)
+  Version   : 1.3.0  (the visible version is filled in from VERSION in lib/call-desk.js)
+              1.3.0 Follow-ups tab, follow-up dates, owner email alerts
               1.2.1 automated-answer branch, do-not-call list, lookup/search fixes
               1.2.0 owner edit/delete · 1.0.0 was the claude.ai artifact build
   Built by  : Claude Fable 5.2 (claude-fable-5-2); 1.2.0 and earlier Claude Opus 5.5
@@ -20,6 +21,7 @@
     <a class="portal-link" href="/portal">Portal ↗</a>
     <nav class="tabs" aria-label="Sections">
       <a href="#call" data-tab="call">Call</a>
+      <a href="#followups" data-tab="followups">Follow-ups <span class="count" id="fcount" data-zero>0</span></a>
       <a href="#questions" data-tab="questions">Find-outs <span class="count" id="qcount" data-zero>0</span></a>
       <a href="#log" data-tab="log">Call log</a>
       <a href="#cheat" data-tab="cheat">Cheat sheet</a>
@@ -93,6 +95,7 @@
           <label class="f" for="s-dm">Decision maker (if different)<input id="s-dm" autocomplete="off"></label>
           <label class="f" for="s-email">Email<input id="s-email" inputmode="email" autocomplete="off"></label>
           <label class="f full" for="s-best">Best time / direct line<input id="s-best" autocomplete="off"></label>
+          <label class="f full" for="s-follow">Follow up on (call back, send info, voicemail, no contact)<input type="date" id="s-follow"></label>
         </div>
 
         <div class="side-h">Consult times to offer</div>
@@ -116,6 +119,17 @@
         <button class="btn primary" id="btn-save">Save call to log</button>
       </aside>
     </div>
+  </section>
+
+  <!-- ================= FOLLOW-UPS ================= -->
+  <section class="view" id="view-followups" hidden>
+    <div class="section-h">
+      <div>
+        <h2>Follow-ups</h2>
+        <p>Everyone who needs another call, by the day it's due. Calling them again closes the follow-up on its own. The badge counts what's due today or overdue.</p>
+      </div>
+    </div>
+    <div id="fcards"></div>
   </section>
 
   <!-- ================= QUESTIONS ================= -->
@@ -169,6 +183,7 @@
         <label class="f full" for="e-best">Best time / direct line<input id="e-best" autocomplete="off"></label>
         <label class="f" for="e-outcome">Outcome<select id="e-outcome"></select></label>
         <label class="f" for="e-consult">Consult time (booked only)<input type="datetime-local" id="e-consult"></label>
+        <label class="f" for="e-follow">Follow up on (blank closes it)<input type="date" id="e-follow"></label>
         <label class="f full" for="e-notes">Notes<textarea id="e-notes"></textarea></label>
       </div>
       <div class="alert info" id="edit-hint" hidden></div>
@@ -237,6 +252,7 @@
       <div class="panel cheat">
         <h3 class="side-h">Desk settings</h3>
         <p class="empty-hint" id="settings-note">Mike sets these. Scotty sees them on the call sheet.</p>
+        <p class="empty-hint" id="alerts-note"></p>
         <label class="f" for="c-avail">Mike's consult availability<textarea id="c-avail" placeholder="Tue–Thu 9–11am and 2–4pm CT. No Mondays."></textarea></label>
         <div class="fgrid">
           <label class="f" for="c-length">Consult length (minutes)<input id="c-length" type="number" min="10" max="90" step="5" value="20"></label>

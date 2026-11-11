@@ -88,3 +88,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_calldesk_dnc_call ON calldesk_dnc(call_id)
 INSERT INTO calldesk_dnc(id,call_id,created_at,by_user,business,phone_norm)
   SELECT 'dnc-'||c.id,c.id,c.created_at,c.by_user,c.business,c.phone_norm FROM calldesk_calls c
   WHERE c.outcome='dnc' AND NOT EXISTS (SELECT 1 FROM calldesk_dnc d WHERE d.call_id=c.id);
+-- Call Desk v1.3.0: dated follow-ups. One row per call that needs another
+-- attempt, closed (done_at) when someone calls that prospect again, marks it
+-- done, or the call stops being a follow-up. The INSERT backfills "Call back"
+-- calls logged before this table existed, unless the same number was already
+-- called again. Safe to re-run: a call that has a row, open or closed, is skipped.
+CREATE TABLE IF NOT EXISTS calldesk_followups (
+  call_id TEXT PRIMARY KEY, due_on TEXT NOT NULL, created_at INTEGER NOT NULL,
+  done_at INTEGER, done_by TEXT, done_reason TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_calldesk_followups_due ON calldesk_followups(due_on) WHERE done_at IS NULL;
+INSERT INTO calldesk_followups(call_id,due_on,created_at)
+  SELECT c.id,strftime('%Y-%m-%d',c.created_at/1000,'unixepoch','+1 day'),c.created_at FROM calldesk_calls c
+  WHERE c.outcome='callback' AND NOT EXISTS (SELECT 1 FROM calldesk_followups f WHERE f.call_id=c.id)
+    AND NOT EXISTS (SELECT 1 FROM calldesk_calls n WHERE n.created_at>c.created_at AND length(c.phone_norm)=10 AND n.phone_norm=c.phone_norm);

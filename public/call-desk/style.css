@@ -179,3 +179,7 @@ footer{color:var(--muted);font-family:var(--f-mono);font-size:.74rem;padding-blo
 .btn.danger:hover{border-color:var(--bad)}
 .btn.danger.armed{background:var(--bad);border-color:var(--bad);color:#fff}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* v1.3.0: Follow-ups tab group headings */
+.group-h{margin:18px 0 8px}
+.group-h:first-child{margin-top:0}

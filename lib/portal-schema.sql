@@ -73,3 +73,18 @@ CREATE INDEX IF NOT EXISTS idx_calldesk_questions_asked ON calldesk_questions(as
 CREATE TABLE IF NOT EXISTS calldesk_config (
   key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL, updated_by TEXT
 );
+-- Call Desk v1.2.1: do-not-call entries get a table of their own, so deleting or
+-- editing the call that created one can no longer lift the flag. Only an owner
+-- lifting it (removed_at) does. The INSERT backfills entries from calls logged
+-- before this table existed and is safe to re-run: a call that already has a
+-- row, lifted or not, is skipped.
+CREATE TABLE IF NOT EXISTS calldesk_dnc (
+  id TEXT PRIMARY KEY, call_id TEXT, created_at INTEGER NOT NULL, by_user TEXT,
+  business TEXT NOT NULL DEFAULT '', phone_norm TEXT NOT NULL DEFAULT '',
+  removed_at INTEGER, removed_by TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_calldesk_dnc_phone ON calldesk_dnc(phone_norm);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_calldesk_dnc_call ON calldesk_dnc(call_id) WHERE call_id IS NOT NULL;
+INSERT INTO calldesk_dnc(id,call_id,created_at,by_user,business,phone_norm)
+  SELECT 'dnc-'||c.id,c.id,c.created_at,c.by_user,c.business,c.phone_norm FROM calldesk_calls c
+  WHERE c.outcome='dnc' AND NOT EXISTS (SELECT 1 FROM calldesk_dnc d WHERE d.call_id=c.id);

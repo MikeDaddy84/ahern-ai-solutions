@@ -2,19 +2,21 @@
 <!--
   ============================================================
   Ahern AI — Call Desk (website prospects)
-  Version   : 1.2.0  (1.2.0 owner edit/delete · 1.0.0 was the claude.ai artifact build)
-  Built by  : Claude Opus 5.5 (claude-opus-5-5)
-  Date      : 2026-10-27
+  Version   : 1.2.1  (the visible version is filled in from VERSION in lib/call-desk.js)
+              1.2.1 automated-answer branch, do-not-call list, lookup/search fixes
+              1.2.0 owner edit/delete · 1.0.0 was the claude.ai artifact build
+  Built by  : Claude Fable 5.2 (claude-fable-5-2); 1.2.0 and earlier Claude Opus 5.5
+  Date      : 2026-11-10
   Served by : lib/call-desk.js behind portal sign-in (owner + employee)
   Data      : calldesk_* tables in the portal Turso database
-  Pricing   : sourced from ahernai.com/services/websites on 2026-10-27
+  Pricing   : matches ahernai.com/services/websites, re-checked 2026-11-10
   ============================================================
 -->
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!-- PORTAL_SESSION --><meta name="robots" content="noindex,nofollow"><title>Ahern AI Call Desk</title><link rel="icon" href="/brand/favicon.png"><link rel="stylesheet" href="/call-desk/style.css?v=1.2.0"><script src="/call-desk/app.js?v=1.2.0" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><!-- PORTAL_SESSION --><meta name="robots" content="noindex,nofollow"><title>Ahern AI Call Desk</title><link rel="icon" href="/brand/favicon.png"><link rel="stylesheet" href="/call-desk/style.css?v={{DESK_VERSION}}"><script src="/call-desk/app.js?v={{DESK_VERSION}}" defer></script></head>
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><h1>Ahern AI Call Desk</h1><span>websites · v1.2.0</span></div>
+    <div class="brand"><h1>Ahern AI Call Desk</h1><span>websites · v{{DESK_VERSION}}</span></div>
     <a class="portal-link" href="/portal">Portal ↗</a>
     <nav class="tabs" aria-label="Sections">
       <a href="#call" data-tab="call">Call</a>
@@ -102,6 +104,7 @@
             <select id="s-chosen"><option value="">Not booked</option><option value="1">Time A</option><option value="2">Time B</option></select>
           </label>
         </div>
+        <div class="alert warn" id="slot-alert" hidden></div>
 
         <div class="side-h">Questions for Mike on this call</div>
         <ul class="qlist" id="call-qs"></ul>
@@ -137,7 +140,7 @@
     <div class="section-h">
       <div>
         <h2>Call log</h2>
-        <p>Every saved call. Booked consults need Mike to send the confirmation email, then mark them confirmed. Do-not-call numbers get flagged on the call sheet automatically.</p>
+        <p>Every saved call. Booked consults need Mike to send the confirmation email, then mark them confirmed. Do-not-call numbers get flagged on the call sheet automatically, and the full list is on the cheat sheet.</p>
       </div>
       <div class="filters" id="lfilters">
         <button data-f="all" aria-pressed="true">All</button>
@@ -148,7 +151,7 @@
       </div>
     </div>
     <div class="row" style="margin-bottom:12px">
-      <label class="f" for="log-search" style="flex:1;min-width:200px">Search business, contact or phone<input id="log-search" type="search"></label>
+      <label class="f" for="log-search" style="flex:1;min-width:200px">Search business, contact, email or phone (searches the whole log)<input id="log-search" type="search"></label>
     </div>
     <section class="panel edit-panel" id="edit-panel" aria-labelledby="edit-title" hidden>
       <div class="row" style="justify-content:space-between">
@@ -187,7 +190,7 @@
     <div class="section-h">
       <div>
         <h2>Cheat sheet</h2>
-        <p>Prices as published on ahernai.com/services/websites (checked Oct 27, 2026). If the site changes, these change. Anything not on this page is a find-out.</p>
+        <p>Prices as published on ahernai.com/services/websites (checked Nov 10, 2026). If the site changes, these change. Anything not on this page is a find-out.</p>
       </div>
     </div>
     <div class="cheatgrid">
@@ -237,14 +240,20 @@
         <label class="f" for="c-avail">Mike's consult availability<textarea id="c-avail" placeholder="Tue–Thu 9–11am and 2–4pm CT. No Mondays."></textarea></label>
         <div class="fgrid">
           <label class="f" for="c-length">Consult length (minutes)<input id="c-length" type="number" min="10" max="90" step="5" value="20"></label>
-          <label class="f" for="c-phone">Scotty's callback number<input id="c-phone" inputmode="tel"></label>
+          <label class="f" for="c-phone">Callback number (read out on voicemails)<input id="c-phone" inputmode="tel"></label>
         </div>
         <button class="btn primary" id="c-save">Save settings</button>
+      </div>
+
+      <div class="panel cheat">
+        <h3 class="side-h">Do-not-call list</h3>
+        <p class="empty-hint" id="dnc-note"></p>
+        <ul class="qlist" id="dnc-list"></ul>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="wrap">Ahern AI Call Desk · v1.2.0 · built with Claude Opus 5.5 · pricing checked 2026-10-27</footer>
+<footer class="wrap">Ahern AI Call Desk · v{{DESK_VERSION}} · built with Claude Opus 5.5 and Claude Fable 5.2 · pricing checked 2026-11-10</footer>
 <div class="toast" id="toast" hidden></div>
 </body></html>

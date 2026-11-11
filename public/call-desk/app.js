@@ -1,7 +1,9 @@
 /*
   Ahern AI — Call Desk client
-  Version  : 1.2.0  (owner-only edit/delete for calls, delete for find-outs)
-  Built by : Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27
+  Version  : 1.2.1  (automated-answer branch, do-not-call list, all-history lookup
+             and search, double-booking warning, find-out retry fix, rep name)
+  Built by : Claude Fable 5.2 (claude-fable-5-2) · 2026-11-10
+             1.2.0 and earlier: Claude Opus 5.5 (claude-opus-5-5) · 2026-10-27
   Talks to : /api/portal/call-desk/* (portal session cookie + X-CSRF-Token)
 */
 (() => {
@@ -12,6 +14,8 @@ const meta = (n) => document.querySelector(`meta[name="${n}"]`)?.content || "";
 const CSRF = meta("call-desk-csrf");
 const ROLE = meta("call-desk-role");
 const IS_OWNER = ROLE === "owner";
+// Whoever is signed in is the one on the phone, so the script uses their first name.
+const REP = meta("call-desk-name").trim().split(/\s+/)[0] || "";
 const API = "/api/portal/call-desk";
 
 /* ---------- helpers ---------- */
@@ -34,6 +38,15 @@ const store = {
 };
 const key = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
 const normPhone = (p) => String(p || "").replace(/\D/g, "").slice(-10);
+const fmtPhone = (n) => (n && n.length === 10 ? "(" + n.slice(0, 3) + ") " + n.slice(3, 6) + "-" + n.slice(6) : (n || ""));
+// "Strawn Diner, LLC" and "the strawn diner" are the same business. Keep in step with normBiz in lib/call-desk.js.
+const BIZ_SUFFIX = new Set(["llc","inc","co","company","corp","corporation","ltd","lp","llp","pllc","pc"]);
+const normBiz = (name) => {
+  const w = String(name || "").toLowerCase().replace(/\./g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+  if (w[0] === "the") w.shift();
+  while (w.length > 1 && BIZ_SUFFIX.has(w[w.length - 1])) w.pop();
+  return w.join(" ");
+};
 const fmtSlot = (v) => { if (!v) return ""; const d = new Date(v); if (isNaN(d)) return ""; return d.toLocaleString("en-US", { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); };
 const fmtWhen = (ms) => new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
 const fmtDue = (ms) => new Date(ms).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "America/Chicago" });
@@ -59,6 +72,7 @@ let nav = store.get("desk.nav", { node: "prep", history: [] });
 let callQs = store.get("desk.callQs", []);
 let config = { availability: "", length: 20, callback_phone: "" };
 let calls = [], questions = [], dncList = [], nextDue = null, online = false;
+let dncActive = false, remotePrior = null, searchRows = null;
 
 const OUTCOMES = [
   ["booked","Consult booked"],["callback","Call back"],["sendinfo","Send info"],["voicemail","Left voicemail"],
@@ -87,10 +101,13 @@ function vars() {
     length: String(config.length || 20),
     due: nextDue ? fmtDue(nextDue) : "",
     phone: config.callback_phone || "",
+    rep: REP,
   };
 }
-const FALLBACK = { business:"[business]", contact:"[name]", dm:"[their name]", hook:"[what you saw]", hookShort:"[what you saw]", slot1:"[Time A]", slot2:"[Time B]", chosen:"[their time]", length:"20", due:"[tomorrow]", phone:"[your number]" };
+const FALLBACK = { business:"[business]", contact:"[name]", dm:"[their name]", hook:"[what you saw]", hookShort:"[what you saw]", slot1:"[Time A]", slot2:"[Time B]", chosen:"[their time]", length:"20", due:"[tomorrow]", phone:"[your number]", rep:"[your name]" };
+const noSite = () => sheet.seen === "none" || sheet.seen === "facebook";
 function line(text) {
+  if (typeof text === "function") text = text();
   const v = vars(), p = el("p");
   text.split(/(\{\w+\})/g).forEach(part => {
     const m = part.match(/^\{(\w+)\}$/);
@@ -110,7 +127,9 @@ const N = {
          "Put two consult times from Mike's availability into Time A and Time B before you dial."],
     options: [ {label:"I'm ready, dialing", to:"gatekeeper"} ] },
   gatekeeper: { stage:"Opening", title:"Someone picks up",
-    say: ["Hi, this is Scotty with Ahern AI over in Gordon. Who would I talk to about the website for {business}? Is that the owner?"],
+    say: [() => noSite()
+      ? "Hi, this is {rep} with Ahern AI over in Gordon. Who would I talk to about getting {business} a website? Is that the owner?"
+      : "Hi, this is {rep} with Ahern AI over in Gordon. Who would I talk to about the website for {business}? Is that the owner?"],
     do: ["Friendly and quick. Don't pitch whoever answers unless they turn out to be the decision maker.",
          "Get the name of whoever answered and put it in 'Who I'm talking to'."],
     options: [
@@ -120,7 +139,43 @@ const N = {
       {label:"\"They're not in\"", hear:"owner unavailable", to:"gk_callback"},
       {label:"\"We're not interested\"", hear:"blocking", to:"gk_block"},
       {label:"Voicemail", hear:"machine picks up", to:"voicemail"},
+      {label:"Automated system", hear:"phone menu, bot, call screening, answering service", to:"ivr"},
     ] },
+  ivr: { stage:"Opening", title:"Automated answer", say: [],
+    do: ["Work out what you've got, then pick it below.",
+         "Never press an emergency or after-hours service option to reach a person. That burns the lead.",
+         "One pass, about a minute. Going in circles? Leave a voicemail or log it and move on.",
+         "Whatever gets you through (\"press 2, then 0\", \"ext 104 is Dale\") goes in 'Best time / direct line'. It shows up the next time this business is called."],
+    options: [
+      {label:"Phone menu", hear:"\"press 1 for…\"", to:"ivr_menu"},
+      {label:"AI receptionist or bot", hear:"a voice that isn't a person", to:"ivr_bot"},
+      {label:"Call screening", hear:"\"state your name and reason for calling\"", to:"ivr_screen"},
+      {label:"Answering service", hear:"a live person who can't transfer you", to:"ivr_service"},
+      {label:"Mailbox full / no voicemail", to:"wrap", outcome:"nocontact", note:"No voicemail available. Try a different day and time."},
+      {label:"Disconnected or wrong number", to:"wrap", outcome:"nocontact", note:"BAD NUMBER: disconnected or wrong. Find a new number before calling again.", danger:true},
+    ] },
+  ivr_menu: { stage:"Opening", title:"Phone menu",
+    say: ["Hi, this is {rep} with Ahern AI. I may have the wrong extension. Who handles the website for {business}?"],
+    do: ["Listen to the menu once. Pick owner, manager or office if it's offered.",
+         "Nothing obvious? Press 0, or say \"operator\". If there's a dial-by-name directory and you know the owner's name, use it.",
+         "A sales or new-customer option is fine. Someone always answers it. Use the line above, then carry on as normal.",
+         "Never the emergency or after-hours service option.",
+         "Note the route that worked in 'Best time / direct line'."],
+    options: [ {label:"Got a person", to:"gatekeeper"}, {label:"Landed in a voicemail box", to:"voicemail"}, {label:"No way through", to:"wrap", outcome:"nocontact", note:"Phone menu: no route to a person."} ] },
+  ivr_bot: { stage:"Opening", title:"AI receptionist or bot",
+    say: ["I'm trying to reach the owner about the company website. Can you connect me, or take a message?",
+          "The message: This is {rep} with Ahern AI in Gordon. I was looking up {business} and {hookShort}. My number is {phone}."],
+    do: ["Talk to it plainly, short sentences. Don't pitch the bot.", "Only leave the message if it offers to take one."],
+    options: [ {label:"It connected me", to:"gatekeeper"}, {label:"It took a message", to:"wrap", outcome:"voicemail", note:"Message left with their automated receptionist."}, {label:"Got nowhere", to:"wrap", outcome:"nocontact", note:"Automated receptionist: couldn't get through or leave a message."} ] },
+  ivr_screen: { stage:"Opening", title:"Call screening",
+    say: ["{rep} with Ahern AI, calling about your website."],
+    do: ["That's the whole line. Say it once, clearly, then wait.", "If they pick up, go straight to the opener."],
+    options: [ {label:"They picked up", to:"opener"}, {label:"Sent to voicemail", to:"voicemail"}, {label:"Declined or hung up", to:"wrap", outcome:"nocontact", note:"Call screening: not accepted."} ] },
+  ivr_service: { stage:"Opening", title:"Answering service",
+    say: ["Hi, this is {rep} with Ahern AI. Could I get the owner's name, and the best time to reach them directly?",
+          "Could you pass on that I called about the company website? My number is {phone}."],
+    do: ["They can't transfer you and they don't work there. Don't pitch them.", "Owner's name goes in 'Decision maker'. The time goes in 'Best time / direct line'."],
+    options: [ {label:"Got a name or a time", to:"wrap", outcome:"callback", note:"Reached their answering service."}, {label:"They only took a message", to:"wrap", outcome:"voicemail", note:"Message left with their answering service."}, {label:"Got nothing", to:"wrap", outcome:"nocontact", note:"Answering service: no details given."} ] },
   gk_regarding: { stage:"Opening", title:"Getting past the front desk",
     say: ["It's about {business}'s website. I was looking you up and {hookShort}. I'd only need a couple of minutes with whoever handles that. Who would that be?"],
     do: ["Straight answer, no tricks. If they ask whether it's a sales call, say yes, it's a short one."],
@@ -135,7 +190,7 @@ const N = {
     do: ["One ask. If it's still no, thank them and go. Don't push past a gatekeeper twice."],
     options: [ {label:"Got name/email", to:"wrap", outcome:"sendinfo"}, {label:"No", to:"wrap", outcome:"nocontact"}, {label:"\"Take us off your list\"", to:"dnc", danger:true} ] },
   opener: { stage:"Decision maker", title:"The opener",
-    say: ["Hi {contact}, this is Scotty with Ahern AI in Gordon. I'll be quick. I was looking for {business} online and {hook}. Have you got two minutes, or is there a better time?"],
+    say: ["Hi {contact}, this is {rep} with Ahern AI in Gordon. I'll be quick. I was looking for {business} online and {hook}. Have you got two minutes, or is there a better time?"],
     do: ["Then stop talking. Let them answer.", "If you were transferred, update 'Who I'm talking to' with the new name first."],
     options: [ {label:"\"Go ahead\"", to:"dm_check"}, {label:"\"Bad time\"", to:"bad_time"}, {label:"\"Not interested\"", to:"obj_notinterested"}, {label:"\"Take me off your list\"", to:"dnc", danger:true} ] },
   dm_check: { stage:"Decision maker", title:"Confirm you've got the right person",
@@ -177,9 +232,9 @@ const N = {
     do: ["Read the email back letter by letter. A bad email kills a booked call.", "If they had any questions you couldn't answer, remind them you'll have answers by {due}."],
     options: [ {label:"Done, save it", to:"wrap", outcome:"booked"} ] },
   voicemail: { stage:"Voicemail", title:"Leave a short one",
-    say: ["Hi, this is Scotty with Ahern AI out of Gordon, calling for the owner of {business}. I was looking you up and {hookShort}.",
+    say: ["Hi, this is {rep} with Ahern AI out of Gordon, calling for the owner of {business}. I was looking you up and {hookShort}.",
           "Mike Ahern builds small-business websites right here in North Texas, starting at $995. Have a look at ahernai.com.",
-          "You can reach me at {phone}. Again, Scotty with Ahern AI. Thanks."],
+          "You can reach me at {phone}. Again, {rep} with Ahern AI. Thanks."],
     do: ["Under 30 seconds. Say the number slowly, twice if you've got room."],
     options: [ {label:"Left it", to:"wrap", outcome:"voicemail"} ] },
   bad_time: { stage:"Objection", title:"\"Bad time\"", say: ["Totally fair. Is later today better, or tomorrow morning?"],
@@ -213,7 +268,7 @@ const N = {
     do: ["If the thing they're stuck on is a question you can't answer, go to find-out."],
     options: [ {label:"Hold the time", to:"booked"}, {label:"It's a question I can't answer", to:"FINDOUT"}, {label:"Call back later", to:"wrap", outcome:"callback"} ] },
   obj_legit: { stage:"Objection", title:"\"Who are you guys?\"",
-    say: ["Fair question. Ahern AI is Mike Ahern, based in Gordon. He's been doing IT and network work for twelve years and builds everything himself.",
+    say: ["Fair question. Ahern AI is Mike Ahern, based in Gordon. He's been doing IT and network work since 2014 and builds everything himself.",
           "The website, ahernai.com, is his work. Have a look, and you can reach us at hello@ahernai.com."],
     do: ["Don't oversell. Point them at the site and let it do the work."],
     options: [ {label:"Satisfied, keep going", to:"discovery"}, {label:"Wants info first", to:"obj_sendinfo"} ] },
@@ -238,11 +293,12 @@ const OBJ_MENU = [
 ];
 
 /* ---------- render: script ---------- */
-function go(to, outcome) {
+function go(to, outcome, note) {
   if (to === "FINDOUT") { openFindout(); return; }
   nav.history.push(nav.node); if (nav.history.length > 60) nav.history.shift();
   nav.node = to;
   if (outcome) { sheet.outcome = outcome; saveSheet(); renderOutcomes(); }
+  if (note && !sheet.notes.includes(note)) { sheet.notes = note + (sheet.notes ? "\n" + sheet.notes : ""); $("#s-notes").value = sheet.notes; saveSheet(); }
   store.set("desk.nav", nav);
   closeFindout(); $("#objmenu").hidden = true; $("#btn-obj").setAttribute("aria-expanded", "false");
   renderScript();
@@ -269,8 +325,10 @@ function renderScript() {
   if (n.options.length) {
     body.append(el("p", { class: "choices-h", text: "What did they say?" }));
     const grid = el("div", { class: "choices" });
-    n.options.forEach(o => grid.append(el("button", { class: "choice" + (o.danger ? " danger" : ""), type: "button", onclick: () => go(o.to, o.outcome) },
-      el("strong", { text: o.label }), o.hear ? el("span", { class: "hear", text: o.hear }) : null)));
+    // A do-not-call match takes the dial button away.
+    const blocked = nav.node === "prep" && dncActive;
+    n.options.forEach(o => grid.append(el("button", { class: "choice" + (o.danger || blocked ? " danger" : ""), type: "button", disabled: blocked, onclick: () => go(o.to, o.outcome, o.note) },
+      el("strong", { text: blocked ? "Do not call. Don't dial this one." : o.label }), o.hear && !blocked ? el("span", { class: "hear", text: o.hear }) : null)));
     body.append(grid);
   }
   $("#btn-back").disabled = !nav.history.length;
@@ -297,27 +355,40 @@ function openFindout() {
 function closeFindout() { $("#findout").hidden = true; $("#fo-text").value = ""; $("#fo-contactinfo").value = ""; }
 $("#btn-findout").addEventListener("click", openFindout);
 $("#fo-cancel").addEventListener("click", closeFindout);
+// A retry reuses its request key only for the very same question. Change the
+// wording or start another question and it gets a fresh key, so the server can
+// never answer a new question with an old one's id.
+let foPending = null; // { key, sig }
+const pendingNote = (t) => "FIND-OUT (not queued yet): " + t;
+const dropPendingNote = (t) => {
+  const note = pendingNote(t);
+  if (!sheet.notes.includes(note)) return;
+  sheet.notes = sheet.notes.split(note).join("").replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "");
+  $("#s-notes").value = sheet.notes; saveSheet();
+};
 $("#fo-save").addEventListener("click", async (ev) => {
   const text = $("#fo-text").value.trim();
   if (!text) { toast("Type their question first."); $("#fo-text").focus(); return; }
   const reach = $("#fo-reach").value;
+  const reachTo = $("#fo-contactinfo").value.trim() || (reach === "email" ? sheet.email : sheet.phone) || "";
+  const sig = [text, reach, reachTo].join("\u0001");
+  if (!foPending || foPending.sig !== sig) foPending = { key: key(), sig };
   const body = {
-    request_key: ev.currentTarget.dataset.key || (ev.currentTarget.dataset.key = key()),
-    text, reach, reach_to: $("#fo-contactinfo").value.trim() || (reach === "email" ? sheet.email : sheet.phone) || "",
+    request_key: foPending.key, text, reach, reach_to: reachTo,
     business: sheet.business, contact: sheet.contact, phone: sheet.phone, email: sheet.email,
   };
   const btn = ev.currentTarget; btn.disabled = true;
   try {
     const r = await api("/questions", { method: "POST", body });
-    delete btn.dataset.key;
+    foPending = null; dropPendingNote(text);
     callQs.push({ id: r.id, text, due: r.due_by }); store.set("desk.callQs", callQs);
     renderCallQs(); closeFindout(); refresh();
     toast("Queued for Mike. Answer due " + fmtDue(r.due_by) + ".");
   } catch (e) {
     if (e.status === 400) { toast(e.message); }
     else {
-      // Keep the question on the call so nothing is lost; the retry key stays on the button.
-      sheet.notes = (sheet.notes ? sheet.notes + "\n" : "") + "FIND-OUT (not queued yet): " + text; $("#s-notes").value = sheet.notes; saveSheet();
+      // Keep the question on the call so nothing is lost. One note line, however many retries.
+      if (!sheet.notes.includes(pendingNote(text))) { sheet.notes = (sheet.notes ? sheet.notes + "\n" : "") + pendingNote(text); $("#s-notes").value = sheet.notes; saveSheet(); }
       toast("Couldn't reach the desk. The question is in your notes. Hit save again to queue it.");
     }
   } finally { btn.disabled = false; }
@@ -334,7 +405,7 @@ function fillSheet() {
   FIELDS.forEach(f => { const i = inputOf(f); if (i) i.value = sheet[f] || ""; });
   if (!sheet.seen) inputOf("seen").value = "none";
   $("#seenother-wrap").hidden = sheet.seen !== "other";
-  renderOutcomes();
+  renderOutcomes(); checkSlots();
 }
 function saveSheet() { store.set("desk.sheet", sheet); }
 let rerenderT;
@@ -344,7 +415,8 @@ FIELDS.forEach(f => {
     sheet[f] = i.value; saveSheet();
     if (f === "seen") $("#seenother-wrap").hidden = sheet.seen !== "other";
     clearTimeout(rerenderT); rerenderT = setTimeout(renderScript, 150);
-    if (f === "business" || f === "phone") checkPrior();
+    if (f === "business" || f === "phone") { checkPrior(); queueLookup(); }
+    if (f === "slot1" || f === "slot2") checkSlots();
   });
 });
 function renderOutcomes() {
@@ -356,21 +428,53 @@ function renderOutcomes() {
     box.append(el("label", { for: "o-" + k }, input, el("span", { text: label })));
   });
 }
+const priorKey = () => normPhone(sheet.phone) + "|" + sheet.business.trim().toLowerCase();
 function checkPrior() {
-  const ph = normPhone(sheet.phone), biz = sheet.business.trim().toLowerCase();
-  const match = (business, phoneNorm) => (ph.length === 10 && phoneNorm === ph) || (biz.length > 3 && String(business || "").trim().toLowerCase() === biz);
+  const ph = normPhone(sheet.phone), biz = normBiz(sheet.business);
+  const match = (business, phoneNorm) => (ph.length === 10 && phoneNorm === ph) || (biz.length > 3 && normBiz(business) === biz);
   const dnc = dncList.find(d => match(d.business, d.phone_norm));
   const hits = calls.filter(c => match(c.business, c.phone_norm));
+  // The page only holds the newest 500 calls. The server lookup covers the rest.
+  const remote = remotePrior && remotePrior.key === priorKey() ? remotePrior : null;
+  const count = Math.max(hits.length, remote ? remote.count : 0);
+  let last = hits[0] || null;
+  if (remote && remote.last && (!last || remote.last.created_at > last.created_at)) last = remote.last;
+  const bad = (remote && remote.bad_number) || hits.some(c => ph.length === 10 && c.phone_norm === ph && String(c.notes || "").includes("BAD NUMBER"));
   const a = $("#dnc-alert"), p = $("#prior-alert");
+  const was = dncActive; dncActive = !!dnc;
   if (dnc) { a.hidden = false; a.textContent = "Do not call. " + (dnc.business || "This number") + " asked to be removed on " + fmtWhen(dnc.created_at) + ". Don't dial."; }
   else a.hidden = true;
-  if (hits.length && !dnc) {
-    const last = hits[0]; p.hidden = false;
-    p.textContent = "Called before: " + hits.length + "×. Last on " + fmtWhen(last.created_at) + " — " + outcomeLabel(last.outcome) + (last.notes ? ". Note: " + String(last.notes).slice(0, 140) : "") + ".";
+  if (count && last && !dnc) {
+    p.hidden = false; p.className = "alert " + (bad ? "bad" : "warn");
+    p.textContent = (bad ? "Bad number. This one was logged as disconnected or wrong. Find a new number before you dial. " : "") +
+      "Called before: " + count + "×. Last on " + fmtWhen(last.created_at) + " — " + outcomeLabel(last.outcome) +
+      (last.best ? ". Direct line / best time: " + String(last.best).slice(0, 120) : "") +
+      (last.notes ? ". Note: " + String(last.notes).slice(0, 140) : "") + ".";
   } else p.hidden = true;
+  if (was !== dncActive && nav.node === "prep") renderScript();
+}
+let lookupT;
+function queueLookup() {
+  clearTimeout(lookupT);
+  const k = priorKey();
+  if (normPhone(sheet.phone).length !== 10 && sheet.business.trim().length <= 3) { remotePrior = null; return; }
+  lookupT = setTimeout(async () => {
+    try {
+      const r = await api("/lookup?phone=" + encodeURIComponent(sheet.phone) + "&business=" + encodeURIComponent(sheet.business.trim()));
+      if (k === priorKey()) { remotePrior = Object.assign(r, { key: k }); checkPrior(); }
+    } catch { /* the local 500-call check still applies */ }
+  }, 450);
+}
+// Warn before a taken time is offered. The server refuses the double-booking either way.
+function checkSlots() {
+  const a = $("#slot-alert");
+  const taken = [...new Set([sheet.slot1, sheet.slot2].filter(Boolean))].map(sl => calls.find(c => c.outcome === "booked" && c.consult_at === sl)).filter(Boolean);
+  if (taken.length) { a.hidden = false; a.textContent = "Already booked: " + taken.map(c => (c.consult_label || fmtSlot(c.consult_at)) + " (" + (c.business || "another prospect") + ")").join(", ") + ". Pick a different time before you offer it."; }
+  else if (sheet.slot1 && sheet.slot1 === sheet.slot2) { a.hidden = false; a.textContent = "Time A and Time B are the same. Give them two options."; }
+  else a.hidden = true;
 }
 function resetCall() {
-  sheet = blankSheet(); nav = { node: "prep", history: [] }; callQs = [];
+  sheet = blankSheet(); nav = { node: "prep", history: [] }; callQs = []; foPending = null; remotePrior = null;
   store.set("desk.sheet", sheet); store.set("desk.nav", nav); store.set("desk.callQs", callQs);
   fillSheet(); renderCallQs(); closeFindout(); renderScript(); checkPrior();
   $("#s-business").focus();
@@ -393,8 +497,8 @@ $("#btn-save").addEventListener("click", async () => {
   };
   const btn = $("#btn-save"); btn.disabled = true; btn.textContent = "Saving…";
   try {
-    await api("/calls", { method: "POST", body });
-    toast("Call saved: " + outcomeLabel(body.outcome) + ".");
+    const r = await api("/calls", { method: "POST", body });
+    toast(r.dnc_hit ? "Saved and flagged for Mike: that number is on the do-not-call list." : "Call saved: " + outcomeLabel(body.outcome) + ".");
     resetCall(); refresh();
   } catch (e) {
     say(e.status === 400 ? e.message : e.status === 403 ? "Your account can't save calls. Ask Mike to check your access." : "Didn't save. Check your connection and hit Save again. Nothing on the sheet was lost.");
@@ -485,12 +589,25 @@ function renderQuestions() {
 /* ---------- log view ---------- */
 let lFilter = "all", lSearch = "";
 $("#lfilters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; lFilter = b.dataset.f; [...$("#lfilters").children].forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderLog(); });
-$("#log-search").addEventListener("input", (e) => { lSearch = e.target.value.trim().toLowerCase(); renderLog(); });
+// Two or more characters searches the whole log on the server, not just the newest 500 on the page.
+let searchT;
+function runSearch(delay) {
+  clearTimeout(searchT);
+  if (lSearch.length < 2) { searchRows = null; return; }
+  const q = lSearch;
+  searchT = setTimeout(async () => {
+    try { const r = await api("/calls/search?q=" + encodeURIComponent(q)); if (q === lSearch) { searchRows = r.calls || []; renderLog(); } }
+    catch { /* keep showing the local matches */ }
+  }, delay);
+}
+$("#log-search").addEventListener("input", (e) => { lSearch = e.target.value.trim().toLowerCase(); searchRows = null; renderLog(); runSearch(350); });
+const isFlagged = (c) => c.outcome === "dnc" || dncList.some(d => (d.phone_norm.length === 10 && d.phone_norm === c.phone_norm) || (normBiz(d.business).length > 3 && normBiz(d.business) === normBiz(c.business)));
 function renderLog() {
   const tb = $("#logbody"); tb.replaceChildren();
   if (!online) { tb.append(el("tr", {}, el("td", { colspan: "8", class: "empty-state" }, el("strong", { text: "Loading the call log…" }), "If this doesn't clear, reload the page."))); return; }
   const ph = lSearch.replace(/\D/g, "");
-  const rows = calls.filter(c => (lFilter === "all" || c.outcome === lFilter) &&
+  const rows = (lSearch.length >= 2 && searchRows) ? searchRows.filter(c => lFilter === "all" || c.outcome === lFilter)
+    : calls.filter(c => (lFilter === "all" || c.outcome === lFilter) &&
     (!lSearch || [c.business, c.contact, c.dm].some(s => String(s || "").toLowerCase().includes(lSearch)) || (ph.length >= 3 && String(c.phone_norm || "").includes(ph))));
   if (!rows.length) { tb.append(el("tr", {}, el("td", { colspan: "8", class: "empty-state" }, el("strong", { text: calls.length ? "No calls match" : "No calls logged yet" }), calls.length ? "Try a different filter." : "Saved calls from the Call tab show up here, newest first."))); return; }
   rows.forEach(c => {
@@ -514,21 +631,21 @@ function renderLog() {
       el("td", { style: "max-width:320px;white-space:pre-wrap", text: c.notes || "" }),
       el("td", { text: c.by_name || "—" }),
       el("td", {}, el("div", { class: "actions" },
-        el("button", { class: "btn sm", type: "button", text: "Call again", onclick: () => loadForRecall(c) }),
+        isFlagged(c) ? null : el("button", { class: "btn sm", type: "button", text: "Call again", onclick: () => loadForRecall(c) }),
         IS_OWNER ? el("button", { class: "btn sm", type: "button", text: "Edit", onclick: () => openEdit(c) }) : null,
-        IS_OWNER ? deleteButton("c:" + c.id, "Delete", c.outcome === "dnc" ? "Confirm: removes do-not-call" : "Confirm delete", async () => {
-          await api("/calls/" + encodeURIComponent(c.id), { method: "DELETE", body: {} });
+        IS_OWNER ? deleteButton("c:" + c.id, "Delete", c.outcome === "dnc" ? "Confirm delete (do-not-call stays)" : "Confirm delete", async () => {
+          const r = await api("/calls/" + encodeURIComponent(c.id), { method: "DELETE", body: {} });
           if (editing && editing.id === c.id) closeEdit();
-          toast("Call deleted."); refresh();
+          toast(r.dnc_kept ? "Call deleted. Its do-not-call flag is still on." : "Call deleted."); refresh();
         }) : null))));
   });
 }
 function loadForRecall(c) {
   sheet = Object.assign(blankSheet(), { business: c.business || "", phone: c.phone || "", website: c.website || "", seen: c.seen || "none", seenother: c.seen_other || "",
     contact: c.dm || c.contact || "", role: c.dm ? "" : (c.role || ""), email: c.email || "", best: c.best || "" });
-  nav = { node: "prep", history: [] }; callQs = [];
+  nav = { node: "prep", history: [] }; callQs = []; foPending = null; remotePrior = null;
   store.set("desk.sheet", sheet); store.set("desk.nav", nav); store.set("desk.callQs", callQs);
-  fillSheet(); renderCallQs(); renderScript(); checkPrior();
+  fillSheet(); renderCallQs(); renderScript(); checkPrior(); queueLookup();
   location.hash = "#call";
 }
 
@@ -564,7 +681,10 @@ $("#edit-save").addEventListener("click", async () => {
   try {
     const r = await api("/calls/" + encodeURIComponent(editing.id), { method: "PATCH", body });
     const lost = editing.confirmed && !r.confirmed;
-    closeEdit(); toast(lost ? "Saved. The consult time changed, so it's back to unconfirmed." : "Changes saved."); refresh();
+    closeEdit();
+    toast(r.dnc_kept ? "Saved. The do-not-call flag is still on. Lift it on the cheat sheet if it was a mistake."
+      : lost ? "Saved. The consult time changed, so it's back to unconfirmed." : "Changes saved.");
+    refresh();
   } catch (e) { hint.hidden = false; hint.textContent = e.message || "Didn't save. Try again."; }
   finally { btn.disabled = false; btn.textContent = "Save changes"; }
 });
@@ -577,12 +697,27 @@ function renderConfig() {
   if (!configDirty) { $("#c-avail").value = config.availability || ""; $("#c-length").value = config.length || 20; $("#c-phone").value = config.callback_phone || ""; }
 }
 ["#c-avail", "#c-length", "#c-phone", "#c-save"].forEach(s => { $(s).disabled = !IS_OWNER; });
-$("#settings-note").textContent = IS_OWNER ? "Scotty sees these on the call sheet and in the voicemail script." : "Mike sets these. You see them on the call sheet.";
+$("#settings-note").textContent = IS_OWNER ? "Whoever is calling sees these on the call sheet and in the voicemail script." : "Mike sets these. You see them on the call sheet.";
 $("#c-save").addEventListener("click", async () => {
   const body = { availability: $("#c-avail").value.trim(), length: parseInt($("#c-length").value, 10) || 20, callback_phone: $("#c-phone").value.trim() };
   try { await api("/config", { method: "PUT", body }); configDirty = false; toast("Settings saved."); refresh(); }
   catch (e) { toast(e.message || "Didn't save. Try again."); }
 });
+
+/* ---------- do-not-call list ---------- */
+function renderDnc() {
+  $("#dnc-note").textContent = IS_OWNER ? "A flag stays on even if the call that set it is edited or deleted. Lift one only if it was logged by mistake."
+    : "These businesses asked not to be called. Only Mike can lift a flag.";
+  const ul = $("#dnc-list"); ul.replaceChildren();
+  if (!dncList.length) { ul.append(el("li", { class: "empty-hint", text: online ? "Nobody has asked to be removed." : "Loading…" })); return; }
+  dncList.forEach(d => ul.append(el("li", {},
+    el("div", { text: [d.business, fmtPhone(d.phone_norm)].filter(Boolean).join(" · ") || "No details recorded" }),
+    el("span", { class: "due", text: "Since " + fmtWhen(d.created_at) }),
+    IS_OWNER ? el("div", { class: "row", style: "margin-top:6px" }, deleteButton("d:" + d.id, "Lift flag", "Confirm lift", async () => {
+      await api("/dnc/" + encodeURIComponent(d.id), { method: "DELETE", body: {} });
+      toast("Do-not-call lifted."); refresh();
+    })) : null)));
+}
 
 /* ---------- copy ---------- */
 document.addEventListener("click", async (e) => {
@@ -610,7 +745,8 @@ async function refresh() {
     const s = await api("/state");
     calls = s.calls || []; questions = s.questions || []; dncList = s.dnc || []; config = s.config || config; nextDue = s.next_due || null;
     online = true;
-    renderConfig(); renderQuestions(); checkPrior(); renderScript();
+    renderConfig(); renderQuestions(); renderDnc(); checkPrior(); checkSlots(); renderScript();
+    if (lSearch.length >= 2) runSearch(0);
     if (!$("#view-log").hidden) renderLog();
   } catch (e) {
     if (e.status !== 401 && !online) toast("Couldn't load the desk. Retrying…");
@@ -621,5 +757,5 @@ setInterval(() => { if (document.visibilityState === "visible") refresh(); }, 20
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
 
 /* ---------- boot ---------- */
-fillSheet(); renderCallQs(); renderScript(); renderConfig(); route(); refresh();
+fillSheet(); renderCallQs(); renderScript(); renderConfig(); renderDnc(); route(); refresh(); queueLookup();
 })();

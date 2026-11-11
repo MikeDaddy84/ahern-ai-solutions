@@ -93,6 +93,8 @@ can be deleted).
 | Answer find-out questions | ✓ | — |
 | Mark booked consults as confirmed | ✓ | — |
 | Edit availability, consult length, callback number | ✓ | — |
+| Edit or delete logged calls, delete find-outs (1.2.0) | ✓ | — |
+| Lift a do-not-call flag (1.2.1) | ✓ | — |
 
 `client` and `member` accounts get a 403 and never see the nav link.
 
@@ -101,7 +103,7 @@ can be deleted).
   Friday questions are due Monday. This is computed server-side.
 - Do-not-call entries are returned in full on every load. They don't age out
   with the 500-row log window, so the call sheet always flags a number that
-  asked to be removed.
+  asked to be removed. Since 1.2.1 they live in their own `calldesk_dnc` table.
 - Calls and questions carry a client `request_key`, so a retried save never
   creates a duplicate.
 - Pricing on the script and cheat sheet matches `/services/websites` as of
@@ -125,8 +127,8 @@ can be deleted).
   the corrected number. A confirmed consult stays confirmed only if it's still
   booked at the same time; moving the time sends it back to unconfirmed.
 - **Call log → Delete** (owner only) uses two clicks: the button turns red and
-  asks for confirmation for five seconds. Deleting a do-not-call entry says so,
-  because it lifts that number's flag. Questions asked on a deleted call stay in
+  asks for confirmation for five seconds. (In 1.2.0 deleting a do-not-call call
+  lifted that number's flag. 1.2.1 changed that: the flag stays.) Questions asked on a deleted call stay in
   the Find-outs queue, unlinked.
 - **Find-outs → Delete** (owner only) removes a question, which is handy for
   clearing test entries.
@@ -136,6 +138,93 @@ can be deleted).
   and owner checks as answer, confirm and settings. No schema change.
 - Test added for role gates, validation, confirmation rules, question
   unlinking and do-not-call removal. `npm test` 70 of 70 passing.
+
+### Call Desk v1.2.1 — review fixes and automated answers, November 10, 2026
+Built with Claude Fable 5.2 after a review of the 1.1.0 and 1.2.0 work. Pushed
+to `main`.
+
+**Fixed**
+- **Do-not-call has its own table.** `calldesk_dnc` holds one entry per
+  do-not-call call. Deleting that call, or editing it to another outcome, no
+  longer lifts the flag; the desk says the flag is still on. Only an owner
+  lifts one, from the new **Do-not-call list** panel on the cheat sheet (two
+  clicks). A lifted entry is kept with who lifted it and when. Marking the same
+  call do-not-call again brings its entry back.
+- **Matching is less brittle.** Business names are compared without case,
+  punctuation, a leading "the" or a trailing LLC/Inc/Co/Corp/Ltd, so "Strawn
+  Diner" matches "The Strawn Diner, L.L.C.". Phone matching is still the last
+  ten digits. A second phone line with a differently spelled name still gets
+  through; that needs a person to notice.
+- **A match takes the dial button away.** With the red banner up, "I'm ready,
+  dialing" is disabled, and "Call again" is hidden on flagged rows in the log.
+- **A call logged against a flagged number is kept, not refused.** Refusing it
+  would only hide the record. The save succeeds, the notes get a `[DNC HIT]`
+  first line, and the caller is told it was flagged.
+- **"Called before" covers the whole log.** `GET /api/portal/call-desk/lookup`
+  counts every earlier call by phone or exact business name; the page no longer
+  relies on the newest 500 rows alone. The banner also shows the last
+  "Best time / direct line" entry.
+- **Log search covers the whole log.** Two or more characters run
+  `GET /api/portal/call-desk/calls/search` (business, contact, decision maker,
+  email, phone digits; newest 200 matches).
+- **No double-booking.** A booked save or edit is refused when another booked
+  call already holds that consult time. The call sheet warns as soon as Time A
+  or Time B matches a booked consult.
+- **Find-out retries can't lose a question.** The retry key is tied to the
+  exact question. A different question always gets a new key. A failed save
+  leaves one note line however many retries, and it is removed once the
+  question is queued.
+- **The script uses the signed-in person's first name** instead of a
+  hard-coded "Scotty", so anyone with desk access can make calls.
+- **Server errors are logged with their name, code and message** (no request
+  body), so a database timeout can be told apart from a bug in the Render log.
+- Smaller: answer, relay and confirm routes check the id format; the opener asks
+  about "getting {business} a website" when there is no site; "twelve years"
+  became "since 2014"; the desk version is defined once (`VERSION` in
+  `lib/call-desk.js`) and filled into the page.
+
+**Added: automated answers**
+- "Someone picks up" has a new **Automated system** option leading to steps
+  for a phone menu, an AI receptionist or bot, call screening, and a live
+  answering service, plus two dead ends (no voicemail, disconnected or wrong
+  number).
+- No new outcome type. Dead ends save as "No contact" with a note. A
+  disconnected or wrong number is tagged `BAD NUMBER` in the notes, and the
+  "Called before" banner turns red for that phone number on the next attempt.
+- Rule written into the script: never use an emergency or after-hours service
+  option to reach a person.
+
+**Schema**
+- Additive only: `calldesk_dnc` and two indexes. The schema file also backfills
+  entries from do-not-call calls logged before 1.2.1. It runs with the rest of
+  the portal schema on first use after deploy and is safe to re-run; a lifted
+  flag stays lifted.
+
+**Validation**
+- `test/call-desk.test.js` grew from 8 to 13 tests: flag survival and lifting,
+  the backfill, the double-booking guard, lookup and search (including a
+  literal `%`), version injection, script-step integrity and name matching.
+- The real `public/call-desk/app.js` was also driven in jsdom against a stubbed
+  API as both roles: do-not-call block, bad-number banner, lookup upgrade, the
+  automated-answer steps, slot warning and both find-out retry cases.
+- `npm test` in the cloud workspace used for this change: 82 of 85 passing. The
+  3 failures are Satori tests that also failed there before any change, because
+  the bundled Satori app could not be installed in that workspace (Node 22
+  against the required Node 24). They were not re-run on Node 24.
+
+**Not done (recommendations only)**
+- Email or text to Mike on a booked consult or a new find-out.
+- A dated callback queue, send-info tracking, lead-list import, real consult
+  slots with a calendar invite, call statistics, soft-delete for calls.
+- Reading prices from `lib/services.js` instead of the two hand-kept copies.
+- Self-serve password reset.
+- The page still polls the full state every 20 seconds.
+
+**Commit identity**
+- Commits from this change are authored as `mike@ahernai.com`. Earlier commits
+  keep the address they were made with; history was not rewritten. The Windows
+  working copy needs its own `git config user.email` change for future commits
+  made there.
 
 ### Employee portal view — October 27, 2026 (later)
 - The **Hosaka** nav link is now owner-only, like Relay, Site visits and

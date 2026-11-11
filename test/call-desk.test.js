@@ -1,4 +1,6 @@
-// Call Desk v1.1.0 — access, CSRF, roles, idempotency, do-not-call and due dates.
+// Call Desk tests — access, CSRF, roles, idempotency, do-not-call, due dates,
+// owner edit/delete (1.2.0), and the 1.2.1 do-not-call list, lookup, search and
+// double-booking guard. The desk version itself lives in lib/call-desk.js.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -149,19 +151,113 @@ test('v1.2.0: only the owner edits or deletes calls and deletes questions',async
   assert.equal(row.business,'Edit Me Roofing LLC');assert.equal(row.phone_norm,'8175550188');assert.equal(row.notes,'fixed typo');assert.equal(row.confirmed,true);assert.equal(row.by_name,'Scotty','original author kept');
   // Moving the time drops the confirmation.
   r=await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{...edit,consult_at:'2026-11-04T14:00'}});assert.equal((await r.json()).confirmed,false);
-  // Delete unlinks questions rather than deleting them, and clears a do-not-call flag.
+  // Delete unlinks questions rather than deleting them. Since 1.2.1 the do-not-call flag outlives the call.
   const dnc=await make('call-key-0101',{business:'Wrong Number Co',phone:'940-555-0999',outcome:'dnc',email:'',consult_at:'',consult_label:''});
   const q=await (await request(API+'/questions',{cookie:sales,token:salesCsrf,body:{request_key:'q-key-0100',text:'Test question'}})).json();
   await store.client.execute({sql:'UPDATE calldesk_questions SET call_id=? WHERE id=?',args:[dnc,q.id]});
   assert.ok((await (await request(API+'/state',{cookie:sales})).json()).dnc.some(d=>d.phone_norm==='9405550999'));
-  assert.equal((await request(API+`/calls/${dnc}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  const gone=await request(API+`/calls/${dnc}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}});
+  assert.equal(gone.status,200);assert.equal((await gone.json()).dnc_kept,true);
   assert.equal((await request(API+`/calls/${dnc}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,404);
   let s=await (await request(API+'/state',{cookie:sales})).json();
-  assert.ok(!s.dnc.some(d=>d.phone_norm==='9405550999'));assert.ok(!s.calls.some(c=>c.id===dnc));
+  assert.ok(s.dnc.some(d=>d.phone_norm==='9405550999'),'flag survives the delete');assert.ok(!s.calls.some(c=>c.id===dnc));
   assert.equal(s.questions.find(x=>x.id===q.id).call_id,null);
   // Question delete: owner only.
   assert.equal((await request(API+`/questions/${q.id}`,{cookie:sales,token:salesCsrf,method:'DELETE',body:{}})).status,403);
   assert.equal((await request(API+`/questions/${q.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
   s=await (await request(API+'/state',{cookie:owner})).json();
   assert.ok(!s.questions.some(x=>x.id===q.id));
+});
+
+test('v1.2.1: a do-not-call flag only comes off when the owner lifts it',async()=>{
+  const post=(key,extra)=>request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:key,business:'Thurber Tire, LLC',phone:'(254) 555-0142',outcome:'dnc',...extra}});
+  const id=(await (await post('call-key-0200')).json()).id;
+  let s=await (await request(API+'/state',{cookie:sales})).json();
+  const entry=s.dnc.find(d=>d.phone_norm==='2545550142');assert.ok(entry&&entry.id,'entry carries an id for lifting');
+  // Editing the call to another outcome keeps the flag and says so.
+  const edited=await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{business:'Thurber Tire, LLC',phone:'(254) 555-0142',outcome:'notinterested'}});
+  assert.equal(edited.status,200);assert.equal((await edited.json()).dnc_kept,true);
+  assert.ok((await (await request(API+'/state',{cookie:sales})).json()).dnc.some(d=>d.id===entry.id));
+  // A later call to the flagged number is kept, tagged, and reported back.
+  const hit=await post('call-key-0201',{outcome:'voicemail',notes:'left a message'});assert.equal(hit.status,201);
+  const hitBody=await hit.json();assert.equal(hitBody.dnc_hit,true);
+  s=await (await request(API+'/state',{cookie:owner})).json();
+  assert.match(s.calls.find(c=>c.id===hitBody.id).notes,/^\[DNC HIT\][^\n]*\nleft a message$/);
+  assert.equal((await (await post('call-key-0202',{phone:'254-555-0000',outcome:'voicemail'})).json()).dnc_hit,false);
+  // Only the owner lifts, and only once.
+  assert.equal((await request(API+`/dnc/${entry.id}`,{cookie:sales,token:salesCsrf,method:'DELETE',body:{}})).status,403);
+  assert.equal((await request(API+`/dnc/${entry.id}`,{cookie:owner,method:'DELETE',body:{}})).status,403,'needs CSRF');
+  assert.equal((await request(API+'/dnc/not-an-id',{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,404);
+  assert.equal((await request(API+`/dnc/${entry.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  assert.equal((await request(API+`/dnc/${entry.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,404);
+  assert.ok(!(await (await request(API+'/state',{cookie:sales})).json()).dnc.some(d=>d.id===entry.id));
+  // Marking the same call do-not-call again brings the lifted entry back.
+  await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{business:'Thurber Tire, LLC',phone:'(254) 555-0142',outcome:'dnc'}});
+  assert.ok((await (await request(API+'/state',{cookie:sales})).json()).dnc.some(d=>d.id===entry.id));
+});
+test('v1.2.1: the schema backfills do-not-call entries from older calls once, and never un-lifts one',async()=>{
+  const statements=require('../lib/portal-db').statements();
+  const user=(await store.client.execute("SELECT id FROM portal_users WHERE email='sales@example.test'")).rows[0].id;
+  // A do-not-call call logged before calldesk_dnc existed: a call row with no list entry.
+  await store.client.execute({sql:"INSERT INTO calldesk_calls(id,request_key,created_at,by_user,business,phone,phone_norm,outcome) VALUES('11111111-1111-4111-8111-111111111111','legacy-key-0001',1000,?,'Legacy Lumber','940-555-0166','9405550166','dnc')",args:[user]});
+  const count=async()=>Number((await store.client.execute("SELECT COUNT(*) AS n FROM calldesk_dnc WHERE call_id='11111111-1111-4111-8111-111111111111' AND removed_at IS NULL")).rows[0].n);
+  assert.equal(await count(),0);
+  await store.client.batch(statements,'write');assert.equal(await count(),1);
+  await store.client.batch(statements,'write');assert.equal(await count(),1,'re-running adds nothing');
+  const s=await (await request(API+'/state',{cookie:sales})).json();
+  const entry=s.dnc.find(d=>d.phone_norm==='9405550166');assert.equal(entry.business,'Legacy Lumber');assert.equal(entry.created_at,1000);
+  assert.equal((await request(API+`/dnc/${entry.id}`,{cookie:owner,token:ownerCsrf,method:'DELETE',body:{}})).status,200);
+  await store.client.batch(statements,'write');assert.equal(await count(),0,'a lifted flag stays lifted across restarts');
+});
+test('v1.2.1: one consult per time slot, on save and on edit',async()=>{
+  const book=(key,business,at)=>request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:key,business,email:'x@y.test',outcome:'booked',consult_at:at,consult_label:'slot'}});
+  const first=await book('call-key-0300','Palo Pinto Pest','2026-11-17T09:00');assert.equal(first.status,201);
+  const clash=await book('call-key-0301','Santo Septic','2026-11-17T09:00');assert.equal(clash.status,400);
+  assert.match((await clash.json()).error,/already booked for Palo Pinto Pest/);
+  assert.equal((await (await request(API+'/state',{cookie:sales})).json()).calls.filter(c=>c.business==='Santo Septic').length,0,'nothing half-saved');
+  // The refused save can be retried with the other time under the same request key.
+  const second=await book('call-key-0301','Santo Septic','2026-11-17T10:00');assert.equal(second.status,201);
+  const id=(await second.json()).id;
+  const move=await request(API+`/calls/${id}`,{cookie:owner,token:ownerCsrf,method:'PATCH',body:{business:'Santo Septic',email:'x@y.test',outcome:'booked',consult_at:'2026-11-17T09:00'}});
+  assert.equal(move.status,400);
+  // A non-booked outcome may reuse the time, and a replayed save is not a clash with itself.
+  assert.equal((await book('call-key-0300','Palo Pinto Pest','2026-11-17T09:00')).status,201);
+});
+test('v1.2.1: called-before lookup and log search cover the whole log',async()=>{
+  const add=(key,extra)=>request(API+'/calls',{cookie:sales,token:salesCsrf,body:{request_key:key,business:'Lipan 100% Auto',phone:'(254) 555-0188',outcome:'nocontact',...extra}});
+  await add('call-key-0400',{notes:'BAD NUMBER: disconnected or wrong.'});await add('call-key-0401',{outcome:'callback',best:'press 2 then 0'});
+  const look=async q=>(await request(API+'/lookup?'+q,{cookie:sales})).json();
+  let r=await look('phone='+encodeURIComponent('254.555.0188'));
+  assert.equal(r.count,2);assert.equal(r.bad_number,true);assert.equal(r.last.outcome,'callback');assert.equal(r.last.best,'press 2 then 0');
+  r=await look('business='+encodeURIComponent('  lipan 100% auto '));assert.equal(r.count,2);assert.equal(r.bad_number,false,'bad-number is a phone match only');
+  assert.deepEqual(await look('phone=555&business=ab'),{count:0,last:null,bad_number:false});
+  assert.equal((await request(API+'/lookup?phone=2545550188',{cookie:client})).status,403);
+  assert.equal((await request(API+'/lookup?phone=2545550188')).status,401);
+  const find=async q=>(await (await request(API+'/calls/search?q='+encodeURIComponent(q),{cookie:sales})).json()).calls;
+  assert.equal((await find('LIPAN')).length,2);assert.equal((await find('(254) 555-0188')).length,2);assert.equal((await find('45550188')).length,2);
+  assert.equal((await find('100%')).length,2,'% is matched literally');
+  assert.equal((await find('%')).length,2,'a lone % is not a wildcard');
+  assert.equal((await find('zzzz')).length,0);
+  const row=(await find('lipan'))[0];assert.equal(row.by_name,'Scotty');assert.equal(typeof row.confirmed,'boolean');
+  assert.equal((await request(API+'/calls/search?q=',{cookie:sales})).status,400);
+  assert.equal((await request(API+'/calls/search?q=lipan',{cookie:client})).status,403);
+});
+test('v1.2.1: version comes from one place, the script uses the signed-in name, and names normalise',async()=>{
+  const html=await (await request('/portal/call-desk',{cookie:sales})).text();
+  assert.doesNotMatch(html,/DESK_VERSION/);
+  const doc=new JSDOM(html).window.document;
+  assert.ok(doc.querySelector(`script[src="/call-desk/app.js?v=${desk.VERSION}"]`));
+  assert.match(doc.querySelector('.brand span').textContent,new RegExp('v'+desk.VERSION.replace(/\./g,'\\.')));
+  assert.equal(doc.querySelector('meta[name="call-desk-name"]').content,'Scotty');
+  assert.ok(doc.querySelector('#dnc-list')&&doc.querySelector('#slot-alert'));
+  assert.equal((await (await request(API+'/state',{cookie:sales})).json()).version,desk.VERSION);
+  const app=fs.readFileSync(path.join(__dirname,'../public/call-desk/app.js'),'utf8');
+  assert.doesNotMatch(app,/Scotty with Ahern AI/,'no hard-coded caller name in the spoken lines');
+  for(const node of ['ivr','ivr_menu','ivr_bot','ivr_screen','ivr_service']) assert.match(app,new RegExp('\\n  '+node+': \\{'));
+  // Every script step an option points at exists.
+  const targets=[...app.matchAll(/to:"([A-Za-z_]+)"/g)].map(m=>m[1]).filter(t=>t!=='FINDOUT');
+  for(const t of new Set(targets)) assert.match(app,new RegExp('\\n  '+t+': \\{'),'missing script step '+t);
+  assert.equal(desk.normBiz('The Strawn Diner, L.L.C.'),'strawn diner');
+  assert.equal(desk.normBiz('Strawn Diner LLC'),'strawn diner');assert.equal(desk.normBiz('  strawn   diner, Inc. '),'strawn diner');
+  assert.equal(desk.normBiz('A&B Plumbing Co'),'a and b plumbing');assert.equal(desk.normBiz('Co'),'co');
 });

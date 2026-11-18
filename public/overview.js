@@ -98,10 +98,15 @@
     list(body, data.messages.map(item => ({ title: item.author, text: item.text, meta: shortDate(item.createdAt) + ' Central' })), 'No crew messages in this period.');
     body.append(node('p', 'Recent room messages. Direct messages stay in Crew Room.', 'overview-note'));
   }
-  const renderers = { visits: renderVisits, satori: renderSatori, 'call-desk': renderCalls, relay: renderRelay, 'crew-room': renderCrew };
+  function renderMail(body, data) {
+    metric(body, data.unread, 'unread in inbox', data.delayed ? 'Mail updates are delayed.' : '');
+    list(body, data.messages.map(m => ({title:m.subject || '(No subject)',text:m.sender,meta:shortDate(m.received)})), 'No starred or flagged inbox messages.');
+  }
+  const renderers = { 'ono-sendai':renderMail, visits: renderVisits, satori: renderSatori, 'call-desk': renderCalls, relay: renderRelay, 'crew-room': renderCrew };
   function validSummary(id, data) {
     const keys = { visits: ['today', 'week', 'month', 'total'], satori: ['total', 'done', 'remaining'], 'call-desk': ['actionable', 'openQuestions', 'overdueQuestions', 'answeredQuestions', 'unconfirmedConsults'], relay: ['replies'], 'crew-room': ['recentMessages'] };
     const count = value => Number.isSafeInteger(value) && value >= 0;
+    if (id === 'ono-sendai') return data && count(data.unread) && Number.isFinite(Date.parse(data.updatedAt)) && Array.isArray(data.messages) && data.messages.every(m=>m && typeof m.subject==='string' && typeof m.sender==='string');
     if (!data || !data.counts || !keys[id].every(key => count(data.counts[key])) || Number.isNaN(Date.parse(data.updatedAt))) return false;
     if (id === 'visits') return Array.isArray(data.days) && data.days.length === 30 && data.days.every(day => /^\d{4}-\d{2}-\d{2}$/.test(day.day) && count(day.views));
     if (id === 'satori') return Array.isArray(data.tasks) && data.tasks.every(task => typeof task.text === 'string') && data.counts.done + data.counts.remaining === data.counts.total;

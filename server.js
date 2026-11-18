@@ -48,6 +48,7 @@ app.disable('x-powered-by');
 // always "http" and req.ip is the proxy — which would break the gate's secure
 // cookie and collapse its rate limiting onto a single address.
 app.set('trust proxy', 1);
+app.post('/api/portal/ono-sendai-feed', express.json({limit:'128kb'}));
 app.use(express.json({ limit: '20kb' }));
 
 // calls.ahernai.com is a short link for the sales team. Portal sign-in only

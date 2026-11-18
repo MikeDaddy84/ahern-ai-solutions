@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'node:test';
+import { expect } from './expect.js';
 import { parseSheetDateToDayKey, mapType, buildSnapshotTasks } from '../../scripts/importLegacy.js';
 
 describe('Legacy Import Utilities', () => {

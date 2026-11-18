@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, beforeEach } from 'node:test';
+import { expect } from './expect.js';
 import { createDb, initTables, AppDatabase } from '../db/client.js';
 import { addTask, updateTask, getTodayTasks, getBacklogTasks } from '../server/services/tasks.js';
 

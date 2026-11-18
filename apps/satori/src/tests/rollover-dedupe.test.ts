@@ -1,39 +1,39 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
-import { runRollover } from '../server/services/rollover.js';
-import * as calendarModule from '../server/services/calendar.js';
+import * as spies from '@vitest/spy';
+import { describe, it, mock, before as beforeAll, after as afterAll } from 'node:test';
+import { expect } from './expect.js';
 import { createDb, initTables, AppDatabase } from '../db/client.js';
 import { tasks, appMeta } from '../db/schema.js';
 import { eq, inArray } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
+
+const fetchEvents = spies.fn();
+const calendars = {
+  getConfiguredCalendars: spies.fn(),
+  getAllCalendars: spies.fn(),
+  fetchAllCalendarEventsForDay: fetchEvents
+};
+mock.module(new URL('../server/services/calendar.ts', import.meta.url).href, { namedExports: calendars });
+const { runRollover } = await import('../server/services/rollover.js');
 
 describe('Rollover Dedupe with calendar_uid (R168)', () => {
   let db: AppDatabase;
-  let dbFile: string;
 
   beforeAll(async () => {
-    dbFile = path.join(os.tmpdir(), `test_dedupe_${Math.random().toString(36).substring(7)}.db`);
-    db = createDb(`file:${dbFile}`);
+    db = createDb('file::memory:?cache=shared');
     await initTables(db);
 
     // Mock calendar config to return a dummy calendar
-    vi.spyOn(calendarModule, 'getConfiguredCalendars').mockReturnValue([
+    calendars.getConfiguredCalendars.mockReturnValue([
       { key: 'test', url: 'http://test', prefix: '📅' }
     ]);
-    vi.spyOn(calendarModule, 'getAllCalendars').mockReturnValue([
+    calendars.getAllCalendars.mockReturnValue([
       { key: 'test', url: 'http://test', prefix: '📅', configured: true }
     ]);
   });
 
   afterAll(async () => {
-    vi.restoreAllMocks();
-    [dbFile, `${dbFile}-journal`, `${dbFile}-wal`].forEach((file) => {
-      if (fs.existsSync(file)) {
-        try { fs.unlinkSync(file); } catch (e) {}
-      }
-    });
+    spies.restoreAllMocks();
+    db.$client.close();
   });
 
   it('1. Legacy string match fallback (today): incoming event matches null-uid task by text, does not duplicate', async () => {
@@ -52,7 +52,7 @@ describe('Rollover Dedupe with calendar_uid (R168)', () => {
     });
 
     // Mock calendar to return the exact same event string
-    vi.spyOn(calendarModule, 'fetchAllCalendarEventsForDay').mockResolvedValueOnce({
+    fetchEvents.mockResolvedValueOnce({
       events: [{
         id: 'uid1-2024-05-01',
         title: 'Legacy Sync',
@@ -89,7 +89,7 @@ describe('Rollover Dedupe with calendar_uid (R168)', () => {
       calendarUid: null
     });
 
-    vi.spyOn(calendarModule, 'fetchAllCalendarEventsForDay').mockResolvedValueOnce({
+    fetchEvents.mockResolvedValueOnce({
       events: [{
         id: 'uid2-2024-05-02', // RRule expanded to today
         title: 'Backlog Legacy',
@@ -129,7 +129,7 @@ describe('Rollover Dedupe with calendar_uid (R168)', () => {
     });
 
     // Mock calendar to return the unedited event string, but with the same UID
-    vi.spyOn(calendarModule, 'fetchAllCalendarEventsForDay').mockResolvedValueOnce({
+    fetchEvents.mockResolvedValueOnce({
       events: [{
         id: eventId,
         title: 'Original Event Name',

@@ -1,33 +1,24 @@
-/**
- * @vitest-environment jsdom
- */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { 
-  formatPrettyDateKey, 
-  getOrdinal, 
-  renderTaskList, 
-  showStatus, 
-  toggleTaskStatus,
-  renderTodayView
-} from '../client/src/main.js';
+import * as spies from '@vitest/spy';
+import { describe, it, beforeEach } from 'node:test';
+import { expect } from './expect.js';
+import { mock, after } from 'node:test';
+import { JSDOM } from 'jsdom';
 import { api } from '../client/src/api.js';
-import * as rain from '../client/src/components/rain.js';
+const updateTask = spies.spyOn(api, 'updateTask');
+const getToday = spies.spyOn(api, 'getToday');
+const rain = { triggerMatrixCelebration:spies.fn(), initMatrixRain:spies.fn() };
+mock.module(new URL('../client/src/components/rain.ts',import.meta.url).href, {namedExports:rain});
 
-vi.mock('../client/src/api.js', () => ({
-  api: {
-    updateTask: vi.fn(),
-    getToday: vi.fn()
-  }
-}));
-
-vi.mock('../client/src/components/rain.js', () => ({
-  triggerMatrixCelebration: vi.fn(),
-  initMatrixRain: vi.fn()
-}));
+const dom = new JSDOM('', {url:'https://example.test'});
+for (const key of ['window','document','navigator','HTMLElement','HTMLInputElement','localStorage','sessionStorage','Event','MouseEvent','KeyboardEvent']) {
+  Object.defineProperty(globalThis,key,{configurable:true,value:dom.window[key]});
+}
+after(() => dom.window.close());
+const {formatPrettyDateKey,getOrdinal,renderTaskList,showStatus,toggleTaskStatus,renderTodayView} = await import('../client/src/main.js');
 
 describe('Frontend Logic & Rendering', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    spies.clearAllMocks();
     document.body.innerHTML = `
       <div id="header-date"></div>
       <div id="count-have_to"></div>
@@ -46,7 +37,7 @@ describe('Frontend Logic & Rendering', () => {
       <button id="btn-retry"></button>
     `;
     // Mock navigator.onLine
-    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
+    spies.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
   });
 
   it('formatPrettyDateKey produces correct ordinals', () => {
@@ -103,7 +94,7 @@ describe('Frontend Logic & Rendering', () => {
     const taskItem = document.getElementById('task-wrapper')!;
     
     // Mock failure
-    vi.mocked(api.updateTask).mockRejectedValueOnce(new Error('Update failed'));
+    updateTask.mockRejectedValueOnce(new Error('Update failed'));
     
     // Attempt toggle
     await toggleTaskStatus('fail-task', true, 'have_to');
@@ -124,10 +115,10 @@ describe('Frontend Logic & Rendering', () => {
     `;
     
     // Mock success update
-    vi.mocked(api.updateTask).mockResolvedValueOnce({} as any);
+    updateTask.mockResolvedValueOnce({} as any);
     
     // Mock getToday to return remaining = 0 for have_to
-    vi.mocked(api.getToday).mockResolvedValue({
+    getToday.mockResolvedValue({
       dayKey: '2024-01-01',
       counts: {
         have_to: { total: 1, remaining: 0 },
@@ -149,10 +140,10 @@ describe('Frontend Logic & Rendering', () => {
       </div>
     `;
     
-    vi.mocked(api.updateTask).mockResolvedValueOnce({} as any);
+    updateTask.mockResolvedValueOnce({} as any);
     
     // Mock getToday to return remaining = 1
-    vi.mocked(api.getToday).mockResolvedValue({
+    getToday.mockResolvedValue({
       dayKey: '2024-01-01',
       counts: {
         have_to: { total: 2, remaining: 1 },
@@ -168,7 +159,7 @@ describe('Frontend Logic & Rendering', () => {
   });
 
   it('live category counts update correctly after fetch', async () => {
-    vi.mocked(api.getToday).mockResolvedValue({
+    getToday.mockResolvedValue({
       dayKey: '2024-01-01',
       counts: {
         have_to: { total: 5, remaining: 3 },
@@ -195,7 +186,7 @@ describe('Frontend Logic & Rendering', () => {
   });
 
   it('toggles checkbox when Enter is pressed (R27)', async () => {
-    const mockClick = vi.fn();
+    const mockClick = spies.fn();
     
     // Simulate the event target
     const mockTarget = {
@@ -217,7 +208,7 @@ describe('Frontend Logic & Rendering', () => {
     const event = {
       target: mockTarget,
       key: 'Enter',
-      preventDefault: vi.fn()
+      preventDefault: spies.fn()
     };
 
     handler(event);
@@ -225,11 +216,11 @@ describe('Frontend Logic & Rendering', () => {
   });
 
   it('contract: main.ts invokes valid api methods (R48)', async () => {
-    const { api: realApi } = await vi.importActual('../client/src/api.js') as any;
+    const realApi = api;
     const fs = await import('fs');
     const path = await import('path');
     
-    const mainTsPath = path.resolve(__dirname, '../client/src/main.ts');
+    const mainTsPath = path.resolve(import.meta.dirname, '../client/src/main.ts');
     const mainCode = fs.readFileSync(mainTsPath, 'utf-8');
     
     const matches = mainCode.matchAll(/api\.([a-zA-Z0-9_]+)\s*\(/g);
@@ -293,7 +284,7 @@ describe('Frontend Logic & Rendering', () => {
     editBtn.click();
     textInput.value = 'New text';
     
-    vi.mocked(api.updateTask).mockRejectedValueOnce(new Error('Update failed'));
+    updateTask.mockRejectedValueOnce(new Error('Update failed'));
     
     // Attempt save
     saveBtn.click();
@@ -326,7 +317,7 @@ describe('Frontend Logic & Rendering', () => {
     saveBtn.click();
     
     // Request should NOT have been made
-    expect(vi.mocked(api.updateTask)).not.toHaveBeenCalled();
+    expect(updateTask).not.toHaveBeenCalled();
     
     // Error should be shown
     const errorSpan = div.querySelector('.edit-error') as HTMLSpanElement;

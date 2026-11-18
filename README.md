@@ -1,5 +1,12 @@
 # Ahern AI — Website
 
+## Ono-Sendai owner inbox
+
+Ono-Sendai mirrors one Gmail inbox on its own VM in provider-read-only mode. The portal receives a bounded HTTPS snapshot of sender, subject, flags, counts and dates. Owners can pair an installation at [/portal/ono-sendai/setup](https://ahernai.com/portal/ono-sendai/setup). Enter the feed key only at the VM setup prompt. The sidebar and Overview widget appear for the paired owner after the first successful import. The inbox page shows recent messages. The widget shows starred or flagged inbox mail and the unread count. Delayed sync is labeled. Other portal users and public previews have no access to the snapshot.
+
+The Linux VM needs the Ono-Sendai release, a Google app password, the owner feed key and the overview timer. The bundled Satori client builds with esbuild and PostCSS. Its suite runs on Node 24 with the standalone matcher and spy libraries. The lockfile no longer includes picomatch (GHSA-fc5q-39xc-vjpf). Both full npm audits, the production build, 90 portal tests, 94 Satori tests and eight Chicago timezone cases passed on Windows. Call Desk and Crew Room use shared in-memory SQLite fixtures with a connection held open for each suite. Live mailbox verification requires a paired owner and a successful upload from the VM.
+
+
 
 ## Overview dashboard — November 10, 2026
 

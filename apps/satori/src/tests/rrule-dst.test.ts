@@ -1,27 +1,21 @@
+import * as spies from '@vitest/spy';
 import ical from 'node-ical';
-import { describe, it, expect, vi, afterAll } from 'vitest';
+import { describe, it, after as afterAll } from 'node:test';
+import { expect } from './expect.js';
 import { getEventsInWindow } from '../server/services/calendar.js';
 
-vi.mock('node-ical', async (importOriginal) => {
-  const actual = await importOriginal<{ default: typeof import('node-ical') }>();
-  return {
-    default: {
-      ...actual.default,
-      async: { ...actual.default.async, fromURL: vi.fn() }
-    }
-  };
-});
+const fromURL = spies.spyOn(ical.async, 'fromURL');
 
 describe('RRULE occurrences across DST and Timezones (R135)', () => {
   
 
   
   afterAll(() => {
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   const setupFeed = async (icalData: string) => {
-        vi.mocked(ical.async.fromURL).mockResolvedValue(await ical.async.parseICS(icalData));
+        fromURL.mockResolvedValue(await ical.async.parseICS(icalData));
   };
 
   const getDay = async (dateStr: string) => {
@@ -179,12 +173,12 @@ END:VCALENDAR`);
 
   it('8. expansion throwing produces a FAILED stat, not a silent zero', async () => {
     // Mock the raw fetch to throw
-    vi.mocked(ical.async.fromURL).mockRejectedValueOnce(new Error('Simulated crash'));
+    fromURL.mockRejectedValueOnce(new Error('Simulated crash'));
     const start = new Date('2024-03-04T00:00:00Z');
     const end = new Date('2024-03-04T23:59:59Z');
     
     // We spy on console.error to ensure it is logged
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const errorSpy = spies.spyOn(console, 'error').mockImplementation(() => {});
 
     const res = await getEventsInWindow([{ key: 'test-fail', url: 'http://crash.me', prefix: '' }], start, end, true);
     

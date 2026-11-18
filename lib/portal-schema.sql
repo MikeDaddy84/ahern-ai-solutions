@@ -102,3 +102,8 @@ INSERT INTO calldesk_followups(call_id,due_on,created_at)
   SELECT c.id,strftime('%Y-%m-%d',c.created_at/1000,'unixepoch','+1 day'),c.created_at FROM calldesk_calls c
   WHERE c.outcome='callback' AND NOT EXISTS (SELECT 1 FROM calldesk_followups f WHERE f.call_id=c.id)
     AND NOT EXISTS (SELECT 1 FROM calldesk_calls n WHERE n.created_at>c.created_at AND length(c.phone_norm)=10 AND n.phone_norm=c.phone_norm);
+
+CREATE TABLE IF NOT EXISTS portal_mail_feeds (
+  user_id TEXT PRIMARY KEY REFERENCES portal_users(id), token_hash TEXT UNIQUE NOT NULL,
+  snapshot TEXT, updated INTEGER NOT NULL DEFAULT 0
+);

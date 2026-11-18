@@ -1,0 +1,53 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const express = require('express');
+const { createClient } = require('@libsql/client');
+const { createStore } = require('../lib/portal-auth');
+const { createRouter } = require('../lib/portal');
+
+test('Ono-Sendai pairs a single owner and publishes bounded, read-only headers', async t => {
+  const client = createClient({url:'file::memory:'});
+  const store = createStore(client);
+  t.after(() => client.close());
+  const app = express();
+  app.use(express.json(), createRouter({storeProvider:()=>store}));
+  const server = app.listen(0,'127.0.0.1');
+  await new Promise(resolve => server.once('listening',resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const origin = 'http://127.0.0.1:' + server.address().port;
+  async function session(name,role) {
+    const email = name+'@example.test', password = 'example-test-password';
+    await store.provision({email,password,workspace:name,name,role});
+    const cookie = await store.login(email,password);
+    return {cookie:'ahern_portal='+cookie,'x-csrf-token':(await store.session(cookie)).csrf,origin};
+  }
+  const owner = await session('first','owner'), other = await session('second','owner'), member = await session('member','employee');
+  const get = (path,headers) => fetch(origin+path,{headers});
+  const post = (path,headers,body) => fetch(origin+path,{method:'POST',headers:{...headers,'content-type':'application/json'},body:JSON.stringify(body)});
+  const pair = headers => post('/api/portal/ono-sendai/pair',headers,{});
+  assert.doesNotMatch(await (await get('/portal',owner)).text(), /data-widget="ono-sendai"/);
+  assert.equal((await pair(member)).status,403);
+  assert.equal((await pair({...owner,'x-csrf-token':'wrong'})).status,403);
+  const {token} = await (await pair(owner)).json();
+  const now = new Date().toISOString();
+  const message = {sender:'Example',subject:'<script>mailSubject</script>',received:now,important:true,unread:true,body:'private message body'};
+  const payload = {version:1,updated:now,accounts:[{state:'idle',last_ok:now,unread:1,messages:[message,{...message,important:false}]}]};
+  const push = (value,body) => post('/api/portal/ono-sendai-feed',{authorization:'Bearer '+value},body);
+  assert.equal((await push('bad',payload)).status,401);
+  assert.equal((await push(token,{version:1})).status,400);
+  assert.equal((await push(token,payload)).status,204);
+  assert.match(await (await get('/portal',owner)).text(), /data-widget="ono-sendai"/);
+  assert.doesNotMatch(await (await get('/portal',other)).text(), /data-widget="ono-sendai"/);
+  const path = '/api/portal/overview/ono-sendai';
+  assert.equal((await get(path,{})).status,401);
+  assert.equal((await get(path,member)).status,403);
+  assert.equal((await get(path,other)).status,503);
+  const result = await (await get(path,owner)).json();
+  assert.equal(result.messages.length,1);
+  assert.equal(result.messages[0].body,undefined);
+  const page = await (await get('/portal/ono-sendai',owner)).text();
+  assert.match(page,/&lt;script&gt;mailSubject/);
+  assert.doesNotMatch(page,/private message body/);
+  assert.equal((await pair(owner)).status,200);
+  assert.equal((await push(token,payload)).status,403);
+});

@@ -1,4 +1,7 @@
 import { spawnSync } from 'node:child_process';
-const chicago=process.argv[2]==='chicago';
-const result=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run',...(chicago?['src/tests/rrule-dst.test.ts']:[])],{stdio:'inherit',env:{...process.env,TZ:chicago?'America/Chicago':'UTC'}});
-process.exit(result.status ?? 1);
+const chicago = process.argv[2] === 'chicago';
+const files = chicago ? 'src/tests/rrule-dst.test.ts' : 'src/tests/*.test.ts';
+const result = spawnSync(process.execPath, ['--import=tsx', '--experimental-test-module-mocks', '--test', files], {
+  stdio:'inherit', env:{...process.env, TZ:chicago ? 'America/Chicago' : 'UTC'}
+});
+process.exitCode = result.status ?? 1;

@@ -1,29 +1,36 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, it } from 'node:test';
+import { expect } from './expect.js';
 import fastify from 'fastify';
 import { getSessionSecret, getTrustedProxyRanges } from '../server/security.js';
 
-afterEach(() => vi.unstubAllEnvs());
+const original = { ...process.env };
+afterEach(() => {
+  for (const key of ['NODE_ENV','SESSION_SECRET','RENDER','TRUSTED_PROXY_CIDRS']) {
+    if (original[key] === undefined) delete process.env[key];
+    else process.env[key] = original[key];
+  }
+});
 
 describe('production session configuration', () => {
   it('rejects missing, short and development session secrets in production', () => {
-    vi.stubEnv('NODE_ENV', 'production');
+    process.env.NODE_ENV = 'production';
     for (const secret of ['', 'too-short', 'a_very_long_secret_key_that_is_at_least_32_chars_long!']) {
-      vi.stubEnv('SESSION_SECRET', secret);
+      process.env.SESSION_SECRET = secret;
       expect(getSessionSecret).toThrow(/unique SESSION_SECRET/);
     }
   });
   it('uses a configured production secret without changing it', () => {
-    vi.stubEnv('NODE_ENV', 'production');
+    process.env.NODE_ENV = 'production';
     const secret = 'test-only-production-secret-with-at-least-32-characters';
-    vi.stubEnv('SESSION_SECRET', secret);
+    process.env.SESSION_SECRET = secret;
     expect(getSessionSecret()).toBe(secret);
   });
 });
 
 describe('forwarded header trust', () => {
   it('rejects spoofed forwarded headers from a direct public client', async () => {
-    vi.stubEnv('RENDER', 'true');
-    vi.stubEnv('TRUSTED_PROXY_CIDRS', '');
+    process.env.RENDER = 'true';
+    process.env.TRUSTED_PROXY_CIDRS = '';
     const app = fastify({ trustProxy: getTrustedProxyRanges() });
     app.get('/', request => ({ ip: request.ip, protocol: request.protocol, host: request.host }));
     try {
@@ -35,8 +42,8 @@ describe('forwarded header trust', () => {
     } finally { await app.close(); }
   });
   it('accepts HTTPS metadata from the internal Render proxy but stops at the public client', async () => {
-    vi.stubEnv('RENDER', 'true');
-    vi.stubEnv('TRUSTED_PROXY_CIDRS', '');
+    process.env.RENDER = 'true';
+    process.env.TRUSTED_PROXY_CIDRS = '';
     const app = fastify({ trustProxy: getTrustedProxyRanges() });
     app.get('/', request => ({ ip: request.ip, protocol: request.protocol }));
     try {

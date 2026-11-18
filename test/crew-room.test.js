@@ -1,14 +1,11 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const fs=require('node:fs');
-const os=require('node:os');
-const path=require('node:path');
 const express=require('express');
 const {createClient}=require('@libsql/client');
 const {JSDOM}=require('jsdom');
 const auth=require('../lib/portal-auth');
 const portal=require('../lib/portal');
-let directory,store,server,origin,owner,second,client,csrf;
+let anchor,store,server,origin,owner,second,client,csrf;
 const password='crew-room-test-password-only';
 async function request(route,{cookie,body,method=body?'POST':'GET',token,source=origin}={}) {
   return fetch(origin+route,{redirect:'manual',method,headers:{...(cookie?{Cookie:cookie}:{}),...(body?{'Content-Type':'application/json',Origin:source}:{}),...(token?{'X-CSRF-Token':token}:{})},body:body?JSON.stringify(body):undefined});
@@ -19,8 +16,11 @@ async function login(email) {
 }
 test.before(async()=>{
   process.env.NODE_ENV='test';
-  directory=fs.mkdtempSync(path.join(os.tmpdir(),'crew-room-'));
-  store=auth.createStore(createClient({url:'file:'+path.join(directory,'portal.db')}));
+  // Transactions can hand off the native connection. Keep the shared database alive until teardown.
+  const url = 'file::memory:?cache=shared';
+  anchor = createClient({url});
+  await anchor.execute('SELECT 1');
+  store = auth.createStore(createClient({url}));
   await store.provision({email:'owner@example.test',name:'Mike',password,workspace:'crew',role:'owner'});
   await store.provision({email:'second@example.test',name:'Other Owner',password,workspace:'other',role:'owner'});
   await store.provision({email:'client@example.test',name:'Customer',password,workspace:'customer',role:'client'});
@@ -29,7 +29,7 @@ test.before(async()=>{
   owner=await login('owner@example.test');second=await login('second@example.test');client=await login('client@example.test');
   csrf=(await (await request('/api/portal/me',{cookie:owner})).json()).csrf;
 });
-test.after(async()=>{await new Promise(resolve=>server.close(resolve));store.client.close();fs.rmSync(directory,{recursive:true,force:true});});
+test.after(async()=>{await new Promise(resolve=>server.close(resolve));store.client.close();anchor.close();});
 test('only owners see the link and can reach the room; anonymous access requires login',async()=>{
   const anonymous=await request('/portal/crew-room');assert.equal(anonymous.status,303);assert.equal(anonymous.headers.get('location'),'/login');
   assert.equal((await request('/api/portal/crew-room/messages')).status,401);

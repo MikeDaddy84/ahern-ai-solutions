@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/server/index.ts",
-    "build:client": "vite build",
+    "build:client": "node scripts/build-client.js",
     "build:server": "tsc -p tsconfig.server.json",
     "build": "npm run build:client && npm run build:server",
     "postbuild": "node scripts/copy-migrations.js",
@@ -46,9 +46,12 @@
     "jsdom": "^30.0.1",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "vite": "^6.4.0",
-    "vitest": "^5.1.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "@vitest/expect": "5.1.0",
+    "@vitest/spy": "5.1.0",
+    "chai": "^6.3.0",
+    "esbuild": "^0.25.12",
+    "postcss": "^8.5.32"
   },
   "overrides": {
     "@fastify/static": {

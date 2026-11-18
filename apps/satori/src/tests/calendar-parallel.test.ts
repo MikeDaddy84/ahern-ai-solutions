@@ -1,32 +1,18 @@
+import * as spies from '@vitest/spy';
 import ical from 'node-ical';
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, after as afterAll } from 'node:test';
+import { expect } from './expect.js';
 import { getEventsInWindow, fetchAllCalendarEventsForDay } from '../server/services/calendar.js';
 
-vi.mock('node-ical', async (importOriginal) => {
-  const actual = await importOriginal<{ default: typeof import('node-ical') }>();
-  return {
-    default: {
-      ...actual.default,
-      async: { ...actual.default.async, fromURL: vi.fn() }
-    }
-  };
-});
+const fromURL = spies.spyOn(ical.async, 'fromURL');
 
 describe('Parallel Feed Fetching (R166)', () => {
-  let fromUrlMock: any;
-
-  beforeAll(async () => {
-
-    const icalMock = await import('node-ical');
-    fromUrlMock = vi.mocked(icalMock.default.async.fromURL);
-  });
-
   afterAll(() => {
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   const setupDelays = (delays: Record<string, number>, fails: Record<string, boolean>, duplicateStr: string = '') => {
-    fromUrlMock.mockImplementation(async (url: string) => {
+    fromURL.mockImplementation(async (url: string) => {
       const isFamily = url.includes('family');
       const key = isFamily ? 'family' : 'personal';
       const delay = delays[key] || 0;
@@ -76,7 +62,7 @@ describe('Parallel Feed Fetching (R166)', () => {
     // Personal fails, family succeeds
     setupDelays({ personal: 10, family: 10 }, { personal: true });
     
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const errorSpy = spies.spyOn(console, 'error').mockImplementation(() => {});
     const res = await getEventsInWindow(sources, start, end, true);
     
     expect(res.stats.length).toBe(2);
@@ -93,7 +79,7 @@ describe('Parallel Feed Fetching (R166)', () => {
   it('3. both fail: two FAILED stats, no crash', async () => {
     setupDelays({ personal: 10, family: 10 }, { personal: true, family: true });
     
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const errorSpy = spies.spyOn(console, 'error').mockImplementation(() => {});
     const res = await getEventsInWindow(sources, start, end, true);
     
     expect(res.stats.length).toBe(2);

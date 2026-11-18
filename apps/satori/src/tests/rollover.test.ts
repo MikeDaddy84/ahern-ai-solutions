@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as spies from '@vitest/spy';
+import { describe, it, mock, beforeEach, afterEach } from 'node:test';
+import { expect } from './expect.js';
 import { createDb, initTables, AppDatabase } from '../db/client.js';
 import { addTask, updateTask, getTodayTasks } from '../server/services/tasks.js';
 import { runRollover, __setCachedRolloverDayForTest } from '../server/services/rollover.js';
-import { vi } from 'vitest';
+
 import { dayLog, tasks } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
@@ -162,7 +164,7 @@ describe('Rollover Engine Coverage', () => {
     });
 
     it('two successive requests on same day hit DB exactly once', async () => {
-      const dbSpy = vi.spyOn(db, 'transaction');
+      const dbSpy = spies.spyOn(db, 'transaction');
       // first call - executes full rollover and populates cache
       await runRollover(db, { dateKey: '2026-08-20' });
       expect(dbSpy).toHaveBeenCalledTimes(1);
@@ -176,7 +178,7 @@ describe('Rollover Engine Coverage', () => {
 
     it('request after cached day is manually advanced falls through to real rollover', async () => {
       await runRollover(db, { dateKey: '2026-08-20' });
-      const dbSpy = vi.spyOn(db, 'transaction');
+      const dbSpy = spies.spyOn(db, 'transaction');
       // next day
       const res = await runRollover(db, { dateKey: '2026-08-21' });
     if (!res.executed) throw new Error('Expected execution');
@@ -187,7 +189,7 @@ describe('Rollover Engine Coverage', () => {
 
     it('force:true bypasses the cache', async () => {
       await runRollover(db, { dateKey: '2026-08-20' }); // populates cache
-      const dbSpy = vi.spyOn(db, 'transaction');
+      const dbSpy = spies.spyOn(db, 'transaction');
       
       const res = await runRollover(db, { dateKey: '2026-08-20', force: true });
     if (!res.executed) throw new Error('Expected execution');
@@ -199,23 +201,21 @@ describe('Rollover Engine Coverage', () => {
 
   it('DST: day_key correct across US spring-forward and fall-back', async () => {
     const { getChicagoDayKey } = await import('../server/utils/date.js');
-    const { vi } = await import('vitest');
-    vi.useFakeTimers();
+    mock.timers.enable({ apis: ['Date'] });
     // Spring Forward
-    vi.setSystemTime(new Date('2026-03-08T07:00:00Z')); // 1am CST
+    mock.timers.setTime(+new Date('2026-03-08T07:00:00Z')); // 1am CST
     expect(getChicagoDayKey()).toBe('2026-03-08');
-    vi.setSystemTime(new Date('2026-03-08T09:00:00Z')); // 4am CDT
+    mock.timers.setTime(+new Date('2026-03-08T09:00:00Z')); // 4am CDT
     expect(getChicagoDayKey()).toBe('2026-03-08');
     // Fall Back
-    vi.setSystemTime(new Date('2026-11-01T06:00:00Z')); // 1am CDT
+    mock.timers.setTime(+new Date('2026-11-01T06:00:00Z')); // 1am CDT
     expect(getChicagoDayKey()).toBe('2026-11-01');
-    vi.setSystemTime(new Date('2026-11-01T08:00:00Z')); // 2am CST
+    mock.timers.setTime(+new Date('2026-11-01T08:00:00Z')); // 2am CST
     expect(getChicagoDayKey()).toBe('2026-11-01');
-    vi.useRealTimers();
+    mock.timers.reset();
   });
 
   it('calendar: recurring events (RRULE, EXDATE, RECURRENCES)', async () => {
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     
     const parsed = await ical.default.async.parseICS(`
@@ -237,7 +237,7 @@ END:VEVENT
 END:VCALENDAR
 `);
 
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue(parsed as any);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue(parsed as any);
 
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
 
@@ -263,12 +263,11 @@ END:VCALENDAR
     expect(todayTasks.map(t => t.text)).toContain('📅 6:00 AM - Weekly Meeting (Moved)');
     
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: all-day event', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     const mockEvents = {
       'event1': {
@@ -278,7 +277,7 @@ END:VCALENDAR
         datetype: 'date',
       }
     };
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents as any);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents as any);
     const res = await runRollover(db, { dateKey: '2026-08-12' });
     if (!res.executed) throw new Error('Expected execution');
     expect(res.calendarImportCount).toBe(1);
@@ -286,12 +285,11 @@ END:VCALENDAR
     const calTask = todayList.categories.have_to.find(t => t.source === 'calendar');
     expect(calTask?.text).toBe('📅 Vacation');
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: timed event', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     const mockEvents = {
       'event1': {
@@ -300,7 +298,7 @@ END:VCALENDAR
         start: new Date('2026-08-13T20:00:00Z'), // 3:00 PM CDT
       }
     };
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents as any);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents as any);
     const res = await runRollover(db, { dateKey: '2026-08-13' });
     if (!res.executed) throw new Error('Expected execution');
     expect(res.calendarImportCount).toBe(1);
@@ -308,41 +306,38 @@ END:VCALENDAR
     const calTask = todayList.categories.have_to.find(t => t.source === 'calendar');
     expect(calTask?.text).toBe('📅 3:00 PM - Dentist Appointment');
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: malformed ICS body (logs, does not throw)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     // Return empty or malformed
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue({} as any);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue({} as any);
     const res = await runRollover(db, { dateKey: '2026-08-14' });
     if (!res.executed) throw new Error('Expected execution');
     expect(res.calendarImportCount).toBe(0);
     expect(res.executed).toBe(true);
     if (!res.executed) throw new Error('Expected execution');
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: unreachable URL (logs, rollover continues)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://invalid-url.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
-    vi.spyOn(ical.default.async, 'fromURL').mockRejectedValue(new Error('Network error'));
+    spies.spyOn(ical.default.async, 'fromURL').mockRejectedValue(new Error('Network error'));
     const res = await runRollover(db, { dateKey: '2026-08-15' });
     if (!res.executed) throw new Error('Expected execution');
     expect(res.calendarImportCount).toBe(0);
     expect(res.executed).toBe(true);
     if (!res.executed) throw new Error('Expected execution');
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: overflow exemption (15 calendar events stay)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     const mockEvents: any = {};
     for (let i = 1; i <= 15; i++) {
@@ -352,7 +347,7 @@ END:VCALENDAR
         start: new Date('2026-08-16T15:00:00Z'), // 10:00 AM CDT
       };
     }
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents);
 
     const res = await runRollover(db, { dateKey: '2026-08-16' });
     if (!res.executed) throw new Error('Expected execution');
@@ -361,12 +356,11 @@ END:VCALENDAR
     expect(todayList.categories.have_to.length).toBe(15);
 
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: overflow mixed (10 regular + 5 calendar trims 5 regular)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/cal.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
     
     // Add 10 regular tasks that will carry over
@@ -384,7 +378,7 @@ END:VCALENDAR
         start: new Date('2026-08-17T15:00:00Z'),
       };
     }
-    vi.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents);
+    spies.spyOn(ical.default.async, 'fromURL').mockResolvedValue(mockEvents);
 
     const res = await runRollover(db, { dateKey: '2026-08-17' });
     if (!res.executed) throw new Error('Expected execution');
@@ -395,7 +389,7 @@ END:VCALENDAR
     expect(calendarCount).toBe(5);
 
     delete process.env.CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('empty DB: rollover with zero tasks does not throw', async () => {
@@ -411,10 +405,9 @@ END:VCALENDAR
   it('calendar: failure isolation (source A fails, source B succeeds)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://invalid-url.local/cal.ics';
     process.env.FAMILY_CALENDAR_ICS_URL = 'http://valid.local/family.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
 
-    vi.spyOn(ical.default.async, 'fromURL').mockImplementation(async (url: string) => {
+    spies.spyOn(ical.default.async, 'fromURL').mockImplementation(async (url: string) => {
       if (url.includes('invalid-url.local')) {
         throw new Error('Network error');
       }
@@ -439,16 +432,15 @@ END:VCALENDAR
 
     delete process.env.CALENDAR_ICS_URL;
     delete process.env.FAMILY_CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 
   it('calendar: cross-calendar dedupe (same event in both feeds -> one task)', async () => {
     process.env.CALENDAR_ICS_URL = 'http://valid.local/personal.ics';
     process.env.FAMILY_CALENDAR_ICS_URL = 'http://valid.local/family.ics';
-    const { vi } = await import('vitest');
     const ical = await import('node-ical');
 
-    vi.spyOn(ical.default.async, 'fromURL').mockImplementation(async (url: string) => {
+    spies.spyOn(ical.default.async, 'fromURL').mockImplementation(async (url: string) => {
       return {
         'event1': {
           type: 'VEVENT',
@@ -473,7 +465,7 @@ END:VCALENDAR
 
     delete process.env.CALENDAR_ICS_URL;
     delete process.env.FAMILY_CALENDAR_ICS_URL;
-    vi.restoreAllMocks();
+    spies.restoreAllMocks();
   });
 });
 

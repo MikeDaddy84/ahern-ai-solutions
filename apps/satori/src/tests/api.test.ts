@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import { expect } from './expect.js';
 import bcrypt from 'bcryptjs';
 import { createDb, initTables, AppDatabase } from '../db/client.js';
 import { buildApp, getSessionConfig } from '../server/app.js';

@@ -5,7 +5,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const os=require('node:os');
 const path=require('node:path');
 const express=require('express');
 const {createClient}=require('@libsql/client');
@@ -13,7 +12,7 @@ const {JSDOM}=require('jsdom');
 const auth=require('../lib/portal-auth');
 const portal=require('../lib/portal');
 const desk=require('../lib/call-desk');
-let directory,store,server,origin,owner,sales,client,ownerCsrf,salesCsrf;
+let anchor,store,server,origin,owner,sales,client,ownerCsrf,salesCsrf;
 const password='call-desk-test-password-only';
 const API='/api/portal/call-desk';
 async function request(route,{cookie,body,method=body?'POST':'GET',token,source=origin}={}) {
@@ -26,8 +25,11 @@ async function login(email) {
 const csrfFor=async cookie=>(await (await request('/api/portal/me',{cookie})).json()).csrf;
 test.before(async()=>{
   process.env.NODE_ENV='test';
-  directory=fs.mkdtempSync(path.join(os.tmpdir(),'call-desk-'));
-  store=auth.createStore(createClient({url:'file:'+path.join(directory,'portal.db')}));
+  // Transactions can hand off the native connection. Keep the shared database alive until teardown.
+  const url = 'file::memory:?cache=shared';
+  anchor = createClient({url});
+  await anchor.execute('SELECT 1');
+  store = auth.createStore(createClient({url}));
   await store.provision({email:'owner@example.test',name:'Mike',password,workspace:'owner',role:'owner'});
   await store.provision({email:'sales@example.test',name:'Scotty',password,workspace:'sales',role:'employee'});
   await store.provision({email:'client@example.test',name:'Customer',password,workspace:'customer',role:'client'});
@@ -36,7 +38,7 @@ test.before(async()=>{
   owner=await login('owner@example.test');sales=await login('sales@example.test');client=await login('client@example.test');
   ownerCsrf=await csrfFor(owner);salesCsrf=await csrfFor(sales);
 });
-test.after(async()=>{await new Promise(resolve=>server.close(resolve));store.client.close();fs.rmSync(directory,{recursive:true,force:true});});
+test.after(async()=>{await new Promise(resolve=>server.close(resolve));store.client.close();anchor.close();});
 
 test('anonymous visitors are sent to sign-in with a desk-only return path; clients are refused',async()=>{
   const anon=await request('/portal/call-desk');assert.equal(anon.status,303);assert.equal(anon.headers.get('location'),'/login?next=%2Fportal%2Fcall-desk');

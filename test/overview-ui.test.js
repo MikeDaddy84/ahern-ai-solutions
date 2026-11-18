@@ -25,8 +25,8 @@ const crew = { status: 'ready', updatedAt, periodDays: 7, counts: { recentMessag
 const response = (data, status = 200) => ({ status, ok: status >= 200 && status < 300, json: async () => data });
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-function open({ role = 'owner', preview = false, fetch = async url => response(url.endsWith('/satori') ? priority('Current priority') : url.endsWith('/visits') ? visits : calls) } = {}) {
-  const dom = new JSDOM(portal.shell({ name: '<img src=x onerror=alert(1)>', role, preview }), { url: 'https://ahernai.com/portal', runScripts: 'outside-only' });
+function open({ role = 'owner', preview = false, mailReady = false, fetch = async url => response(url.endsWith('/satori') ? priority('Current priority') : url.endsWith('/visits') ? visits : calls) } = {}) {
+  const dom = new JSDOM(portal.shell({ name: '<img src=x onerror=alert(1)>', role, preview, mailReady }), { url: 'https://ahernai.com/portal', runScripts: 'outside-only' });
   dom.window.fetch = fetch;
   dom.window.eval(script);
   return dom;
@@ -220,5 +220,20 @@ test('malformed successful summaries with null or missing counts stay unavailabl
     assert.equal(card(dom, 'relay').dataset.state, 'unavailable');
     assert.equal(card(dom, 'relay').querySelector('.overview-metric'), null);
     assert.doesNotMatch(card(dom, 'relay').textContent, /NaN|No replies recorded/);
+  } finally { dom.window.close(); }
+});
+
+test('paired owner sees starred mail, safe header text, stale status and an inbox link', async () => {
+  const mail = { status:'ready',updatedAt,unread:3,delayed:true,messages:[{subject:'<b>Review invoice</b>',sender:'Example',received:updatedAt}] };
+  const dom = open({ mailReady:true, fetch:async url => response(url.endsWith('/ono-sendai') ? mail : url.endsWith('/satori') ? priority('My priority') : url.endsWith('/visits') ? visits : calls) });
+  try {
+    await flush();
+    const widget = card(dom,'ono-sendai');
+    assert.equal(widget.dataset.state,'ready');
+    assert.match(widget.textContent,/3unread in inbox/);
+    assert.match(widget.textContent,/Mail updates are delayed/);
+    assert.match(widget.textContent,/<b>Review invoice<\/b>/);
+    assert.equal(widget.querySelector('b'),null);
+    assert.equal(widget.querySelector('a').getAttribute('href'),'/portal/ono-sendai');
   } finally { dom.window.close(); }
 });

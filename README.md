@@ -1946,3 +1946,10 @@ The origin remains loopback-only at `127.0.0.1:9132`. No router port forwarding 
 changes to Hosaka's connector, mail routing, or established agent services were made.
 Operational details and recovery steps live in the private Hermes workspace's
 `crew-room/REMOTE-ACCESS.md`. Native Android apps remain future work.
+## Ono-Sendai owner mailbox
+
+The Ono-Sendai sidebar opens a three-pane mail client for an owner who has paired a mailbox device at `/portal/ono-sendai/setup`. The owner can search and read a folder, create a folder, move messages, change read status, compose, reply, reply all, and forward an original message with its attachments. The Overview retains its starred-mail and unread summary.
+
+Install the matching worker from the Ono-Sendai repository on the paired VM. Enter its printed device fingerprint in **Enable the mail client** on the owner setup page. The existing feed credentials continue to serve Overview. Rotating the feed requires pairing the device again. Before device pairing the mailbox route displays the existing summary.
+
+Mailbox actions require the owner session and CSRF token. The VM connects outbound with two credentials. Actions and results stay in memory in the current single-instance portal and expire on disconnect or timeout. The Gmail credential and submission deduplication database stay on the VM. Reading renders text and attachment names. Files in a forwarded original are included as an attached email.

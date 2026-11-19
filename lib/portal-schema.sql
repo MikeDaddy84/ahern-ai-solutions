@@ -107,3 +107,7 @@ CREATE TABLE IF NOT EXISTS portal_mail_feeds (
   user_id TEXT PRIMARY KEY REFERENCES portal_users(id), token_hash TEXT UNIQUE NOT NULL,
   snapshot TEXT, updated INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS portal_mail_devices (
+  user_id TEXT PRIMARY KEY REFERENCES portal_users(id),
+  device_hash TEXT NOT NULL UNIQUE, feed_hash TEXT NOT NULL
+);

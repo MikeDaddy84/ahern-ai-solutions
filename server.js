@@ -49,6 +49,7 @@ app.disable('x-powered-by');
 // cookie and collapse its rate limiting onto a single address.
 app.set('trust proxy', 1);
 app.post('/api/portal/ono-sendai-feed', express.json({limit:'128kb'}));
+app.post(['/api/portal/ono-device/result','/api/portal/ono-sendai/mail'], express.json({limit:'768kb'}));
 app.use(express.json({ limit: '20kb' }));
 
 // calls.ahernai.com is a short link for the sales team. Portal sign-in only

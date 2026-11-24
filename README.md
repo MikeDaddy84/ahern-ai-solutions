@@ -1,5 +1,54 @@
 # Ahern AI — Website
 
+## Security status — November 24, 2026
+
+This read-only status check supersedes the current-status statements in the
+November 2 maintenance record below; historical changes remain documented there.
+
+- All seven Render services have a latest deployment marked live and are not
+  suspended. The five Node applications and RustDesk returned HTTP 200 in fresh
+  checks. The website's health response confirms its database is connected.
+  The chore application's configured readiness route also returned 200.
+- Fresh npm audits of the exact deployed lockfiles report zero findings for
+  the website, bundled Satori, standalone Satori, Dende, Token Climb, and the
+  chore app. Audits ran in temporary directories without installing packages
+  or changing deployed application code. Zero known audit findings is not a
+  complete security assessment.
+- Current logs confirm Node 24.22.1 for the website and 24.22.2 for standalone
+  Satori and Dende. The other two runtimes were verified during the November 2
+  remediation; this check did not obtain new runtime-version log entries for
+  those services. No error-level Render entries were returned for the sampled
+  period beginning 14:30 UTC. Website CPU and memory samples show ample capacity.
+- The Droplet is reachable through authenticated SSH. Docker, nginx, Tailscale,
+  and AppArmor are active, both RustDesk processes run, the package consistency
+  audit is empty, and no failed systemd units were reported. Root disk usage is
+  16%; automatic security updates and apt timers remain enabled.
+- **Droplet maintenance is due:** 31 packages are available according to the
+  package lists refreshed today, including security-pocket packages. A reboot
+  is explicitly required. The running kernel remains 6.8.0-147-generic, with
+  6.8.0-149 already referenced by the reboot notice and 6.8.0-151 available.
+  Tailscale is now 1.104.5, with 1.104.7 available. The SSH account requires a
+  sudo password for privileged maintenance. This status check installed no
+  packages and did not reboot the server.
+- **Recovery has two distinct states:** the saved October 26 Droplet archive
+  still matches its verified SHA-256; its November 2 isolated recovery report
+  records 73 restored files and one SQLite database passing integrity checks.
+  It is a historical recovery copy, not a fresh November 24 snapshot.
+  Separately, the website's scheduled repository backup remains blocked:
+  today's status command returned EPERM when opening its private configuration,
+  consistent with the November 23 failed attempt documented below. New backup
+  freshness cannot be verified until authorized Windows access is restored.
+  No folder permissions were changed.
+- Current DigitalOcean billing and provider-backup freshness were not rechecked.
+  A booted replacement-server restore, interactive RustDesk session, and Dende's
+  separately documented home-server installation remain outside this check.
+
+Next maintenance priorities are restoring authorized website-backup access and
+verifying a new backup, then applying the Droplet updates with sudo and verifying
+the required reboot. No production deployment or infrastructure change was made
+during this status check. Unrelated local work was preserved.
+
+
 ## Ono-Sendai owner inbox
 
 Ono-Sendai mirrors one Gmail inbox on its own VM in provider-read-only mode. The portal receives a bounded HTTPS snapshot of sender, subject, flags, counts and dates. Owners can pair an installation at [/portal/ono-sendai/setup](https://ahernai.com/portal/ono-sendai/setup). Enter the feed key only at the VM setup prompt. The sidebar and Overview widget appear for the paired owner after the first successful import. The inbox page shows recent messages. The widget shows starred or flagged inbox mail and the unread count. Delayed sync is labeled. Other portal users and public previews have no access to the snapshot.

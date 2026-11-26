@@ -36,7 +36,7 @@
   async function api(action, fields={}) {
     const response = await fetch('/api/portal/ono-sendai/mail', {
       method:'POST',cache:'no-store',headers:{'Content-Type':'application/json',
-      'X-CSRF-Token':el('main').dataset.csrf},body:JSON.stringify({action,...fields})
+      'X-CSRF-Token':el('main').dataset.csrf},body:JSON.stringify({...fields,action,account:root.dataset.account})
     });
     const data = await response.json().catch(()=>({}));
     if (!response.ok) throw new Error(data.error || 'Could not reach Ono-Sendai. Refresh and try again.');
@@ -119,7 +119,7 @@
     tools.append(dest,button('Move',async()=>{
       if (!dest.value) throw new Error('Choose a destination folder.');
       await api('move',{...ref,destination:dest.value});
-      await list(); return 'Message moved in Gmail.';
+      await list(); return 'Message moved.';
     }));
     reader.replaceChildren(make('h2',h.Subject || '(No subject)'),make('p',h.From,'mail-from'),
       make('p','To: '+h.To+(h.Cc?' · Cc: '+h.Cc:''),'mail-detail'),make('p',h.Date,'mail-detail'),
@@ -155,7 +155,7 @@
     const name=el('folder-name').value.trim();
     await api('create',{name});el('folder-name').value='';await folders();
     for (const item of el('folder-list').children) item.setAttribute('aria-pressed',String(item.dataset.folder===state.folder));
-    return 'Folder created in Gmail.';
+    return 'Folder created.';
   });
   submit('composer',async()=>{
     const draft=state.draft;

@@ -224,14 +224,15 @@ test('malformed successful summaries with null or missing counts stay unavailabl
 });
 
 test('paired owner sees starred mail, safe header text, stale status and an inbox link', async () => {
-  const mail = { status:'ready',updatedAt,unread:3,delayed:true,messages:[{subject:'<b>Review invoice</b>',sender:'Example',received:updatedAt}] };
+  const mail = { status:'ready',updatedAt,unread:3,delayed:true,accounts:[{id:'one',address:'one@example.test',unread:1},{id:'two',address:'two@example.test',unread:2}],messages:[{account:'two@example.test',subject:'<b>Review invoice</b>',sender:'Example',received:updatedAt}] };
   const dom = open({ mailReady:true, fetch:async url => response(url.endsWith('/ono-sendai') ? mail : url.endsWith('/satori') ? priority('My priority') : url.endsWith('/visits') ? visits : calls) });
   try {
     await flush();
     const widget = card(dom,'ono-sendai');
     assert.equal(widget.dataset.state,'ready');
-    assert.match(widget.textContent,/3unread in inbox/);
-    assert.match(widget.textContent,/Mail updates are delayed/);
+    assert.match(widget.textContent,/3unread across inboxes/);
+    assert.match(widget.textContent,/Some counts may be delayed/);
+    assert.equal(widget.querySelector('a[href$="/account/two"]').textContent,'two@example.test2 unread');
     assert.match(widget.textContent,/<b>Review invoice<\/b>/);
     assert.equal(widget.querySelector('b'),null);
     assert.equal(widget.querySelector('a').getAttribute('href'),'/portal/ono-sendai');

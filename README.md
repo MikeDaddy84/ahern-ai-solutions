@@ -2005,6 +2005,6 @@ Mailbox actions require the owner session and CSRF token. The VM connects outbou
 
 ### Choosing a mail account
 
-Ono-Sendai opens to the owner's connected mailboxes. Select an address to open its inbox or use **All accounts** to switch. The Overview shows unread counts per account and the four newest starred messages across accounts, labeled with their source address. A missing count appears as unavailable. Each command is bound to the selected account. The VM operator connects additional provider accounts and explicitly shares their IDs with the portal.
+Ono-Sendai opens to the owner's connected mailboxes. Select an address to open its inbox or use **All accounts** to switch. The Overview shows unread counts per account and the four newest starred messages across accounts, labeled with their source address. A missing count appears as unavailable. Each command is bound to the selected account. Owners can choose **Add Account** to connect Gmail, Google Workspace or Yahoo from the paired portal. Setup checks incoming and outgoing access using a provider app password encrypted for the paired device. After the first summary, the mailbox appears on the account list and Overview. Other IMAP providers still use the VM configuration and explicit sharing workflow.
 
 Validation covers account isolation, unknown account IDs, missing counts, combined starred mail, per-account widget links, and the account ID on browser mail actions.

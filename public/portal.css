@@ -118,3 +118,9 @@
 .overview-bottom div { display:flex; flex-wrap:wrap; gap:1.5rem; }.overview-bottom a { color:var(--color-primary); }
 @media(max-width:1150px) { .overview-card { grid-column:span 6; }.overview-visits { grid-column:span 12; }.overview-satori { grid-column:span 6; } }
 @media(max-width:700px) { .overview-welcome { align-items:flex-start; }.overview-welcome p:not(.portal-kicker) { font-size:.85rem; }.overview-controls time { display:none; }.overview-refresh { font-size:.75rem; padding:.5rem .7rem; }.overview-grid { gap:1rem; }.overview-card,.overview-grid:not(:has(.overview-visits)) .overview-card { grid-column:span 12; }.overview-card { padding:1.2rem; }.overview-metric strong { font-size:2.3rem; } }
+
+.overview-mail-accounts { display: grid; gap: .4rem; margin-block: .75rem; }
+.overview-mail-accounts a { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem .6rem; align-items: baseline; color: inherit; text-decoration: none; }
+.overview-mail-accounts a:hover span, .overview-mail-accounts a:focus-visible span { text-decoration: underline; }
+.overview-mail-accounts span { overflow-wrap: anywhere; }
+.overview-mail-accounts strong { white-space: nowrap; font-size: .85em; }

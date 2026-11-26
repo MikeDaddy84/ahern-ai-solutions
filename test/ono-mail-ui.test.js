@@ -5,7 +5,7 @@ const {JSDOM} = require('jsdom');
 const {workspace} = require('../lib/ono-mail-workspace');
 
 test('owner can open a folder and reader and explicitly submit a reply or forward', async t => {
-  const dom = new JSDOM('<main id="main" data-csrf="fixture">'+workspace()+'</main>',{
+  const dom = new JSDOM('<main id="main" data-csrf="fixture">'+workspace({id:'second',address:'second@example.test'})+'</main>',{
     url:'https://portal.example.test/portal/ono-sendai',runScripts:'outside-only'
   });
   t.after(()=>dom.window.close());
@@ -16,6 +16,7 @@ test('owner can open a folder and reader and explicitly submit a reply or forwar
     assert.equal(url,'/api/portal/ono-sendai/mail');
     assert.equal(opts.headers['X-CSRF-Token'],'fixture');
     const request=JSON.parse(opts.body);calls.push(request);
+    assert.equal(request.account,'second');
     const results={
       folders:{address:'pilot@example.test',folders:[{id:'INBOX',name:'Inbox'},{id:'Projects',name:'Projects'}]},
       list:{validity:'9',messages:[{uid:17,sender:'Pat',subject:'<Work>',date:'',unread:true}],next:null},

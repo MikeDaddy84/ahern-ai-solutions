@@ -21,3 +21,33 @@
 @media(max-width:1050px){.mail-columns{grid-template-columns:minmax(110px,.65fr) minmax(150px,1fr) minmax(190px,1.25fr)}}
 @media(max-width:850px){.mail-columns{grid-template-columns:minmax(105px,.65fr) minmax(0,1.35fr)}.mail-reader{grid-column:1/-1;border-top:1px solid #344551}.mail-list{border-right:0}#message-list,#folder-list{max-height:42vh}}
 @media(max-width:480px){.mail-columns{display:block}.mail-columns>aside{border:0}.mail-folders #folder-list{display:flex;overflow:auto;max-height:none}.mail-folders #folder-list button{width:auto;flex:none}.mail-columns>section,.mail-columns>aside{padding:.6rem 0}}
+
+.ono-mail #folder-create > div, .ono-mail #mail-search > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: .375rem;
+}
+#folder-create input, #mail-search input { flex: 1 1 4.5rem; width: auto; min-height: 2.5rem; }
+#folder-create button, #mail-search button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  min-height: 2.5rem;
+  padding: .4rem .8rem;
+  font-weight: 600;
+  color: #9cf3df;
+  background: #193331;
+  border-color: #38625b;
+}
+#folder-create button:hover, #mail-search button:hover { background: #234943; border-color: #67e8cb; }
+.mail-back, .mail-connection { display: inline-block; color: #9debd9; font-size: .86rem; }
+.mail-back { margin-bottom: 1rem; }
+.mail-accounts h1 { margin: 0 0 1.3rem; font-size: 1.8rem; color: #eef4f7; }
+.mail-account-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,17rem),1fr)); gap: .8rem; margin: .8rem 0 1.25rem; }
+.mail-account-card { display: grid; grid-template-columns: 1fr auto; gap: .4rem .8rem; padding: 1.05rem 1.15rem; border: 1px solid #344e59; border-radius: 9px; background: #172530; color: #eef4f7; text-decoration: none; }
+.mail-account-card:hover, .mail-account-card:focus-visible { border-color: #67e8cb; background: #1c3038; }
+.mail-account-card strong { grid-column: 1; overflow-wrap: anywhere; }
+.account-provider { grid-column: 1; color: #b9c8ce; font-size: .8rem; }
+.account-count { grid-column: 1; color: #93e8d4; font-size: .85rem; }
+.account-arrow { grid-column: 2; grid-row: 1 / span 3; align-self: center; color: #93e8d4; }

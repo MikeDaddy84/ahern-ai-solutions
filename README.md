@@ -2002,3 +2002,9 @@ The Ono-Sendai sidebar opens a three-pane mail client for an owner who has paire
 Install the matching worker from the Ono-Sendai repository on the paired VM. Enter its printed device fingerprint in **Enable the mail client** on the owner setup page. The existing feed credentials continue to serve Overview. Rotating the feed requires pairing the device again. Before device pairing the mailbox route displays the existing summary.
 
 Mailbox actions require the owner session and CSRF token. The VM connects outbound with two credentials. Actions and results stay in memory in the current single-instance portal and expire on disconnect or timeout. The Gmail credential and submission deduplication database stay on the VM. Reading renders text and attachment names. Files in a forwarded original are included as an attached email.
+
+### Choosing a mail account
+
+Ono-Sendai opens to the owner's connected mailboxes. Select an address to open its inbox or use **All accounts** to switch. The Overview shows unread counts per account and the four newest starred messages across accounts, labeled with their source address. A missing count appears as unavailable. Each command is bound to the selected account. The VM operator connects additional provider accounts and explicitly shares their IDs with the portal.
+
+Validation covers account isolation, unknown account IDs, missing counts, combined starred mail, per-account widget links, and the account ID on browser mail actions.

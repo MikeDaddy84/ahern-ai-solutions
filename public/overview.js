@@ -99,14 +99,28 @@
     body.append(node('p', 'Recent room messages. Direct messages stay in Crew Room.', 'overview-note'));
   }
   function renderMail(body, data) {
-    metric(body, data.unread, 'unread in inbox', data.delayed ? 'Mail updates are delayed.' : '');
-    list(body, data.messages.map(m => ({title:m.subject || '(No subject)',text:m.sender,meta:shortDate(m.received)})), 'No starred or flagged inbox messages.');
+    const accounts = data.accounts || [];
+    if (data.unread!==null) {
+      const partial = accounts.some(a=>a.unread===null);
+      metric(body, data.unread, partial?'unread in synced inboxes':'unread across inboxes',
+        data.delayed?'Some counts may be delayed.':'');
+    }
+    const counts = node('div', undefined, 'overview-mail-accounts');
+    for (const account of accounts) {
+      const link = node('a');
+      link.href = '/portal/ono-sendai/account/'+encodeURIComponent(account.id);
+      link.append(node('span', account.address || 'Primary mailbox'),
+        node('strong', account.unread===null ? 'Count unavailable' : number(account.unread)+' unread'));
+      counts.append(link);
+    }
+    body.append(counts);
+    list(body, data.messages.map(m => ({title:m.subject || '(No subject)',text:m.sender,meta:[m.account,shortDate(m.received)].filter(Boolean).join(' · ')})), 'No starred or flagged inbox messages.');
   }
   const renderers = { 'ono-sendai':renderMail, visits: renderVisits, satori: renderSatori, 'call-desk': renderCalls, relay: renderRelay, 'crew-room': renderCrew };
   function validSummary(id, data) {
     const keys = { visits: ['today', 'week', 'month', 'total'], satori: ['total', 'done', 'remaining'], 'call-desk': ['actionable', 'openQuestions', 'overdueQuestions', 'answeredQuestions', 'unconfirmedConsults'], relay: ['replies'], 'crew-room': ['recentMessages'] };
     const count = value => Number.isSafeInteger(value) && value >= 0;
-    if (id === 'ono-sendai') return data && count(data.unread) && Number.isFinite(Date.parse(data.updatedAt)) && Array.isArray(data.messages) && data.messages.every(m=>m && typeof m.subject==='string' && typeof m.sender==='string');
+    if (id === 'ono-sendai') return data && (count(data.unread) || data.unread===null) && Number.isFinite(Date.parse(data.updatedAt)) && Array.isArray(data.messages) && data.messages.every(m=>m && typeof m.subject==='string' && typeof m.sender==='string');
     if (!data || !data.counts || !keys[id].every(key => count(data.counts[key])) || Number.isNaN(Date.parse(data.updatedAt))) return false;
     if (id === 'visits') return Array.isArray(data.days) && data.days.length === 30 && data.days.every(day => /^\d{4}-\d{2}-\d{2}$/.test(day.day) && count(day.views));
     if (id === 'satori') return Array.isArray(data.tasks) && data.tasks.every(task => typeof task.text === 'string') && data.counts.done + data.counts.remaining === data.counts.total;

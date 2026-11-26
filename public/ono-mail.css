@@ -48,6 +48,16 @@
 .mail-account-card { display: grid; grid-template-columns: 1fr auto; gap: .4rem .8rem; padding: 1.05rem 1.15rem; border: 1px solid #344e59; border-radius: 9px; background: #172530; color: #eef4f7; text-decoration: none; }
 .mail-account-card:hover, .mail-account-card:focus-visible { border-color: #67e8cb; background: #1c3038; }
 .mail-account-card strong { grid-column: 1; overflow-wrap: anywhere; }
+.account-list-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.account-add, .mail-enrollment #enroll-submit { display:inline-flex; align-items:center; min-height:2.5rem; padding:.5rem 1rem; box-sizing:border-box; border-radius:6px; border:1px solid transparent; background:#67e8cb; color:#091e1b; font-size:.9rem; font-weight:700; text-decoration:none; }
+.account-add:hover, .mail-enrollment #enroll-submit:hover { background:#9cf3df; color:#091e1b; }
+.mail-enrollment { max-width:37rem; }
+.mail-enrollment h1 { margin:.2rem 0 1.2rem; }
+.mail-enrollment form { max-width:28rem; }
+.mail-enrollment form input, .mail-enrollment form select { width:100%; box-sizing:border-box; min-height:2.6rem; }
+.mail-enrollment p { line-height:1.5; font-size:.9rem; }
+.mail-enrollment a { color:#9cf3df; }
+.mail-enrollment #enroll-status:empty { display:none; }
 .account-provider { grid-column: 1; color: #b9c8ce; font-size: .8rem; }
 .account-count { grid-column: 1; color: #93e8d4; font-size: .85rem; }
 .account-arrow { grid-column: 2; grid-row: 1 / span 3; align-self: center; color: #93e8d4; }
